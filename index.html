@@ -98,7 +98,8 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .nav a:not(:last-of-type)::after{                         /* feiner Trennstrich rechts */
   content:"";position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--pill);   /* volle Höhe */
 }
-.nav a.in-win{color:var(--on)}                          /* im Farbfenster: dunkle Schrift, auch im Dunkelmodus */
+.nav a.in-win{color:var(--on)}
+.nav a.nav-end.in-win{color:#f2f2ef}                    /* dunkelgraues Fenster: helle Schrift */                          /* im Farbfenster: dunkle Schrift, auch im Dunkelmodus */
 /* Band aus Projektfarben, je Eintrag eine Fläche mit harter Kante; das Rechteck ist ein Fenster darauf.
    Gleitet es über eine Kante, wandert der Farbwechsel mit durch das Rechteck. */
 .nav__hl{
@@ -108,6 +109,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 }
 .count{margin-left:auto;font:400 .8125rem var(--mono);color:var(--mute);letter-spacing:0;opacity:var(--p);font-variant-numeric:tabular-nums;white-space:nowrap}
 .count b{font-weight:400;color:var(--ink);display:inline-block}
+.at-end .count{opacity:0;transition:opacity .4s}          /* letzte Seite: keine Seitenzahl */
 .count b.tick{animation:tick .5s var(--out)}
 @keyframes tick{from{transform:translateY(-.6em);opacity:0}}
 
@@ -129,6 +131,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 }
 .mark-slot{height:0;margin:0}
 .lede{
+  transform-origin:0 0;
   margin:clamp(1.5rem,4vh,3rem) 0 0;max-width:24ch;
   font-size:clamp(1.5rem,3vw,2.25rem);font-weight:500;line-height:1.14;letter-spacing:-.05em;
 }
@@ -145,7 +148,6 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   display:grid;scroll-snap-align:start;
 }
 .card{
-  transition:color .4s;
   position:relative;isolation:isolate;overflow:hidden;
   display:grid;grid-template-rows:auto 1fr auto;gap:1.5rem;
   --t:clamp(2.6rem,7.4vw,7rem);                          /* Titelgröße */
@@ -160,7 +162,22 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   content:"";position:absolute;inset:0;z-index:-1;background:var(--hl);
   clip-path:inset(100% 0 0 0);transition:clip-path 1.8s cubic-bezier(0,.9,.1,1);   /* steiler Start, sehr langes Auslaufen */
 }
-.card:hover,.card:focus-within{color:var(--on)}
+/* Schrift an der Füllkante — ohne Zeitsteuerung:
+   Projektkarten wechseln die Schriftfarbe nicht (hell: dunkel, dunkel: weiß).
+   Die Linkseite (dunkelgraue Füllung) nutzt »difference«: Schwarz wird an der Kante exakt zu Weiß. */
+@media (prefers-color-scheme:dark){
+  .slide .card{color:#fff}
+  .slide .card .tagline{color:rgb(255 255 255 / .6)}
+  .slide .card .meta{color:#fff}
+  .slide .card .meta .no{color:#fff}
+}
+.card{background:var(--bg)}                              /* Grund für die Invertierung */
+.inv :is(.meta,.title,.tagline,.body,.end__head,.links){color:#fff;mix-blend-mode:difference}
+.inv :is(.meta,.tagline,.end__head span){color:rgb(255 255 255 / .6)}
+.inv .meta .no{color:#fff}
+.inv .title:has(a:is(:hover,:focus-visible)),
+.inv .links:has(a:is(:hover,:focus-visible)){mix-blend-mode:normal;color:var(--pill-ink)}   /* Pille sichtbar: normal */
+.inv .meta .d:hover{color:#fff}
 
 /* Projektbild: Klick = Halbton-Raster, Doppelklick = volles Farbbild.
    Breitet sich vom Klickpunkt als Kreis aus; über der Farbfläche, hinter der Schrift */
@@ -179,15 +196,20 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .card.is-full .shot.full{clip-path:circle(150% at var(--cx,50%) var(--cy,50%));transition:clip-path 1.6s cubic-bezier(0,.9,.1,1)}
 .card:hover::before,.card:focus-within::before{clip-path:inset(0)}
 
-.meta{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:.3rem 1.25rem;max-width:calc(100% - 12rem);font:400 .8125rem/1.4 var(--mono);color:var(--mute);letter-spacing:0;transition:color 1s var(--soft)}
+.meta{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:.3rem 1.25rem;max-width:calc(100% - 12rem);font:400 .8125rem/1.4 var(--mono);color:var(--ink);letter-spacing:0}   /* voll deckend */
 .meta .no{color:inherit}
 .card:not(:hover) .meta .no{color:var(--ink)}
-.meta .d{position:relative;display:inline-flex;align-items:center;transform-origin:0 50%;transition:transform .6s var(--out),color .25s}
-.meta .d:hover{z-index:3;transform:scale(4);color:var(--pill)}
+.meta .d{position:relative;display:inline-flex}          /* Trefferfläche bleibt in Normalgröße … */
+.meta .d:hover{z-index:3;color:var(--pill)}
+.meta .dx{                                                 /* … nur die innere Schrift wächst und fängt keine Maus */
+  display:inline-flex;align-items:center;pointer-events:none;
+  transform-origin:0 50%;transition:transform .6s var(--out);
+}
+.meta .d:hover .dx{transform:scale(4)}
 .meta .d.gap{margin-left:1.25rem}                         /* Abstand: Eckdaten | Technik */
-.status{gap:.5rem}
-.status::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--hl);transition:background .5s,box-shadow .5s}
-.status.prototyp::before{background:none;box-shadow:inset 0 0 0 1.5px var(--hl)}
+.status .dx{gap:.5rem}
+.status .dx::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--hl)}
+.status.prototyp .dx::before{background:none;box-shadow:inset 0 0 0 1.5px var(--hl)}
 
 .num{
   position:absolute;right:calc(clamp(1rem,3vw,2.5rem) + .3em);top:clamp(.5rem,2vw,1.5rem);z-index:-1;   /* .3em ≈ halbe Ziffernbreite */
@@ -201,7 +223,6 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .main{align-self:end;display:grid;gap:1.1rem;max-width:62rem}
 .title{margin:0;font-size:var(--t);font-weight:500;line-height:.95;letter-spacing:-.065em}
 .title a{position:relative;display:inline-block;padding:0 .3em .06em;margin-left:-.3em}
-.title a{transition:color .15s}
 :is(.title,.links) a::before,.pill-ghost{
   content:"";position:absolute;z-index:-1;border-radius:0 .54em .54em .54em;background:var(--pill);
 }
@@ -216,26 +237,27 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   opacity:1;inset:-.02em 0 -.04em;transform:none;         /* Hover: erscheint in Textgröße, wächst etwas darüber */
   transition:transform 0s,opacity .12s linear,inset 1.1s var(--out);
 }
-.tagline{margin:0;max-width:30ch;font-size:clamp(1.25rem,2.2vw,1.75rem);line-height:1.15;letter-spacing:-.05em;color:var(--mute);transition:color 1s var(--soft)}
+.tagline{margin:0;max-width:30ch;font-size:clamp(1.25rem,2.2vw,1.75rem);line-height:1.15;letter-spacing:-.05em;color:var(--mute)}
 
 .body{margin:0;max-width:60ch}
 
 /* Farbfläche aktiv: alles in Tinte, Nummer gefüllt */
-.card:hover :is(.meta,.tagline),
-.card:focus-within :is(.meta,.tagline){color:rgb(25 27 29 / .72)}
-.card:hover .status::before,.card:focus-within .status::before{background:currentColor}
-.card:hover .status.prototyp::before,.card:focus-within .status.prototyp::before{background:none;box-shadow:inset 0 0 0 1.5px currentColor}
+/* Statuspunkt: Projektfarbe mit Ring in Schriftfarbe — sichtbar auf Grund und Füllung */
+.status .dx::before{box-shadow:0 0 0 1.5px currentColor}
+.status.prototyp .dx::before{box-shadow:inset 0 0 0 1.5px currentColor}
 
 
 /* ── Cursor: Kreis, oberes linkes Viertel eckig = Zeigerspitze ── */
 .has-cursor,.has-cursor *{cursor:none !important}
 /* Cursor liegt über der Spur und deckt sie ab; Farbe schwarz oder weiß, je nach Grund */
 .fx{position:fixed;inset:0;z-index:100;pointer-events:none;transition:opacity .3s;--cur:#000}
+@media (prefers-color-scheme:dark){.fx{--cur-line:rgb(0 0 0 / .7)}}   /* dunkel: weißer Cursor, schwarze Kontur */
 .fx.on-nav{--cur:#fff !important;mix-blend-mode:difference}   /* über der Navigation: weiß, invertiert, was darunter liegt */
 .cursor,.trail{position:absolute;left:0;top:0;will-change:transform}
+.cursor svg path{shape-rendering:geometricPrecision;stroke-linejoin:miter}
 .cursor{width:22px;height:22px}
 .cursor svg{display:block;width:100%;height:100%;overflow:visible;fill:var(--cur);
-  stroke:rgb(255 255 255 / .3);stroke-width:2;paint-order:stroke fill;   /* feine weiße Kontur, 1 px außen */
+  stroke:var(--cur-line,rgb(255 255 255 / .7));stroke-width:2;paint-order:stroke fill;   /* Kontur 1 px außen, Gegenfarbe zum Cursor */
   transition:width .45s var(--out),height .45s var(--out),fill .25s}
 .cursor svg path{vector-effect:non-scaling-stroke}       /* Kontur bleibt 1 px, egal wie groß der Cursor ist */
 .cursor.is-link svg{width:160%;height:160%}             /* Größe über die Maße statt transform: Kontur skaliert nicht mit */
@@ -254,16 +276,16 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   margin:0;font-size:var(--t);font-weight:500;line-height:.95;letter-spacing:-.065em;
   transform-origin:0 0;
 }
-.end__head span{color:var(--mute);transition:color .4s}
-.card--end:hover .end__head span{color:rgb(242 242 239 / .55)}
+.end__head span{color:var(--mute)}
 /* Projektlinks: große Schrift, beim Hover die Link-Pille wie bei den Projekttiteln */
 .links{
   align-self:end;display:flex;flex-wrap:wrap;gap:.1em .9em;
   font-size:clamp(1.8rem,4.4vw,4.4rem);font-weight:500;line-height:1.05;letter-spacing:-.06em;
 }
-.links a{position:relative;display:inline-block;padding:0 .3em .06em;margin-left:-.3em;transition:color .15s}
+.links a{position:relative;display:inline-block;padding:0 .3em .06em;margin-left:-.3em}
 .links a::before,.links .pill-ghost{background:var(--hl)}     /* Pille in der Projektfarbe */
 .links a:is(:hover,:focus-visible){color:#191b1d}
+.inv .links:has(a:is(:hover,:focus-visible)){color:#191b1d}
 @media (prefers-reduced-motion:no-preference){
   @supports (animation-timeline:view()){
     .end__head{animation:grow linear both;animation-timeline:view();animation-range:entry 0% entry 100%}
@@ -301,6 +323,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
     <a href="#doday" style="--hl:var(--c-doday)"><b>05</b><span>Do Day</span></a>
     <a href="#chromachron" style="--hl:var(--c-chrom)"><b>06</b><span>Chromachron</span></a>
     <a href="#makerspaces" style="--hl:var(--c-maker)"><b>07</b><span>makerspac.es</span></a>
+    <a href="#links" class="nav-end" style="--hl:#2c2e31"><b>↗</b><span>project urls</span></a>
   </nav>
   <span class="count" aria-hidden="true"><b>00</b> / 07</span>
 </header>
@@ -316,7 +339,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   <section class="slide" id="msmrdev" style="--hl:var(--c-index)">
     <article class="card" style="--img:url(img/msmrdev.svg);--full:url(img/msmrdev.jpg)">
       <span class="shot" aria-hidden="true"></span><span class="shot full" aria-hidden="true"></span>
-      <div class="meta"><span class="d no">01</span><span class="d">Web</span><span class="d gap">HTML</span><span class="d">CSS</span><span class="d">Vanilla JS</span></div>
+      <div class="meta"><span class="d no"><span class="dx">01</span></span><span class="d"><span class="dx">Web</span></span><span class="d gap"><span class="dx">HTML</span></span><span class="d"><span class="dx">CSS</span></span><span class="d"><span class="dx">Vanilla JS</span></span></div>
       <span class="num" aria-hidden="true">01</span>
       <div class="main">
         <h2 class="title">msmr.dev</h2>
@@ -329,10 +352,10 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   <section class="slide" id="korrekturen" style="--hl:var(--c-korr)">
     <article class="card" style="--img:url(img/korrekturen.svg);--full:url(img/korrekturen.jpg)">
       <span class="shot" aria-hidden="true"></span><span class="shot full" aria-hidden="true"></span>
-      <div class="meta"><span class="d no">02</span><span class="d">Web</span><span class="d gap">TypeScript</span><span class="d">Hono</span><span class="d">Drizzle</span><span class="d">SQLite</span><span class="d">TanStack Table</span><span class="d">IMAP</span></div>
+      <div class="meta"><span class="d no"><span class="dx">02</span></span><span class="d"><span class="dx">Web</span></span><span class="d gap"><span class="dx">TypeScript</span></span><span class="d"><span class="dx">Hono</span></span><span class="d"><span class="dx">Drizzle</span></span><span class="d"><span class="dx">SQLite</span></span><span class="d"><span class="dx">TanStack Table</span></span><span class="d"><span class="dx">IMAP</span></span></div>
       <span class="num" aria-hidden="true">02</span>
       <div class="main">
-        <h2 class="title"><a href="https://korrekturen.msmr.co">korrekturen</a></h2>
+        <h2 class="title"><a href="https://korrekturen.msmr.co" target="_blank" rel="noopener">korrekturen</a></h2>
         <p class="tagline">Reporting and tracking corrections sent to newsrooms.</p>
       </div>
       <p class="body">Reports are submitted through an iOS Shortcut and sent as email. A SHA-256 token in the subject line serves as a correlation ID; an IMAP worker matches the outbox against the inbox and links each reply to its report. Results are reviewed in a table view with filtering and sorting.</p>
@@ -342,10 +365,10 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   <section class="slide" id="afterworkphotos" style="--hl:var(--c-awp)">
     <article class="card" style="--img:url(img/afterworkphotos.svg);--full:url(img/afterworkphotos.jpg)">
       <span class="shot" aria-hidden="true"></span><span class="shot full" aria-hidden="true"></span>
-      <div class="meta"><span class="d no">03</span><span class="d">Web</span><span class="d">Smartphone</span><span class="d">VR</span><span class="d">Snap</span><span class="d status">Live</span><span class="d gap">HTML</span><span class="d">CSS</span><span class="d">Vanilla JS</span><span class="d">three.js</span><span class="d">WebXR</span><span class="d">Swift</span><span class="d">PHP</span><span class="d">GitHub Actions</span></div>
+      <div class="meta"><span class="d no"><span class="dx">03</span></span><span class="d"><span class="dx">Web</span></span><span class="d"><span class="dx">Smartphone</span></span><span class="d"><span class="dx">VR</span></span><span class="d"><span class="dx">Snap</span></span><span class="d status"><span class="dx">Live</span></span><span class="d gap"><span class="dx">HTML</span></span><span class="d"><span class="dx">CSS</span></span><span class="d"><span class="dx">Vanilla JS</span></span><span class="d"><span class="dx">three.js</span></span><span class="d"><span class="dx">WebXR</span></span><span class="d"><span class="dx">Swift</span></span><span class="d"><span class="dx">PHP</span></span><span class="d"><span class="dx">GitHub Actions</span></span></div>
       <span class="num" aria-hidden="true">03</span>
       <div class="main">
-        <h2 class="title"><a href="https://afterworkphotos.com">afterworkphotos</a></h2>
+        <h2 class="title"><a href="https://afterworkphotos.com" target="_blank" rel="noopener">afterworkphotos</a></h2>
         <p class="tagline">Square photos, taken after work — on the web, on the phone, in VR, straight from the camera.</p>
       </div>
       <p class="body">On the desktop a wall of prints, on phone and iPad a pile of paper sheets to swipe through, and for the Meta Quest a VR gallery where every floor is a year, joined by a lift. Snap, a personal iOS camera, takes the square shot, suggests a name and posts it; a GitHub workflow files it by date, rebuilds the index and the photo is live. No build step, no framework.</p>
@@ -354,7 +377,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 
   <section class="slide" id="led" style="--hl:var(--c-led)">
     <article class="card">
-      <div class="meta"><span class="d no">04</span><span class="d">Hardware</span><span class="d gap">ESP32</span><span class="d">WS2812B</span><span class="d">WLED/DDP</span><span class="d">TypeScript</span><span class="d">FDM printing</span></div>
+      <div class="meta"><span class="d no"><span class="dx">04</span></span><span class="d"><span class="dx">Hardware</span></span><span class="d gap"><span class="dx">ESP32</span></span><span class="d"><span class="dx">WS2812B</span></span><span class="d"><span class="dx">WLED/DDP</span></span><span class="d"><span class="dx">TypeScript</span></span><span class="d"><span class="dx">FDM printing</span></span></div>
       <span class="num" aria-hidden="true">04</span>
       <div class="main">
         <h2 class="title">LED Info Display</h2>
@@ -367,10 +390,10 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   <section class="slide" id="doday" style="--hl:var(--c-doday)">
     <article class="card" style="--img:url(img/doday.svg);--full:url(img/doday.jpg)">
       <span class="shot" aria-hidden="true"></span><span class="shot full" aria-hidden="true"></span>
-      <div class="meta"><span class="d no">05</span><span class="d">Web</span><span class="d status prototyp">Prototype</span><span class="d gap">TypeScript</span><span class="d">Hono</span><span class="d">tsdav</span><span class="d">CalDAV/WebDAV</span><span class="d">PWA</span></div>
+      <div class="meta"><span class="d no"><span class="dx">05</span></span><span class="d"><span class="dx">Web</span></span><span class="d status prototyp"><span class="dx">Prototype</span></span><span class="d gap"><span class="dx">TypeScript</span></span><span class="d"><span class="dx">Hono</span></span><span class="d"><span class="dx">tsdav</span></span><span class="d"><span class="dx">CalDAV/WebDAV</span></span><span class="d"><span class="dx">PWA</span></span></div>
       <span class="num" aria-hidden="true">05</span>
       <div class="main">
-        <h2 class="title"><a href="https://do.msmr.co">Do Day</a></h2>
+        <h2 class="title"><a href="https://github.com/01msmr/doday/blob/main/README.md" target="_blank" rel="noopener">Do Day</a></h2>
         <p class="tagline">A task and calendar PWA built on a self-hosted Nextcloud.</p>
       </div>
       <p class="body">A Hono backend wraps CalDAV and WebDAV and exposes them as an HTTP API; the data stays in the existing Nextcloud instance. Tasks are organised with hierarchical tags following the #Area.Subarea pattern, resolved through a UID-based registry stored in WebDAV.</p>
@@ -380,10 +403,10 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   <section class="slide" id="chromachron" style="--hl:var(--c-chrom)">
     <article class="card" style="--img:url(img/chromachron.svg);--full:url(img/chromachron.jpg)">
       <span class="shot" aria-hidden="true"></span><span class="shot full" aria-hidden="true"></span>
-      <div class="meta"><span class="d no">06</span><span class="d">Experiment</span><span class="d status">Live</span><span class="d gap">p5.js</span><span class="d">PWA</span><span class="d">Rhino</span></div>
+      <div class="meta"><span class="d no"><span class="dx">06</span></span><span class="d"><span class="dx">Experiment</span></span><span class="d status"><span class="dx">Live</span></span><span class="d gap"><span class="dx">p5.js</span></span><span class="d"><span class="dx">PWA</span></span><span class="d"><span class="dx">Rhino</span></span></div>
       <span class="num" aria-hidden="true">06</span>
       <div class="main">
-        <h2 class="title"><a href="https://time.msmr.co">Chromachron</a></h2>
+        <h2 class="title"><a href="https://time.msmr.co" target="_blank" rel="noopener">Chromachron</a></h2>
         <p class="tagline">A clock without hands: fields of colour instead of numerals.</p>
       </div>
       <p class="body">The Chromachron principle implemented in p5.js, installable as a PWA on iOS. The spiral was constructed in Rhino and carried over as a Bézier curve. Most of the effort went into iOS-specific PWA details: status bar, icon delivery and viewport behaviour.</p>
@@ -393,10 +416,10 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   <section class="slide" id="makerspaces" style="--hl:var(--c-maker)">
     <article class="card" style="--img:url(img/makerspaces.svg);--full:url(img/makerspaces.jpg)">
       <span class="shot" aria-hidden="true"></span><span class="shot full" aria-hidden="true"></span>
-      <div class="meta"><span class="d no">07</span><span class="d">Web</span><span class="d status">Live</span><span class="d gap">Vanilla JS</span><span class="d">MapLibre</span><span class="d">SpaceAPI</span><span class="d">GitHub Pages</span></div>
+      <div class="meta"><span class="d no"><span class="dx">07</span></span><span class="d"><span class="dx">Web</span></span><span class="d status"><span class="dx">Live</span></span><span class="d gap"><span class="dx">Vanilla JS</span></span><span class="d"><span class="dx">MapLibre</span></span><span class="d"><span class="dx">SpaceAPI</span></span><span class="d"><span class="dx">GitHub Pages</span></span></div>
       <span class="num" aria-hidden="true">07</span>
       <div class="main">
-        <h2 class="title"><a href="https://makerspac.es">makerspac.es</a></h2>
+        <h2 class="title"><a href="https://makerspac.es" target="_blank" rel="noopener">makerspac.es</a></h2>
         <p class="tagline">A map of makerspaces across the German-speaking world.</p>
       </div>
       <p class="body">A directory of open workshops with filtering, clustering and radius search, born out of the Toolbox Bodensee community. Where a space publishes SpaceAPI, its opening status is shown live. An embed mode lets other sites include the map. Built without a framework, served statically from GitHub Pages.</p>
@@ -405,17 +428,17 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 
 </main>
 
-<footer class="end">
-  <div class="card card--end">
+<footer class="end" id="links">
+  <div class="card card--end inv">
     <h2 class="end__head">Made at Lake Constance. <span>All projects:</span></h2>
     <nav class="links" aria-label="All projects">
         <a href="https://msmr.dev" style="--hl:var(--c-index)">msmr.dev</a>
-        <a href="https://korrekturen.msmr.co" style="--hl:var(--c-korr)">korrekturen</a>
-        <a href="https://afterworkphotos.com" style="--hl:var(--c-awp)">afterworkphotos</a>
+        <a href="https://korrekturen.msmr.co" style="--hl:var(--c-korr)" target="_blank" rel="noopener">korrekturen</a>
+        <a href="https://afterworkphotos.com" style="--hl:var(--c-awp)" target="_blank" rel="noopener">afterworkphotos</a>
         <a href="#led" style="--hl:var(--c-led)">LED Info Display</a>
-        <a href="https://do.msmr.co" style="--hl:var(--c-doday)">Do Day</a>
-        <a href="https://time.msmr.co" style="--hl:var(--c-chrom)">Chromachron</a>
-        <a href="https://makerspac.es" style="--hl:var(--c-maker)">makerspac.es</a>
+        <a href="https://github.com/01msmr/doday/blob/main/README.md" style="--hl:var(--c-doday)" target="_blank" rel="noopener">Do Day</a>
+        <a href="https://time.msmr.co" style="--hl:var(--c-chrom)" target="_blank" rel="noopener">Chromachron</a>
+        <a href="https://makerspac.es" style="--hl:var(--c-maker)" target="_blank" rel="noopener">makerspac.es</a>
     </nav>
   </div>
 </footer>
@@ -431,18 +454,13 @@ const mark = document.querySelector('.mark');
 const slot = document.querySelector('.mark-slot');
 const hero = document.querySelector('.hero');
 const TOP  = 14;
-let big = 1, slotTop = 0, travel = 1, padX = 0, markW = 0, large = false;
+let big = 1, slotTop = 0, travel = 1, padX = 0, markW = 0, ledeTop = 0, ledeH = 0;
+const lede = document.querySelector('.lede');
 
-/* Scharf bleiben: Beim Vergrößern würde der Browser die 30-px-Schrift hochskalieren
-   (pixelig). Darum wird die Marke groß gesetzt und nur herunterskaliert; erst in der
-   Kopfleiste gilt wieder die echte Größe von 30 px. */
-function setLarge(on){
-  if (on === large) return;
-  large = on;
-  mark.style.fontSize = on ? 30 * big + 'px' : '';
-}
+/* Echte Schrift-Transition: die Schriftgröße selbst läuft mit (nicht transform:scale).
+   Der Browser setzt die Buchstaben bei jeder Größe neu — scharf, ohne Umschalten. */
 function measure(){
-  large = null; setLarge(false);
+  mark.style.fontSize = '';
   mark.style.transform = 'none';
   padX = parseFloat(getComputedStyle(bar).paddingLeft);
   markW = mark.getBoundingClientRect().width;
@@ -451,6 +469,8 @@ function measure(){
   slot.style.height = mark.offsetHeight * big * .86 + 'px';
   slotTop = slot.offsetTop;
   travel = Math.max(1, hero.offsetHeight * .6);
+  lede.style.transform = ''; lede.style.opacity = '';
+  ledeTop = lede.offsetTop; ledeH = lede.offsetHeight;
   update();
 }
 function update(){
@@ -468,9 +488,16 @@ function update(){
   const my = (1 - t) ** 2 * sy + 2 * (1 - t) * t * cy + t * t * ey;
   const x  = mx - markW * s / 2 - padX;                  // linke obere Ecke relativ zur Ruhelage
   const y  = my - h * s / 2 - TOP;
-  setLarge(s > 1.002);
-  mark.style.transform = `translate3d(${x}px,${y}px,0) scale(${large ? s / big : 1})`;
+  mark.style.fontSize = (30 * s).toFixed(2) + 'px';
+  mark.style.transform = `translate3d(${x}px,${y}px,0)`;
   root.style.setProperty('--p', t.toFixed(3));
+
+  // Unterzeile: schrumpft und verblasst beim Hochscrollen; ganz weg, wenn sie noch
+  // eine eigene Höhe unter der Kopfleiste steht
+  const end = parseFloat(getComputedStyle(root).getPropertyValue('--bar')) + ledeH;
+  const q = Math.min(1, Math.max(0, scrollY / Math.max(1, ledeTop - end)));
+  lede.style.opacity = (1 - q).toFixed(3);
+  lede.style.transform = `scale(${(1 - .35 * q).toFixed(3)})`;
 }
 let queued = false;
 addEventListener('scroll', () => {
@@ -490,28 +517,29 @@ const slides = [...document.querySelectorAll('.slide')];
 const nav    = document.querySelector('.nav');
 const links  = [...nav.querySelectorAll('a')];
 const hl     = nav.querySelector('.nav__hl');
+const endLink = nav.querySelector('.nav-end');
 const count  = document.querySelector('.count b');
 let current = -2, hovered = null;
 
+const box = a => {                           // genaue Lage eines Eintrags im Band (Bruchteile von Pixeln)
+  const n = hl.getBoundingClientRect(), r = a.getBoundingClientRect();
+  return { l:r.left - n.left, r:r.right - n.left, w:n.width };
+};
 function paintBand(){
-  const w = nav.clientWidth, stops = [];
+  const stops = [];
   links.forEach(a => {
-    const tint = getComputedStyle(a).getPropertyValue('--hl');   // volle Projektfarbe
-    stops.push(`${tint} ${a.offsetLeft / w * 100}%`, `${tint} ${(a.offsetLeft + a.offsetWidth) / w * 100}%`);   // harte Kanten, keine Mischung
+    const c = getComputedStyle(a).getPropertyValue('--hl'), b = box(a);   // volle Projektfarbe
+    stops.push(`${c} ${b.l}px`, `${c} ${b.r}px`);                          // harte Kanten, in px wie das Fenster
   });
   hl.style.background = `linear-gradient(to right, ${stops.join(',')})`;
 }
 function placeHl(){
-  const a = hovered || links[current];
-  const w = nav.clientWidth;
+  const a = hovered || (atEnd ? endLink : links[current]);
   links.forEach(l => l.classList.toggle('in-win', l === a));
-  if (!a) {                                   // nichts aktiv: auf den ersten Eintrag zusammenziehen
-    const mid = links[0].offsetLeft + links[0].offsetWidth / 2;
-    hl.style.setProperty('--l', mid + 'px'); hl.style.setProperty('--r', (w - mid) + 'px');
-    return;
-  }
-  hl.style.setProperty('--l', a.offsetLeft + 'px');
-  hl.style.setProperty('--r', (w - a.offsetLeft - a.offsetWidth) + 'px');
+  const t = a || links[0], b = box(t);
+  const L = a ? b.l : (b.l + b.r) / 2, R = a ? b.r : L;   // nichts aktiv: auf den ersten Eintrag zusammenziehen
+  hl.style.setProperty('--l', L + 'px');
+  hl.style.setProperty('--r', (b.w - R) + 'px');
 }
 function relayout(){ paintBand(); placeHl(); }
 links.forEach(a => a.addEventListener('pointerenter', () => { hovered = a; placeHl(); }));
@@ -535,17 +563,24 @@ const io = new IntersectionObserver(entries => entries.forEach(en => {
 [hero, ...slides].forEach(el => io.observe(el));
 addEventListener('resize', relayout);
 document.fonts.ready.then(relayout);
+new ResizeObserver(relayout).observe(nav);   // Breite ändert sich (Schrift, schmale Ansicht): Band neu malen
 
 /* ═══ Links/rechts wechselt das Projekt wie hoch/runter:
    Pfeiltasten, seitliches Wischen am Trackpad, Wischen am Touchscreen ═══ */
 const endPage = document.querySelector('.end');
 const screens = [hero, ...slides, endPage];         // letzte Seite mit den Links gehört dazu
 let atEnd = false;
-new IntersectionObserver(([en]) => { atEnd = en.isIntersecting; }, { threshold:.5 }).observe(endPage);
+new IntersectionObserver(([en]) => {
+  atEnd = en.isIntersecting;
+  root.classList.toggle('at-end', atEnd);
+  endLink.toggleAttribute('aria-current', atEnd);
+  links.forEach((a, j) => { if (a !== endLink) a.toggleAttribute('aria-current', !atEnd && j === current); });
+  relayout();
+}, { threshold:.5 }).observe(endPage);
 
 /* Start ↔ erstes Projekt: eigener, langsamer Bildlauf (≈ doppelte Dauer des
    Browser-Bildlaufs), damit die Wortmarke Zeit für ihren Bogen hat. */
-const SLOW = 1400;
+const SLOW = 1050;                          // halb zwischen Browser (≈ 700 ms) und 1400 ms
 let gliding = false, glideEnd = 0;
 function glide(to){
   if (gliding) return;
@@ -683,11 +718,7 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
 
   /* Schwarz oder Weiß — was auf dem Grund unter dem Cursor mehr Kontrast hat */
   const dark = matchMedia('(prefers-color-scheme: dark)');
-  const tone = t => {
-    if (t.closest('.title a, .meta .d')) return dark.matches ? '#fff' : '#000';   // Pille / Detail: weiß bzw. schwarz
-    if (t.closest('.card')) return '#000';                                        // Projektfarbe: helle Töne
-    return dark.matches ? '#fff' : '#000';                                        // Seitengrund
-  };
+  const tone = () => dark.matches ? '#fff' : '#000';   // hell: schwarz, dunkel: weiß — überall
 
   let mx = -99, my = -99, running = false, last = 0;
   const c = { x:-99, y:-99, vx:0, vy:0 };     // Cursorposition mit Feder
@@ -708,7 +739,8 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
     const steps = Math.min(4, Math.max(1, Math.round((now - (last || now - 16.7)) / 16.7)));
     last = now;
     for (let i = 0; i < steps; i++) step();   // bildratenunabhängig
-    cur.style.transform = `translate3d(${c.x}px,${c.y}px,0)`;
+    const dpr = devicePixelRatio || 1, snap = v => Math.round(v * dpr) / dpr;   // auf Gerätepixel: bleibt scharf
+    cur.style.transform = `translate3d(${snap(c.x)}px,${snap(c.y)}px,0)`;
     let still = Math.abs(mx - c.x) + Math.abs(my - c.y) + Math.abs(c.vx) + Math.abs(c.vy) < .1;
     for (const d of dots) {
       const dist = Math.hypot(c.x + R - d.x, c.y + R - d.y);
@@ -722,7 +754,7 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
     if (c.x === -99) { c.x = ev.clientX; c.y = ev.clientY; dots.forEach(d => { d.x = c.x + R; d.y = c.y + R; }); }
     mx = ev.clientX; my = ev.clientY;
     cur.classList.toggle('is-link', !!ev.target.closest('a'));
-    fx.style.setProperty('--cur', tone(ev.target));
+    fx.style.setProperty('--cur', tone());
     fx.classList.toggle('on-nav', !!ev.target.closest('.nav'));
     root.classList.remove('is-away');
     if (!running) { running = true; requestAnimationFrame(loop); }
