@@ -24,6 +24,8 @@
   --pill:#fff;                          /* weiße Elemente — im Dunkelmodus schwarz */
   --pill-ink:#191b1d;
   --on:#191b1d;                         /* Schrift auf Projektfarbe, in beiden Modi dunkel */
+  --end-fill:#2c2e31;                   /* Linkseite: Füllung … */
+  --end-on:#fff;                        /* … und Schrift darauf (dunkel: umgekehrt) */
   color-scheme:light dark;
   --sans:"Geist",system-ui,sans-serif;
   --mono:"Geist Mono",ui-monospace,monospace;
@@ -51,6 +53,8 @@
     --line:rgb(236 236 232 / .14);
     --pill:#000;
     --pill-ink:#ecece8;
+    --end-fill:#e4e4e0;
+    --end-on:#000;
   }
 }
 *{box-sizing:border-box}
@@ -99,7 +103,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   content:"";position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--pill);   /* volle Höhe */
 }
 .nav a.in-win{color:var(--on)}
-.nav a.nav-end.in-win{color:#f2f2ef}                    /* dunkelgraues Fenster: helle Schrift */                          /* im Farbfenster: dunkle Schrift, auch im Dunkelmodus */
+.nav a.nav-end.in-win{color:var(--end-on)}                    /* dunkelgraues Fenster: helle Schrift */                          /* im Farbfenster: dunkle Schrift, auch im Dunkelmodus */
 /* Band aus Projektfarben, je Eintrag eine Fläche mit harter Kante; das Rechteck ist ein Fenster darauf.
    Gleitet es über eine Kante, wandert der Farbwechsel mit durch das Rechteck. */
 .nav__hl{
@@ -176,7 +180,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .inv :is(.meta,.tagline,.end__head span){color:rgb(255 255 255 / .6)}
 .inv .meta .no{color:#fff}
 .inv .title:has(a:is(:hover,:focus-visible)),
-.inv .links:has(a:is(:hover,:focus-visible)){mix-blend-mode:normal;color:var(--pill-ink)}   /* Pille sichtbar: normal */
+.inv .links:has(a:is(:hover,:focus-visible)){mix-blend-mode:normal;color:var(--end-on)}   /* Pille sichtbar: normal, Schrift wie auf der gefüllten Karte */
 .inv .meta .d:hover{color:#fff}
 
 /* Projektbild: Klick = Halbton-Raster, Doppelklick = volles Farbbild.
@@ -270,7 +274,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   padding:calc(var(--bar) + 1rem) var(--pad) 1rem;
   display:grid;
 }
-.card--end{--hl:#2c2e31;--on:#f2f2ef;grid-template-rows:auto 1fr}   /* füllt sich beim Hover dunkelgrau, Schrift hell */
+.card--end{--hl:var(--end-fill);grid-template-rows:auto 1fr}   /* hell: dunkelgrau füllen, dunkel: hellgrau */
 /* Unterzeile wird beim letzten Scrollen zur großen Überschrift */
 .end__head{
   margin:0;font-size:var(--t);font-weight:500;line-height:.95;letter-spacing:-.065em;
@@ -284,8 +288,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 }
 .links a{position:relative;display:inline-block;padding:0 .3em .06em;margin-left:-.3em}
 .links a::before,.links .pill-ghost{background:var(--hl)}     /* Pille in der Projektfarbe */
-.links a:is(:hover,:focus-visible){color:#191b1d}
-.inv .links:has(a:is(:hover,:focus-visible)){color:#191b1d}
+.links a:is(:hover,:focus-visible){color:inherit}              /* Schrift bleibt wie auf der gefüllten Karte */
 @media (prefers-reduced-motion:no-preference){
   @supports (animation-timeline:view()){
     .end__head{animation:grow linear both;animation-timeline:view();animation-range:entry 0% entry 100%}
@@ -323,7 +326,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
     <a href="#doday" style="--hl:var(--c-doday)"><b>05</b><span>Do Day</span></a>
     <a href="#chromachron" style="--hl:var(--c-chrom)"><b>06</b><span>Chromachron</span></a>
     <a href="#makerspaces" style="--hl:var(--c-maker)"><b>07</b><span>makerspac.es</span></a>
-    <a href="#links" class="nav-end" style="--hl:#2c2e31"><b>↗</b><span>project urls</span></a>
+    <a href="#links" class="nav-end" style="--hl:var(--end-fill)"><b>↗</b><span>project urls</span></a>
   </nav>
   <span class="count" aria-hidden="true"><b>00</b> / 07</span>
 </header>
