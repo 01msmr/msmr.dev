@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>msmr.dev — Projekte</title>
+<meta name="description" content="Eigene Projekte aus Web und Hardware. Pro Projekt ein Absatz.">
+<meta property="og:title" content="msmr.dev — Projekte">
+<meta property="og:description" content="Web, Hardware, Experimente. Sechs Projekte, je ein Absatz.">
+<meta property="og:url" content="https://msmr.dev/">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --paper:#E9E9E3;
+  --graphite:#1B1C19;
+  --soft:#5E6058;
+  --rule:#BEBFB5;
+  --rule-fine:#DCDDD5;
+  --ink:#1F4FD8;
+  --live:#2F7D52;
+  --mono:"IBM Plex Mono",monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--graphite);
+  font:16px/1.6 "IBM Plex Sans",system-ui,sans-serif;
+  background-image:
+    linear-gradient(to right,var(--rule-fine) 1px,transparent 1px),
+    linear-gradient(to bottom,var(--rule-fine) 1px,transparent 1px);
+  background-size:8px 8px;
+}
+main{max-width:44rem;margin:0 auto;padding:0 1rem 5rem}
+a{color:inherit;text-decoration-color:var(--ink);text-underline-offset:3px}
+a:hover{color:var(--ink)}
+a:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+
+header{padding:clamp(3rem,10vw,5rem) 0 1rem;border-bottom:1.5px solid var(--graphite)}
+h1{
+  font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 122,"wght" 780;
+  font-size:clamp(2.6rem,11vw,4.5rem);line-height:.9;letter-spacing:-.02em;margin:0;
+}
+h1 span{color:var(--ink)}
+.intro{margin:1.5rem 0 0;font-size:1.0625rem}
+.note{display:block;margin-top:.5rem;font:.75rem var(--mono);color:var(--soft)}
+
+h2{
+  display:flex;gap:.9rem;align-items:baseline;margin:3.5rem 0 0;padding-bottom:.5rem;
+  border-bottom:1px solid var(--graphite);
+  font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 112,"wght" 620;font-size:1.0625rem;
+}
+h2 small{font:.7rem var(--mono);letter-spacing:.12em;color:var(--ink)}
+
+article{padding:1.75rem 0;border-bottom:1px solid var(--rule)}
+article:last-of-type{border-bottom:0}
+h3{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:.4rem .9rem;margin:0;
+  font-family:"Archivo",sans-serif;font-variation-settings:"wdth" 108,"wght" 700;
+  font-size:1.5rem;line-height:1.2;
+}
+.status{
+  display:inline-flex;align-items:center;gap:.4rem;font:.68rem var(--mono);
+  letter-spacing:.08em;text-transform:uppercase;color:var(--soft);
+}
+.status::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--soft)}
+.status.live::before{background:var(--live)}
+.status.aktiv::before{background:var(--ink)}
+.tagline{margin:.4rem 0 0;color:var(--soft)}
+.body{margin:.7rem 0 0}
+.stack{list-style:none;display:flex;flex-wrap:wrap;gap:.35rem .5rem;margin:1rem 0 0;padding:0}
+.stack li{font:.68rem var(--mono);color:var(--soft);border:1px solid var(--rule);padding:.12rem .45rem}
+.facts{display:flex;flex-wrap:wrap;gap:.2rem 1.5rem;margin:.9rem 0 0;font:.72rem var(--mono);color:var(--soft)}
+.facts b{color:var(--graphite);font-weight:500}
+
+footer{
+  margin-top:3rem;padding-top:1rem;border-top:1.5px solid var(--graphite);
+  display:flex;flex-wrap:wrap;gap:.6rem 2rem;
+  font:.7rem var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--soft);
+}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>msmr<span>.dev</span></h1>
+</header>
+
+<p class="intro">
+  Eigene Projekte aus Web und Hardware. Pro Projekt ein Absatz: was es ist,
+  wie es gebaut ist und wo es steht.
+  <span class="note">Entwicklung durchgängig mit Claude Code in Visual Studio Code. Stand 08.2026.</span>
+</p>
+
+<h2><small>WEB</small>Web</h2>
+
+<article>
+  <h3>makerspac.es <span class="status live">Live</span></h3>
+  <p class="tagline">Karte der Makerspaces im deutschsprachigen Raum.</p>
+  <p class="body">Verzeichnis offener Werkstätten mit Filterung, Clustering und Umkreissuche, entstanden im Umfeld der Toolbox Bodensee. Wo ein Space SpaceAPI bereitstellt, wird der Öffnungsstatus live übernommen. Ein Embed-Modus erlaubt die Einbindung in fremde Seiten. Umsetzung ohne Framework, Auslieferung statisch über GitHub Pages.</p>
+  <ul class="stack"><li>Vanilla JS</li><li>MapLibre</li><li>SpaceAPI</li><li>GitHub Pages</li></ul>
+  <p class="facts"><span>Seit <b>2024</b></span><a href="https://makerspac.es">makerspac.es ↗</a></p>
+</article>
+
+<article>
+  <h3>korrekturen.msmr.co <span class="status aktiv">In Arbeit</span></h3>
+  <p class="tagline">Erfassung und Nachverfolgung von Korrekturhinweisen an Redaktionen.</p>
+  <p class="body">Meldungen werden per iOS-Shortcut eingereicht und als E-Mail versendet. Ein SHA-256-Token im Betreff dient als Korrelations-ID; ein IMAP-Worker gleicht Postausgang und Posteingang ab und ordnet Antworten der jeweiligen Meldung zu. Auswertung über eine Tabellenansicht mit Filter- und Sortierfunktion.</p>
+  <ul class="stack"><li>TypeScript</li><li>Hono</li><li>Drizzle</li><li>SQLite</li><li>TanStack Table</li><li>IMAP</li></ul>
+  <p class="facts"><span>Seit <b>2026</b></span><a href="https://korrekturen.msmr.co">korrekturen.msmr.co ↗</a></p>
+</article>
+
+<article>
+  <h3>msmr.dev <span class="status aktiv">In Arbeit</span></h3>
+  <p class="tagline">Diese Projektübersicht.</p>
+  <p class="body">Eine statische HTML-Datei ohne Build-Schritt und ohne JavaScript. Die Projekte stehen linear untereinander, gegliedert nach Web, Hardware und Experimenten.</p>
+  <ul class="stack"><li>HTML</li><li>CSS</li></ul>
+  <p class="facts"><span>Seit <b>2026</b></span></p>
+</article>
+
+<article>
+  <h3>Do Day <span class="status">Prototyp</span></h3>
+  <p class="tagline">Aufgaben- und Kalender-PWA auf Basis der eigenen Nextcloud.</p>
+  <p class="body">Ein Hono-Backend kapselt CalDAV und WebDAV und stellt sie als HTTP-API bereit; die Daten bleiben in der bestehenden Nextcloud-Instanz. Aufgaben werden über hierarchische Tags nach dem Schema #Bereich.Unterbereich strukturiert, aufgelöst über eine UID-basierte Registry im WebDAV.</p>
+  <ul class="stack"><li>TypeScript</li><li>Hono</li><li>tsdav</li><li>CalDAV/WebDAV</li><li>PWA</li></ul>
+  <p class="facts"><span>Seit <b>2025</b></span><a href="https://doday.msmr.co">doday.msmr.co ↗</a></p>
+</article>
+
+<h2><small>HW</small>Hardware</h2>
+
+<article>
+  <h3>LED-Infodisplay <span class="status aktiv">In Arbeit</span></h3>
+  <p class="tagline">Modulare Laufschriftanzeige, 64×8 Pixel.</p>
+  <p class="body">Matrix aus WS2812B an einem ESP32, angesteuert über WLED per DDP von einem eigenen TypeScript-Renderer. Die Module werden über eine selbst entworfene Bajonett-Kupplung mechanisch und elektrisch verbunden, wodurch sich die Anzeige in der Breite erweitern lässt. Gehäuse im FDM-Druck.</p>
+  <ul class="stack"><li>ESP32</li><li>WS2812B</li><li>WLED/DDP</li><li>TypeScript</li><li>FDM-Druck</li></ul>
+  <p class="facts"><span>Seit <b>2026</b></span><span>Nicht öffentlich</span></p>
+</article>
+
+<h2><small>EXP</small>Experimente</h2>
+
+<article>
+  <h3>Chromachron <span class="status live">Live</span></h3>
+  <p class="tagline">Uhr ohne Zeiger, Farbflächen statt Ziffern.</p>
+  <p class="body">Umsetzung des Chromachron-Prinzips in p5.js, als PWA unter iOS installierbar. Die Spirale wurde in Rhino konstruiert und als Bézierkurve übernommen. Der Aufwand lag überwiegend bei den iOS-spezifischen PWA-Details: Statusleiste, Icon-Auslieferung und Viewport-Verhalten.</p>
+  <ul class="stack"><li>p5.js</li><li>PWA</li><li>Rhino</li></ul>
+  <p class="facts"><span>Seit <b>2025</b></span><a href="https://time.msmr.co">time.msmr.co ↗</a></p>
+</article>
+
+<footer>
+  <span>msmr.dev</span>
+  <a href="https://github.com/01msmr">github.com/01msmr</a>
+  <a href="https://msmr.co">msmr.co</a>
+  <span>Bodensee</span>
+</footer>
+
+</main>
+</body>
+</html>
