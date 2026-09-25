@@ -259,9 +259,12 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .has-cursor,.has-cursor *{cursor:none !important}
 /* Cursor liegt über der Spur und deckt sie ab; Farbe schwarz oder weiß, je nach Grund */
 .fx{position:fixed;inset:0;z-index:100;pointer-events:none;transition:opacity .3s;--cur:#000}
-@media (prefers-color-scheme:dark){.fx{--cur-line:rgb(0 0 0 / .7)}}   /* dunkel: weißer Cursor, schwarze Kontur */
-.fx.on-nav{--cur:#fff !important;--cur-line:rgb(0 0 0 / .7)}   /* über der Navigation: Farben umgekehrt — hell: weiß */
-@media (prefers-color-scheme:dark){.fx.on-nav{--cur:#000 !important;--cur-line:rgb(255 255 255 / .7)}}   /* dunkel: schwarz */
+.fx{--cur-inv:#fff;--cur-line-inv:rgb(0 0 0 / .7)}      /* umgekehrte Farben für den Teil über der Navigation */
+@media (prefers-color-scheme:dark){.fx{--cur-line:rgb(0 0 0 / .7);--cur-inv:#000;--cur-line-inv:rgb(255 255 255 / .7)}}
+/* Nur der Teil des Cursors, der die Navigation überdeckt, erscheint invertiert:
+   eine zweite Cursor-Kopie, zugeschnitten auf die Fläche der Navigation; die Spur bleibt normal */
+.fx-inv{position:absolute;inset:0;clip-path:inset(100%)}
+.fx-inv .cursor svg{fill:var(--cur-inv);stroke:var(--cur-line-inv)}
 .cursor,.trail{position:absolute;left:0;top:0;will-change:transform}
 .cursor svg path{shape-rendering:geometricPrecision;stroke-linejoin:miter}
 .cursor{width:22px;height:22px}
@@ -789,6 +792,19 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
     return { el:d, x:-99, y:-99 };
   }) : [];
   fx.append(cur);                             // zuletzt = oben
+  const inv = document.createElement('div');  // Kopie in umgekehrten Farben, nur über der Navigation sichtbar
+  inv.className = 'fx-inv';
+  const cur2 = cur.cloneNode(true);
+  inv.append(cur2);
+  fx.append(inv);
+  const navEl = document.querySelector('.nav');
+  const clipNav = () => {                     // Ausschnitt = Fläche der Navigation, sobald sie sichtbar ist
+    if (lastP < .6) { inv.style.clipPath = 'inset(100%)'; return; }
+    const r = navEl.getBoundingClientRect();
+    inv.style.clipPath = `inset(${r.top}px ${innerWidth - r.right}px ${innerHeight - r.bottom}px ${r.left}px)`;
+  };
+  addEventListener('scroll', clipNav, { passive:true });
+  addEventListener('resize', clipNav);
   document.body.append(fx);
   root.classList.add('has-cursor', 'is-away');
 
@@ -816,7 +832,7 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
     last = now;
     for (let i = 0; i < steps; i++) step();   // bildratenunabhängig
     const dpr = devicePixelRatio || 1, snap = v => Math.round(v * dpr) / dpr;   // auf Gerätepixel: bleibt scharf
-    cur.style.transform = `translate3d(${snap(c.x)}px,${snap(c.y)}px,0)`;
+    cur.style.transform = cur2.style.transform = `translate3d(${snap(c.x)}px,${snap(c.y)}px,0)`;
     let still = Math.abs(mx - c.x) + Math.abs(my - c.y) + Math.abs(c.vx) + Math.abs(c.vy) < .1;
     for (const d of dots) {
       const dist = Math.hypot(c.x + R - d.x, c.y + R - d.y);
@@ -829,9 +845,10 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
   addEventListener('pointermove', ev => {
     if (c.x === -99) { c.x = ev.clientX; c.y = ev.clientY; dots.forEach(d => { d.x = c.x + R; d.y = c.y + R; }); }
     mx = ev.clientX; my = ev.clientY;
-    cur.classList.toggle('is-link', !!ev.target.closest('a'));
+    const link = !!ev.target.closest('a');
+    cur.classList.toggle('is-link', link); cur2.classList.toggle('is-link', link);
+    clipNav();
     fx.style.setProperty('--cur', tone());
-    fx.classList.toggle('on-nav', !!ev.target.closest('.nav'));
     root.classList.remove('is-away');
     if (!running) { running = true; requestAnimationFrame(loop); }
   }, { passive:true });
