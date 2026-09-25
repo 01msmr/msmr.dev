@@ -11,11 +11,12 @@
 <meta name="theme-color" content="#fafaf8" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e0f10" media="(prefers-color-scheme: dark)">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
 
 <style>
+/* Schriften liegen auf dem eigenen Server (Latin-Teilmenge, SIL OFL — siehe fonts/OFL.txt) */
+@font-face{font-family:"Geist";src:url(fonts/geist-latin.woff2) format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url(fonts/geist-mono-latin.woff2) format("woff2");font-weight:100 900;font-display:swap}
 :root{
   --bg:#fafaf8;
   --ink:#191b1d;
@@ -77,8 +78,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 }
 .bar::before{
   content:"";position:absolute;inset:0;z-index:-1;opacity:var(--p);
-  background:color-mix(in srgb,var(--bg) 85%,transparent);
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  background:color-mix(in srgb,var(--bg) 94%,transparent);   /* ohne Blur: günstiger für schwache Grafik */
   border-bottom:1px solid var(--line);
 }
 .mark{
@@ -164,7 +164,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 @media (max-width:699px){.card{--r:40px}}               /* Smartphone */
 .card::before{
   content:"";position:absolute;inset:0;z-index:-1;background:var(--hl);
-  clip-path:inset(100% 0 0 0);transition:clip-path 1.8s cubic-bezier(0,.9,.1,1);   /* steiler Start, sehr langes Auslaufen */
+  transform:translateY(101%);transition:transform 1.8s cubic-bezier(0,.9,.1,1);   /* gleitet von unten ein (GPU); steiler Start, sehr langes Auslaufen */
 }
 /* Schrift an der Füllkante — ohne Zeitsteuerung:
    Projektkarten wechseln die Schriftfarbe nicht (hell: dunkel, dunkel: weiß).
@@ -183,22 +183,26 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .inv .links:has(a:is(:hover,:focus-visible)){mix-blend-mode:normal;color:var(--end-on)}   /* Pille sichtbar: normal, Schrift wie auf der gefüllten Karte */
 .inv .meta .d:hover{color:#fff}
 
-/* Projektbild: Klick = Halbton-Raster, Doppelklick = volles Farbbild.
-   Breitet sich vom Klickpunkt als Kreis aus; über der Farbfläche, hinter der Schrift */
+/* Projektbild: Klick = Halbton-Raster (im Browser aus dem Bildschirmfoto gezeichnet),
+   Doppelklick = volles Bild. Über der Farbfläche, hinter der Schrift. */
 .shot{
-  position:absolute;inset:0;z-index:-1;pointer-events:none;
-  background:var(--img) center/cover no-repeat;
+  position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;
   opacity:.24;mix-blend-mode:multiply;
   clip-path:circle(0 at var(--cx,50%) var(--cy,50%));
   transition:clip-path .5s cubic-bezier(.5,0,.75,0);
 }
-.shot.full{background-image:var(--full);opacity:1;mix-blend-mode:normal}
+.shot.full{background:var(--full,none) center/cover no-repeat;opacity:1;mix-blend-mode:normal}
 /* Raster: blendet einfach ein und aus */
 .shot:not(.full){opacity:0;clip-path:none;transition:opacity .6s ease}           /* Ausblenden per Klick: zügig */
 .card.slow-out .shot:not(.full){transition:opacity 4s ease}                         /* Ausblenden nach Ablauf: langsam */
 .card:is(.is-shot,.is-full) .shot:not(.full){opacity:.15;transition:opacity .8s ease}
 .card.is-full .shot.full{clip-path:circle(150% at var(--cx,50%) var(--cy,50%));transition:clip-path 1.6s cubic-bezier(0,.9,.1,1)}
-.card:hover::before,.card:focus-within::before{clip-path:inset(0)}
+.card:hover::before,.card:focus-within::before{transform:none}
+/* Touch (kein Hover): die Karte auf dem Bildschirm füllt sich nach dem Einrasten */
+@media (hover:none){
+  .slide.is-active .card::before,.at-end .card--end::before{transform:none}
+  .card{touch-action:manipulation}                       /* Doppeltippen = Doppelklick, kein Zoom */
+}
 
 .meta{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:.3rem 1.25rem;max-width:calc(100% - 12rem);font:400 .8125rem/1.4 var(--mono);color:var(--ink);letter-spacing:0}   /* voll deckend */
 .meta .no{color:inherit}
@@ -256,7 +260,8 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 /* Cursor liegt über der Spur und deckt sie ab; Farbe schwarz oder weiß, je nach Grund */
 .fx{position:fixed;inset:0;z-index:100;pointer-events:none;transition:opacity .3s;--cur:#000}
 @media (prefers-color-scheme:dark){.fx{--cur-line:rgb(0 0 0 / .7)}}   /* dunkel: weißer Cursor, schwarze Kontur */
-.fx.on-nav{--cur:#fff !important;mix-blend-mode:difference}   /* über der Navigation: weiß, invertiert, was darunter liegt */
+.fx.on-nav{--cur:#fff !important;--cur-line:rgb(0 0 0 / .7)}   /* über der Navigation: Farben umgekehrt — hell: weiß */
+@media (prefers-color-scheme:dark){.fx.on-nav{--cur:#000 !important;--cur-line:rgb(255 255 255 / .7)}}   /* dunkel: schwarz */
 .cursor,.trail{position:absolute;left:0;top:0;will-change:transform}
 .cursor svg path{shape-rendering:geometricPrecision;stroke-linejoin:miter}
 .cursor{width:22px;height:22px}
@@ -340,8 +345,8 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   </section>
 
   <section class="slide" id="msmrdev" style="--hl:var(--c-index)">
-    <article class="card" style="--img:url(img/msmrdev.svg);--full:url(img/msmrdev.jpg)">
-      <span class="shot" aria-hidden="true"></span><span class="shot full" aria-hidden="true"></span>
+    <article class="card" data-shot="img/msmrdev.webp?v=2">
+      <canvas class="shot" aria-hidden="true"></canvas><span class="shot full" aria-hidden="true"></span>
       <div class="meta"><span class="d no"><span class="dx">01</span></span><span class="d"><span class="dx">Web</span></span><span class="d gap"><span class="dx">HTML</span></span><span class="d"><span class="dx">CSS</span></span><span class="d"><span class="dx">Vanilla JS</span></span></div>
       <span class="num" aria-hidden="true">01</span>
       <div class="main">
@@ -353,8 +358,8 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   </section>
 
   <section class="slide" id="korrekturen" style="--hl:var(--c-korr)">
-    <article class="card" style="--img:url(img/korrekturen.svg);--full:url(img/korrekturen.jpg)">
-      <span class="shot" aria-hidden="true"></span><span class="shot full" aria-hidden="true"></span>
+    <article class="card" data-shot="img/korrekturen.webp?v=2">
+      <canvas class="shot" aria-hidden="true"></canvas><span class="shot full" aria-hidden="true"></span>
       <div class="meta"><span class="d no"><span class="dx">02</span></span><span class="d"><span class="dx">Web</span></span><span class="d gap"><span class="dx">TypeScript</span></span><span class="d"><span class="dx">Hono</span></span><span class="d"><span class="dx">Drizzle</span></span><span class="d"><span class="dx">SQLite</span></span><span class="d"><span class="dx">TanStack Table</span></span><span class="d"><span class="dx">IMAP</span></span></div>
       <span class="num" aria-hidden="true">02</span>
       <div class="main">
@@ -366,8 +371,8 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   </section>
 
   <section class="slide" id="afterworkphotos" style="--hl:var(--c-awp)">
-    <article class="card" style="--img:url(img/afterworkphotos.svg);--full:url(img/afterworkphotos.jpg)">
-      <span class="shot" aria-hidden="true"></span><span class="shot full" aria-hidden="true"></span>
+    <article class="card" data-shot="img/afterworkphotos.webp?v=2">
+      <canvas class="shot" aria-hidden="true"></canvas><span class="shot full" aria-hidden="true"></span>
       <div class="meta"><span class="d no"><span class="dx">03</span></span><span class="d"><span class="dx">Web</span></span><span class="d"><span class="dx">Smartphone</span></span><span class="d"><span class="dx">VR</span></span><span class="d"><span class="dx">Snap</span></span><span class="d status"><span class="dx">Live</span></span><span class="d gap"><span class="dx">HTML</span></span><span class="d"><span class="dx">CSS</span></span><span class="d"><span class="dx">Vanilla JS</span></span><span class="d"><span class="dx">three.js</span></span><span class="d"><span class="dx">WebXR</span></span><span class="d"><span class="dx">Swift</span></span><span class="d"><span class="dx">PHP</span></span><span class="d"><span class="dx">GitHub Actions</span></span></div>
       <span class="num" aria-hidden="true">03</span>
       <div class="main">
@@ -391,8 +396,8 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   </section>
 
   <section class="slide" id="doday" style="--hl:var(--c-doday)">
-    <article class="card" style="--img:url(img/doday.svg);--full:url(img/doday.jpg)">
-      <span class="shot" aria-hidden="true"></span><span class="shot full" aria-hidden="true"></span>
+    <article class="card" data-shot="img/doday.webp?v=2">
+      <canvas class="shot" aria-hidden="true"></canvas><span class="shot full" aria-hidden="true"></span>
       <div class="meta"><span class="d no"><span class="dx">05</span></span><span class="d"><span class="dx">Web</span></span><span class="d status prototyp"><span class="dx">Prototype</span></span><span class="d gap"><span class="dx">TypeScript</span></span><span class="d"><span class="dx">Hono</span></span><span class="d"><span class="dx">tsdav</span></span><span class="d"><span class="dx">CalDAV/WebDAV</span></span><span class="d"><span class="dx">PWA</span></span></div>
       <span class="num" aria-hidden="true">05</span>
       <div class="main">
@@ -404,8 +409,8 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   </section>
 
   <section class="slide" id="chromachron" style="--hl:var(--c-chrom)">
-    <article class="card" style="--img:url(img/chromachron.svg);--full:url(img/chromachron.jpg)">
-      <span class="shot" aria-hidden="true"></span><span class="shot full" aria-hidden="true"></span>
+    <article class="card" data-shot="img/chromachron.webp?v=2">
+      <canvas class="shot" aria-hidden="true"></canvas><span class="shot full" aria-hidden="true"></span>
       <div class="meta"><span class="d no"><span class="dx">06</span></span><span class="d"><span class="dx">Experiment</span></span><span class="d status"><span class="dx">Live</span></span><span class="d gap"><span class="dx">p5.js</span></span><span class="d"><span class="dx">PWA</span></span><span class="d"><span class="dx">Rhino</span></span></div>
       <span class="num" aria-hidden="true">06</span>
       <div class="main">
@@ -417,8 +422,8 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   </section>
 
   <section class="slide" id="makerspaces" style="--hl:var(--c-maker)">
-    <article class="card" style="--img:url(img/makerspaces.svg);--full:url(img/makerspaces.jpg)">
-      <span class="shot" aria-hidden="true"></span><span class="shot full" aria-hidden="true"></span>
+    <article class="card" data-shot="img/makerspaces.webp?v=2">
+      <canvas class="shot" aria-hidden="true"></canvas><span class="shot full" aria-hidden="true"></span>
       <div class="meta"><span class="d no"><span class="dx">07</span></span><span class="d"><span class="dx">Web</span></span><span class="d status"><span class="dx">Live</span></span><span class="d gap"><span class="dx">Vanilla JS</span></span><span class="d"><span class="dx">MapLibre</span></span><span class="d"><span class="dx">SpaceAPI</span></span><span class="d"><span class="dx">GitHub Pages</span></span></div>
       <span class="num" aria-hidden="true">07</span>
       <div class="main">
@@ -474,10 +479,13 @@ function measure(){
   travel = Math.max(1, hero.offsetHeight * .6);
   lede.style.transform = ''; lede.style.opacity = '';
   ledeTop = lede.offsetTop; ledeH = lede.offsetHeight;
-  update();
+  update(true);
 }
-function update(){
+let lastP = -1;
+function update(force){
   const p = Math.min(1, Math.max(0, scrollY / travel));
+  if (p === lastP && !force) return;          // nach dem Startbildschirm: nichts mehr zu tun, kein Neuberechnen der Seite
+  lastP = p;
   // EIN Bogen: die Mitte der Marke läuft auf einer quadratischen Bézierkurve
   // von der Mitte der großen Marke zur Mitte der kleinen. Der Kontrollpunkt liegt
   // auf Höhe des Starts und über dem Ziel — also erst nach links, dann nach oben.
@@ -646,8 +654,72 @@ addEventListener('touchend', ev => {
    Klick: Raster ein/aus. Doppelklick (nur bei Raster): volles Farbbild ↔ Raster.
    Nach 11 s ohne Aktion in der Karte blendet jedes Bild aus (4 s); danach wieder mit Klick beginnen. ═══ */
 const SHOW_FOR = 11000;                     // danach blendet das Bild aus
-document.querySelectorAll('.card:has(.shot)').forEach(card => {
+
+/* Halbton im Browser: Punkte auf gedrehtem Raster (45°), Fläche ∝ Dunkelheit.
+   Gezeichnet für die echte Kartengröße und Pixeldichte — scharf, ohne eigene Dateien. */
+function halftone(canvas, img){
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  if (!w || !h) return;
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  const sc = Math.max(w / img.naturalWidth, h / img.naturalHeight);       // wie background-size:cover
+  const dw = img.naturalWidth * sc, dh = img.naturalHeight * sc;
+  const cell = 12.8 * dw / 1600;                                          // Rasterweite wie bisher
+  // Vorlage klein, weich und grau abtasten
+  const k = 4 / cell, sw = Math.ceil(w * k), sh = Math.ceil(h * k);
+  const src = document.createElement('canvas'); src.width = sw; src.height = sh;
+  const sx = src.getContext('2d', { willReadFrequently:true });
+  sx.filter = `blur(${(cell / 3 * k).toFixed(2)}px) grayscale(1)`;
+  sx.drawImage(img, (w - dw) / 2 * k, (h - dh) / 2 * k, dw * k, dh * k);
+  const px = sx.getImageData(0, 0, sw, sh).data;
+  // Kontrast strecken (1 % abschneiden), überwiegend dunkle Bilder umkehren
+  const hist = new Uint32Array(256); let sum = 0;
+  for (let i = 0; i < px.length; i += 4) { hist[px[i]]++; sum += px[i]; }
+  const n = px.length / 4, cut = n * .01;
+  let lo = 0, hi = 255, acc = 0;
+  while (lo < 255 && (acc += hist[lo]) < cut) lo++;
+  acc = 0; while (hi > 0 && (acc += hist[hi]) < cut) hi--;
+  const span = Math.max(1, hi - lo);
+  const inv = (sum / n - lo) / span * 255 < 100;
+  const lum = (x, y) => {
+    const i = (Math.min(sh - 1, Math.max(0, y | 0)) * sw + Math.min(sw - 1, Math.max(0, x | 0))) * 4;
+    const g = Math.min(255, Math.max(0, (px[i] - lo) / span * 255));
+    return inv ? 255 - g : g;
+  };
+  // Punkte zeichnen
+  canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+  const cx = canvas.getContext('2d');
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cx.fillStyle = '#000'; cx.beginPath();
+  const a = Math.PI / 4, ux = Math.cos(a) * cell, uy = Math.sin(a) * cell;
+  const m = Math.ceil(Math.hypot(w, h) / cell) + 2, rmax = cell * .72, rmin = .9 * dw / 1600;
+  for (let i = -m; i <= m; i++) for (let j = -m; j <= m; j++) {
+    const x = w / 2 + i * ux - j * uy, y = h / 2 + i * uy + j * ux;
+    if (x < -cell || y < -cell || x > w + cell || y > h + cell) continue;
+    const dark = Math.max(0, (1 - lum(x * k, y * k) / 255 - .1) / .9) ** .8;
+    const r = rmax * Math.sqrt(dark);
+    if (r < rmin) continue;
+    cx.moveTo(x + r, y); cx.arc(x, y, r, 0, Math.PI * 2);
+  }
+  cx.fill();
+  canvas.dataset.size = w + 'x' + h;
+}
+
+document.querySelectorAll('.card[data-shot]').forEach(card => {
   let clickTimer, hideTimer, mode = null;     // null | 'shot' | 'full'
+  const canvas = card.querySelector('canvas.shot');
+  let img = null;
+  const load = () => {                        // erst bei Kontakt mit der Karte laden
+    if (img) return img.decode ? img.decode().catch(() => {}) : Promise.resolve();
+    img = new Image();
+    img.src = card.dataset.shot;
+    card.style.setProperty('--full', `url(${card.dataset.shot})`);
+    return img.decode ? img.decode().catch(() => {}) : new Promise(r => { img.onload = r; });
+  };
+  const draw = () => load().then(() => {
+    if (img.naturalWidth && canvas.dataset.size !== canvas.clientWidth + 'x' + canvas.clientHeight) halftone(canvas, img);
+  });
+  card.addEventListener('pointerenter', load, { once:true });
+  addEventListener('resize', () => { if (canvas.dataset.size) { delete canvas.dataset.size; if (mode) draw(); } });
   const at = ev => {
     const r = card.getBoundingClientRect();
     card.style.setProperty('--cx', ev.clientX - r.left + 'px');
@@ -658,6 +730,7 @@ document.querySelectorAll('.card:has(.shot)').forEach(card => {
     if (mode) hideTimer = setTimeout(() => show(null, true), SHOW_FOR);
   };
   const show = (m, slow = false) => {         // slow: nach Ablauf langsam ausblenden, sonst zügig
+    if (m) draw();
     card.classList.toggle('slow-out', slow);
     mode = m;
     card.classList.toggle('is-shot', m === 'shot');
