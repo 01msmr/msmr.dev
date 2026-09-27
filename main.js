@@ -553,20 +553,18 @@ if (!calm.matches) {
     new ResizeObserver(size).observe(card);
     const wake = () => { live.add(s); if (!raf) { t0 = 0; raf = requestAnimationFrame(loop); } };
     if (touch) {
-      // Touch: Füllung, sobald die Karte eingerastet ist (ganz im Bild), leeren unter 50 %.
+      // Touch: Füllung, sobald die Karte eingerastet ist (ganz im Bild). Beim Verlassen bleibt sie voll;
+      // erst ganz außer Sicht wird sie unsichtbar zurückgesetzt, damit sie beim nächsten Mal wieder steigt.
       // Karten höher als der Bildschirm: bezogen auf den Anteil, der überhaupt ins Bild passt.
       const screen = card.closest('.slide, .end');
-      const fit = Math.min(1, innerHeight / screen.offsetHeight);
-      const IN = .999 * fit, OUT = .5 * fit;             // .999 statt 1: der Browser meldet oft 0,9999…
+      const IN = .999 * Math.min(1, innerHeight / screen.offsetHeight);   // .999 statt 1: der Browser meldet oft 0,9999…
       new IntersectionObserver(([en]) => {
-        const on = en.intersectionRatio >= IN;
-        if (!on && en.intersectionRatio >= OUT) return;   // dazwischen: Zustand halten
-        if ((s.target === FULL) === on) return;
-        s.target = on ? FULL : 0;
-        if (on) fillStart = performance.now();
-        s.mx = on ? (s.mx ?? .5) : null;
-        wake();
-      }, { threshold:[OUT, IN] }).observe(screen);
+        if (en.intersectionRatio >= IN && s.target !== FULL) {
+          s.target = FULL; fillStart = performance.now(); s.mx = s.mx ?? .5; wake();
+        } else if (!en.isIntersecting && s.target === FULL) {
+          s.target = 0; s.level = 0; s.lv = 0; s.mx = null; s.y.fill(0); s.v.fill(0); draw(s);   // außer Sicht: leer
+        }
+      }, { threshold:[0, IN] }).observe(screen);
       card.addEventListener('pointermove', e => { if (e.pointerType === 'touch') { stir(s, e); wake(); } });
       card.addEventListener('pointerup', () => { s.px = null; });
       size();
