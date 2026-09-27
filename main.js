@@ -127,7 +127,8 @@ function paintBand(){
   hl.style.backgroundImage = `linear-gradient(to right, ${stops.join(',')})`;
 }
 function placeHl(){
-  const a = hovered || peek || choice || (atEnd ? endLink : links[current]);
+  // schmal: auf dem Startbildschirm steht das Fenster schon auf 01 — es ist da, bevor die Leiste ins Bild kommt
+  const a = hovered || peek || choice || (atEnd ? endLink : links[current]) || (narrow.matches ? links[0] : null);
   links.forEach(l => l.classList.toggle('in-win', l === a));
   const b = box(a || links[0]);
   const L = a ? b.l : 0, R = a ? b.r : box(links[0]).l - 2;   // nichts aktiv: Fenster auf dem unsichtbaren Eintrag 0 (2 px Abstand: kein Farbsaum an 01)
