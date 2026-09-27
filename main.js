@@ -149,6 +149,8 @@ function markNeighbours(c){                   // schmal: aktiver Eintrag (oder d
     a.classList.toggle('edge-r', d === K + 1);
   });
 }
+// schmal: 01 ist von Anfang an aktiv (Name + Fenster) — beim Wechsel Start → 01 ändert sich nichts
+if (narrow.matches) links[0].setAttribute('aria-current', '');
 markNeighbours();                               // gleich beim Laden: der Streifen startet reduziert
 links.forEach(a => a.addEventListener('pointerenter', () => { hovered = a; placeHl(); }));
 /* Klick: der Eintrag wird sofort aktiv — die Seite folgt. Sonst springt die Markierung beim
@@ -226,7 +228,7 @@ let scrubbing = false, settleT = 0;
 const NAV_MS = 450;                             // Takt der Umschalt-Animation (wie .nav__hl im CSS)
 function centerNav(){                           // aktiven Eintrag sofort in die Mitte des Streifens
   if (!narrow.matches || scrubbing) return;
-  const a = atEnd ? endLink : links[current];
+  const a = atEnd ? endLink : (links[current] || links[0]);   // Startbildschirm: 01
   if (!a) return;
   nav.scrollLeft = Math.max(0, Math.min(nav.scrollWidth - nav.clientWidth, a.offsetLeft + a.offsetWidth / 2 - nav.clientWidth / 2));
 }
@@ -272,7 +274,7 @@ const io = new IntersectionObserver(entries => entries.forEach(en => {
 scroller.addEventListener('scroll', () => { if (pending !== null) waitIdle(); }, { passive:true });
 [hero, ...slides].forEach(el => io.observe(el));
 addEventListener('resize', relayout);
-document.fonts.ready.then(relayout);
+document.fonts.ready.then(() => { relayout(); centerNav(); });   // Anfangszustand: Band, Fenster, schmal 01 mittig
 new ResizeObserver(relayout).observe(nav);   // Breite ändert sich (Schrift, schmale Ansicht): Band neu malen
 
 /* ── Links/rechts wechselt das Projekt wie hoch/runter:
