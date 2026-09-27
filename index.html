@@ -1062,7 +1062,7 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
     const d = document.createElement('div');
     d.className = 'trail';
     d.style.setProperty('--sz', (18 * (1 - i / (N + 1))).toFixed(1) + 'px');
-    d.style.opacity = (.95 * (.1 / .95) ** (i / (N - 1))).toFixed(3);   // von 95 % mit festem Faktor je Kreis auf 10 % beim letzten
+    d.style.opacity = (.9 * .77 ** i).toFixed(3);   // erster Kreis 90 %, jeder weitere × 0,77
     fx.append(d);
     return { el:d, x:-99, y:-99 };
   }) : [];
