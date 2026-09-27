@@ -1033,7 +1033,7 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
     const d = document.createElement('div');
     d.className = 'trail';
     d.style.setProperty('--sz', (18 * (1 - i / (N + 1))).toFixed(1) + 'px');
-    d.style.opacity = (.5 * (1 - i / N)).toFixed(3);
+    d.style.opacity = (.95 * (1 - i / N)).toFixed(3);   // erster Kreis 95 %, dann abnehmend
     fx.append(d);
     return { el:d, x:-99, y:-99 };
   }) : [];
@@ -1059,13 +1059,10 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
   const tone = () => dark.matches ? '#fff' : '#000';   // hell: schwarz, dunkel: weiß — überall
 
   let mx = -99, my = -99, running = false, last = 0;
-  const c = { x:-99, y:-99, vx:0, vy:0 };     // Cursorposition mit Feder
-  const STIFF = .11, DAMP = .72;              // Feder: sanft anlaufen, weich ausrollen
+  const c = { x:-99, y:-99 };                 // Cursorposition (= Maus)
   const FOLLOW = .03, SLOWER = .9;            // Spur: erster Kreis folgt mit 3 % pro Frame, jeder weitere 10 % träger
   const step = () => {                        // ein Schritt à 16,7 ms (60 fps)
-    c.vx = (c.vx + (mx - c.x) * STIFF) * DAMP;
-    c.vy = (c.vy + (my - c.y) * STIFF) * DAMP;
-    c.x += c.vx; c.y += c.vy;
+    c.x = mx; c.y = my;                       // Cursor sitzt direkt auf der Maus — kein Nachfedern
     let px = c.x + R, py = c.y + R;           // jeder Kreis folgt seinem Vorgänger
     dots.forEach((d, i) => {
       const f = FOLLOW * SLOWER ** i;
@@ -1079,7 +1076,7 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
     for (let i = 0; i < steps; i++) step();   // bildratenunabhängig
     const dpr = devicePixelRatio || 1, snap = v => Math.round(v * dpr) / dpr;   // auf Gerätepixel: bleibt scharf
     cur.style.transform = cur2.style.transform = `translate3d(${snap(c.x)}px,${snap(c.y)}px,0)`;
-    let still = Math.abs(mx - c.x) + Math.abs(my - c.y) + Math.abs(c.vx) + Math.abs(c.vy) < .1;
+    let still = true;
     for (const d of dots) {
       const dist = Math.hypot(c.x + R - d.x, c.y + R - d.y);
       if (dist > .2) still = false;
@@ -1091,6 +1088,7 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
   addEventListener('pointermove', ev => {
     if (c.x === -99) { c.x = ev.clientX; c.y = ev.clientY; dots.forEach(d => { d.x = c.x + R; d.y = c.y + R; }); }
     mx = ev.clientX; my = ev.clientY;
+    cur.style.transform = cur2.style.transform = `translate3d(${mx}px,${my}px,0)`;   // sofort, ohne auf den nächsten Frame zu warten
     const link = !!ev.target.closest('a');
     cur.classList.toggle('is-link', link); cur2.classList.toggle('is-link', link);
     clipNav();
