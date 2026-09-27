@@ -5,7 +5,8 @@
    3 Schmale Navigation (Auswahlrad)
    4 Blättern (aktives Projekt; Rad/Tasten auf dem Rechner, Wischen auf Touch — je Geste eine Karte,
      im Tempo der Geste; seitliche Gesten)
-   5 Projektbild · 6 Link-Pille · 7 Flüssigkeit · 8 Cursor */
+   5 Projektbild und Details (Raster/Bild; Tipp auf ein Detail; weggeblättert: zurückgesetzt)
+   6 Link-Pille · 7 Flüssigkeit · 8 Cursor */
 
 /* ═══ 0 Grundlagen: Elemente, Medienabfragen, gemeinsamer Zustand ═══ */
 const root    = document.documentElement;
@@ -441,9 +442,10 @@ document.addEventListener('click', ev => {
   history.replaceState(null, '', a.getAttribute('href'));
 });
 
-/* ═══ 5 Projektbild
+/* ═══ 5 Projektbild und Details
    Klick: Raster ein/aus. Doppelklick (nur bei Raster): volles Farbbild ↔ Raster.
-   Nach 11 s ohne Aktion in der Karte blendet jedes Bild aus (4 s); danach wieder mit Klick beginnen. ═══ */
+   Nach 11 s ohne Aktion in der Karte blendet jedes Bild aus (4 s); danach wieder mit Klick beginnen.
+   Ganz aus dem Bild geblättert: Bild aus, offenes Detail zu — die Karte kommt leer zurück. ═══ */
 const SHOW_FOR = 11000;                     // danach blendet das Bild aus
 
 /* Halbton im Browser: Punkte auf gedrehtem Raster (45°), Fläche ∝ Dunkelheit.
@@ -506,21 +508,25 @@ if (pagerOn) document.addEventListener('click', ev => {
   if (openD) closeD();
   else { d.classList.add('on'); openD = d; }
 }, true);
-const detailIo = new IntersectionObserver(es => es.forEach(en => {   // weggeblättert: offenes Detail zu
-  if (!en.isIntersecting && openD && en.target.contains(openD)) closeD();
+const onAway = new Map();                    // Karte → Zurücksetzen ihres Bildes
+const away = new IntersectionObserver(es => es.forEach(en => {   // ganz weggeblättert
+  if (en.isIntersecting) return;
+  if (openD && en.target.contains(openD)) closeD();
+  onAway.get(en.target)?.();
 }));
-document.querySelectorAll('.card').forEach(c => detailIo.observe(c));
+document.querySelectorAll('.card').forEach(c => away.observe(c));
 
 document.querySelectorAll('.card[data-shot]').forEach(card => {
   let clickTimer, hideTimer, mode = null;     // null | 'shot' | 'full'
   const canvas = card.querySelector('canvas.shot');
   let img = null;
   const load = () => {                        // erst bei Kontakt mit der Karte laden
-    if (img) return img.decode ? img.decode().catch(() => {}) : Promise.resolve();
-    img = new Image();
-    img.src = card.dataset.shot;
-    card.style.setProperty('--full', `url(${card.dataset.shot})`);
-    return img.decode ? img.decode().catch(() => {}) : new Promise(r => { img.onload = r; });
+    if (!img) {
+      img = new Image();
+      img.src = card.dataset.shot;
+      card.style.setProperty('--full', `url(${card.dataset.shot})`);
+    }
+    return img.decode().catch(() => {});
   };
   const draw = () => load().then(() => {
     if (img.naturalWidth && canvas.dataset.size !== canvas.clientWidth + 'x' + canvas.clientHeight) halftone(canvas, img);
@@ -544,9 +550,7 @@ document.querySelectorAll('.card[data-shot]').forEach(card => {
     card.classList.toggle('is-full', m === 'full');
     arm();
   };
-  new IntersectionObserver(([en]) => {       // weggeblättert: Raster/Bild aus
-    if (!en.isIntersecting && mode) { clearTimeout(clickTimer); show(null); }
-  }).observe(card);
+  onAway.set(card, () => { clearTimeout(clickTimer); if (mode) show(null); });
   card.addEventListener('pointermove', arm, { passive:true });   // Bewegung in der Karte zählt als Aktion
   card.addEventListener('mousedown', ev => { if (ev.detail > 1 && !ev.target.closest('a')) ev.preventDefault(); });   // kein Markieren beim Doppelklick
   // Touch: ein Tipp auf ein Detail (Technik) vergrößert nur das Detail — kein Tipp auf die Karte

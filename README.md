@@ -79,7 +79,9 @@ Push to `main`. A GitHub webhook tells the netcup server to pull.
 
 In the narrow nav the active item always sits in the centre. On a switch the colour window resizes around it and crossfades, and the neighbours follow the window's edges, all in 0.45 s. Swiping the strip works like a picker: numbers only while swiping, the centred item becomes active on release.
 
-**Cards.** Hover (desktop) fills a card like a thick liquid that bulges toward the cursor. On touch devices the card fills once it has settled and stays full while it leaves the screen; the nav switches at the same moment. Keyboard focus fills a card as well. A click shows a halftone of the screenshot, drawn in the browser, and a double-click on the halftone shows the full screenshot. After 11 s without activity the image fades out. Tech details grow on hover; on touch devices a tap enlarges one, and the next tap anywhere only closes it again. Scrolling a card out of view hides its image and closes its detail.
+**Cards.** Hover (desktop) fills a card like a thick liquid that bulges toward the cursor. On touch devices the card fills once it has settled and stays full while it leaves the screen; the nav switches at the same moment. Keyboard focus fills a card as well.
+
+**Image and details.** A click (tap) on a card shows a halftone of the screenshot, drawn in the browser; a double-click on the halftone shows the full screenshot. After 11 s without activity the image fades out. Tech details grow on hover; on touch devices a tap enlarges one, and while it is open the next tap anywhere only closes it (no halftone, no link). A card scrolled fully out of view comes back plain: image hidden, detail closed.
 
 ## Notes
 
