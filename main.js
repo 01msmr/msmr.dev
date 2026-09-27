@@ -176,7 +176,8 @@ function setActive(i, now = false){           // now: Navigation sofort (Auswahl
     // gab es vorher keinen aktiven Eintrag (Start → 01), steht das Fenster sofort in seiner Breite — nichts, wovon es wachsen könnte
     const hadActive = links.some(a => a.hasAttribute('aria-current'));
     const wOld = narrow.matches && hadActive ? windowWidth() : 0;
-    const on = atEnd ? endLink : links[current];    // Linkseite sichtbar: »project urls« bleibt aktiv
+    // Linkseite sichtbar: »project urls« bleibt aktiv; schmal auf dem Startbildschirm bleibt 01 stehen (Name + Fenster)
+    const on = atEnd ? endLink : (links[current] || (narrow.matches ? links[0] : null));
     links.forEach(a => a.toggleAttribute('aria-current', a === on));
     count.textContent = String(current + 1).padStart(2, '0');
     count.classList.remove('tick'); void count.offsetWidth; count.classList.add('tick');
