@@ -253,6 +253,10 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 }
 .meta .d:hover .dx{transform:scale(4)}
 .meta .d.gap{margin-left:1.25rem}                         /* Abstand: Eckdaten | Technik */
+/* Trefferfläche: waagerecht bis zur Mitte der Lücke zum Nachbarn (Lücke 1,25 rem),
+   senkrecht 50 % der Höhe darüber und darunter */
+.meta .d::after{content:"";position:absolute;inset:-50% -.625rem}
+.meta .d.gap::after{left:-1.875rem}                        /* dort ist die Lücke breiter */
 .status .dx{gap:.5rem}
 .status .dx::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--hl)}
 .status.prototyp .dx::before{background:none;box-shadow:inset 0 0 0 1.5px var(--hl)}
@@ -1033,7 +1037,7 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
     const d = document.createElement('div');
     d.className = 'trail';
     d.style.setProperty('--sz', (18 * (1 - i / (N + 1))).toFixed(1) + 'px');
-    d.style.opacity = (.95 * (1 - i / N)).toFixed(3);   // erster Kreis 95 %, dann abnehmend
+    d.style.opacity = (.95 * (.1 / .95) ** (i / (N - 1))).toFixed(3);   // von 95 % mit festem Faktor je Kreis auf 10 % beim letzten
     fx.append(d);
     return { el:d, x:-99, y:-99 };
   }) : [];
