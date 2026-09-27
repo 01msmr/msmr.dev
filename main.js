@@ -34,7 +34,7 @@ root.classList.add('js');
 /* ═══ 1 Wortmarke: bildschirmbreit auf dem Start, schrumpft links oben
    in die Kopfleiste (30 px). Ohne JS steht sie gleich klein dort. ═══ */
 const TOP  = 14;
-let big = 1, slotTop = 0, travel = 1, padX = 0, markW = 0, ledeTop = 0, ledeH = 0, ledeEnd = 0;
+let big = 1, slotTop = 0, travel = 1, padX = 0, markW = 0, ledeTop = 0, ledeH = 0, ledeEnd = 0, barH = 58;
 
 
 /* Echte Schrift-Transition: die Schriftgröße selbst läuft mit (nicht transform:scale).
@@ -51,7 +51,8 @@ function measure(){
   travel = Math.max(1, hero.offsetHeight * .6);
   lede.style.transform = ''; lede.style.opacity = '';
   ledeTop = lede.offsetTop; ledeH = lede.offsetHeight;
-  ledeEnd = parseFloat(getComputedStyle(root).getPropertyValue('--bar')) + ledeH;   // ganz weg: eine eigene Höhe unter der Kopfleiste
+  barH = parseFloat(getComputedStyle(root).getPropertyValue('--bar'));
+  ledeEnd = barH + ledeH;   // ganz weg: eine eigene Höhe unter der Kopfleiste
   update(true);
 }
 let lastP = -1;
@@ -76,6 +77,9 @@ function update(force){
   mark.style.fontSize = (30 * s).toFixed(2) + 'px';
   mark.style.transform = `translate3d(${x}px,${y}px,0)`;
   root.style.setProperty('--p', t.toFixed(3));
+  // Leiste/Navigation: kommen im selben Tempo herunter, in dem die Wortmarke das letzte Stück (eine
+  // Leistenhöhe) hinaufsteigt — sie beginnen kurz vor dem Ende und sind mit ihr zugleich am Ziel
+  root.style.setProperty('--nav-y', -Math.min(Math.max(0, my - ey), barH) + 'px');
 
   // Unterzeile: schrumpft und verblasst beim Hochscrollen; ganz weg, wenn sie noch
   // eine eigene Höhe unter der Kopfleiste steht

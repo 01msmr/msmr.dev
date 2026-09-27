@@ -62,7 +62,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 }
 .bar::before{
   content:"";position:absolute;inset:0;z-index:-1;opacity:var(--p);
-  transform:translateY(calc((1 - var(--p)) * -100%));   /* Startbildschirm: Leiste oben aus dem Bild, fährt mit dem Scrollen herein */
+  transform:translateY(var(--nav-y,0px));               /* Startbildschirm: Leiste oben aus dem Bild; fährt herein, während die Wortmarke das letzte Stück steigt */
   background:color-mix(in srgb,var(--bg) 94%,transparent);   /* ohne Blur: günstiger für schwache Grafik */
   border-bottom:1px solid var(--line);
 }
@@ -79,7 +79,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   position:relative;display:flex;gap:0;align-self:stretch;min-width:0;   /* volle Höhe der Kopfleiste */
   font-size:.9375rem;letter-spacing:-.03em;
   opacity:clamp(0,(var(--p) - .55) * 2.2,1);
-  transform:translateY(calc((1 - var(--p)) * -100%));   /* mit der Leiste aus dem Bild und wieder herein */
+  transform:translateY(var(--nav-y,0px));               /* mit der Leiste aus dem Bild und wieder herein */
   pointer-events:auto;
 }
 .nav a{position:relative;display:flex;align-items:center;padding:0 .75rem;color:var(--ink);white-space:nowrap;transition:color .5s var(--soft)}
@@ -95,7 +95,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   clip-path:inset(0 var(--r,50%) 0 var(--l,50%));
   transition:clip-path .9s var(--out);                   /* startet sofort, läuft weich aus */
 }
-.count{margin-left:auto;font:400 .8125rem var(--mono);color:var(--mute);letter-spacing:0;opacity:var(--p);transform:translateY(calc((1 - var(--p)) * -150%));font-variant-numeric:tabular-nums;white-space:nowrap}
+.count{margin-left:auto;font:400 .8125rem var(--mono);color:var(--mute);letter-spacing:0;opacity:var(--p);transform:translateY(var(--nav-y,0px));font-variant-numeric:tabular-nums;white-space:nowrap}
 .count b{font-weight:400;color:var(--ink);display:inline-block}
 .at-end .count{opacity:0;transition:opacity .4s}          /* letzte Seite: keine Seitenzahl */
 .count b.tick{animation:tick .5s var(--out)}
