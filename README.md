@@ -2,7 +2,7 @@
 
 [msmr.dev](https://msmr.dev): an overview of personal projects in web and hardware, one screen per project.
 
-A single static HTML file with no build step and no framework. The wordmark shrinks along one curve into the header while you scroll. Each project snaps into place as its own screen. Hovering a card fills it with the project's colour. Clicking shows a halftone of the project, and a double-click shows the full screenshot. The last screen links to every project.
+A single static HTML file with no build step and no framework. The wordmark shrinks along one curve into the header while you scroll. Each project snaps into place as its own screen. Hovering a card fills it with the project's colour like a thick liquid that bulges toward the cursor. Clicking shows a halftone of the project, and a double-click shows the full screenshot. The last screen links to every project.
 
 ## Files
 
@@ -10,7 +10,7 @@ A single static HTML file with no build step and no framework. The wordmark shri
 |---|---|
 | `index.html` | the whole page: markup, CSS and JS |
 | `img/<name>.webp` | screenshot of a project: shown on double-click, and drawn as a halftone on click |
-| `fonts/` | Geist and Geist Mono (Latin subset, SIL OFL), served from this site |
+| `fonts/` | Hanken Grotesk (Latin subset, SIL OFL), served from this site; used for everything |
 | `.htaccess` | caching and compression rules for the server |
 | `icons/`, `site.webmanifest` | favicons, iOS and Android icons in every project colour; the page picks one at random on each load |
 | `tools/icons.py` | regenerates the icons (needs fontTools and ImageMagick) |

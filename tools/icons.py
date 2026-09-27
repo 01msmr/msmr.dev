@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Icons für msmr.dev: »msmr« in Geist 600 auf der Form der Seite
-(Kreis, oberes linkes Viertel eckig — wie Cursor und Karten), je Projektfarbe.
+"""Icons für msmr.dev: »msmr« in Hanken Grotesk 600 auf der Form der Seite
+(große Radien mit kurzen Geraden, oben links eckig — wie die Karten), je Projektfarbe.
 
     python3 tools/icons.py
 
@@ -35,8 +35,8 @@ def oklch_hex(L, C, h):
 
 
 def word_path(text, size, tracking=-.065):
-    """Umriss von text in Geist 600 als SVG-Pfad, Breite und Höhe (px)."""
-    font = TTFont(ROOT / 'fonts/geist-latin.woff2')
+    """Umriss von text in Hanken Grotesk 600 als SVG-Pfad, Breite und Höhe (px)."""
+    font = TTFont(ROOT / 'fonts/hanken-grotesk-latin.woff2')
     font = instancer.instantiateVariableFont(font, {'wght': 600})
     upm, cmap, gs = font['head'].unitsPerEm, font.getBestCmap(), font.getGlyphSet()
     sc, x, parts = size / upm, 0, []
@@ -55,7 +55,11 @@ def svg(color, size=100, pad=0, paper=None, word='msmr', fill=1.3):
     """Form + Schrift. pad: Rand um die Form, paper: Hintergrund (iOS), fill: Wortbreite relativ zum Radius."""
     R = (size - 2 * pad) / 2
     cx = cy = size / 2
-    shape = f'M{cx - R} {cy - R}H{cx}A{R} {R} 0 1 1 {cx - R} {cy}Z'
+    # Wie die Karten: oben links eckig, sonst große Radien — dazwischen kurze Geraden (16 % der Seite)
+    x0, y0, x1, y1 = cx - R, cy - R, cx + R, cy + R
+    r = 2 * R * .42
+    shape = (f'M{x0} {y0}H{x1 - r}A{r} {r} 0 0 1 {x1} {y0 + r}V{y1 - r}'
+             f'A{r} {r} 0 0 1 {x1 - r} {y1}H{x0 + r}A{r} {r} 0 0 1 {x0} {y1 - r}Z')
     d, w, xh = word_path(word, 1)
     fs = R * fill / w                                          # Schriftgröße: Wort ≈ fill/2 der Breite
     d, w, xh = word_path(word, fs)

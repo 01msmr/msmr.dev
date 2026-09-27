@@ -11,7 +11,7 @@
 <meta name="theme-color" content="#fafaf8" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e0f10" media="(prefers-color-scheme: dark)">
 
-<link rel="preload" href="fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/hanken-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="icon" href="icons/fav-0.svg" type="image/svg+xml">
 <link rel="icon" href="icons/fav-0-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="icons/touch-0.png">
@@ -26,9 +26,8 @@
 </script>
 
 <style>
-/* Schriften liegen auf dem eigenen Server (Latin-Teilmenge, SIL OFL — siehe fonts/OFL.txt) */
-@font-face{font-family:"Geist";src:url(fonts/geist-latin.woff2) format("woff2");font-weight:100 900;font-display:swap}
-@font-face{font-family:"Geist Mono";src:url(fonts/geist-mono-latin.woff2) format("woff2");font-weight:100 900;font-display:swap}
+/* Schrift liegt auf dem eigenen Server (Latin-Teilmenge, SIL OFL — siehe fonts/OFL-HankenGrotesk.txt) */
+@font-face{font-family:"Hanken Grotesk";src:url(fonts/hanken-grotesk-latin.woff2) format("woff2");font-weight:100 900;font-display:swap}
 :root{
   --bg:#fafaf8;
   --ink:#191b1d;
@@ -40,8 +39,8 @@
   --end-fill:#2c2e31;                   /* Linkseite: Füllung … */
   --end-on:#fff;                        /* … und Schrift darauf (dunkel: umgekehrt) */
   color-scheme:light dark;
-  --sans:"Geist",system-ui,sans-serif;
-  --mono:"Geist Mono",ui-monospace,monospace;
+  --sans:"Hanken Grotesk",system-ui,sans-serif;
+  --mono:"Hanken Grotesk",system-ui,sans-serif;   /* auch die Details: eine Schrift für alles */
   --pad:clamp(1rem,4vw,3rem);
   --bar:58px;                           /* 30px Wortmarke + 2×14px */
   --out:cubic-bezier(.16,1,.3,1);       /* expo-out: schnell rein, weich aus */
@@ -294,6 +293,11 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .status.prototyp .dx::before{box-shadow:inset 0 0 0 1.5px currentColor}
 
 
+/* ── Füllung als Flüssigkeit (nur mit Maus): ersetzt die glatte Fläche ── */
+.liquid .card::before{display:none}
+.liq{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+.liq path{fill:var(--hl)}
+
 /* ── Cursor: Kreis, oberes linkes Viertel eckig = Zeigerspitze ── */
 .has-cursor,.has-cursor *{cursor:none !important}
 /* Cursor liegt über der Spur und deckt sie ab; Farbe schwarz oder weiß, je nach Grund */
@@ -415,13 +419,13 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   <section class="slide" id="afterworkphotos" style="--hl:var(--c-awp)">
     <article class="card" data-shot="img/afterworkphotos.webp?v=2">
       <canvas class="shot" aria-hidden="true"></canvas><span class="shot full" aria-hidden="true"></span>
-      <div class="meta"><span class="d no"><span class="dx">03</span></span><span class="d"><span class="dx">Web</span></span><span class="d"><span class="dx">Smartphone</span></span><span class="d"><span class="dx">VR</span></span><span class="d"><span class="dx">Snap</span></span><span class="d status"><span class="dx">Live</span></span><span class="d gap"><span class="dx">HTML</span></span><span class="d"><span class="dx">CSS</span></span><span class="d"><span class="dx">Vanilla JS</span></span><span class="d"><span class="dx">three.js</span></span><span class="d"><span class="dx">WebXR</span></span><span class="d"><span class="dx">Swift</span></span><span class="d"><span class="dx">PHP</span></span><span class="d"><span class="dx">GitHub Actions</span></span></div>
+      <div class="meta"><span class="d no"><span class="dx">03</span></span><span class="d"><span class="dx">Web</span></span><span class="d"><span class="dx">Smartphone</span></span><span class="d"><span class="dx">WebXR</span></span><span class="d"><span class="dx">Snap Cam</span></span><span class="d status"><span class="dx">Live</span></span><span class="d gap"><span class="dx">HTML</span></span><span class="d"><span class="dx">CSS</span></span><span class="d"><span class="dx">Vanilla JS</span></span><span class="d"><span class="dx">three.js</span></span><span class="d"><span class="dx">Swift</span></span><span class="d"><span class="dx">PHP</span></span><span class="d"><span class="dx">GitHub Actions</span></span></div>
       <span class="num" aria-hidden="true">03</span>
       <div class="main">
-        <h2 class="title"><a href="https://afterworkphotos.com" target="_blank" rel="noopener">afterworkphotos</a> <a href="https://snap.afterworkphotos.com" target="_blank" rel="noopener">Snap</a> <a href="https://afterworkphotos.com/gallery/" target="_blank" rel="noopener">VR gallery</a></h2>
-        <p class="tagline">Square photos, taken after work — on the web, on the phone, in VR, straight from the camera.</p>
+        <h2 class="title"><a href="https://afterworkphotos.com" target="_blank" rel="noopener">afterworkphotos</a> <a href="https://snap.afterworkphotos.com" target="_blank" rel="noopener">Snap Cam</a> <a href="https://afterworkphotos.com/gallery/" target="_blank" rel="noopener">WebXR gallery</a></h2>
+        <p class="tagline">Square photos, taken after work — on the web, on the phone, in WebXR, straight from the camera.</p>
       </div>
-      <p class="body">On the desktop a wall of prints, on phone and iPad a pile of paper sheets to swipe through, and for the Meta Quest a VR gallery where every floor is a year, joined by a lift. Snap, a personal iOS camera, takes the square shot, suggests a name and posts it; a GitHub workflow files it by date, rebuilds the index and the photo is live. No build step, no framework.</p>
+      <p class="body">On the desktop a wall of prints, on phone and iPad a pile of paper sheets to swipe through, and a WebXR gallery for VR headsets where every floor is a year, joined by a lift. Snap Cam, a personal iOS camera, takes the square shot, suggests a name and posts it; a GitHub workflow files it by date, rebuilds the index and the photo is live. No build step, no framework.</p>
     </article>
   </section>
 
@@ -666,7 +670,8 @@ function centred(){                           // Eintrag, dessen Mitte der Strei
   return best;
 }
 function slideMark(){                         // »msmr« weicht, sobald der Streifen gescrollt wird
-  if (!narrow.matches) { mark.style.translate = ''; markM.style.opacity = ''; return; }
+  // nur mit kleiner Marke in der Kopfleiste — auf dem Startbildschirm steht »msmr.dev« vollständig links
+  if (!narrow.matches || lastP < 1) { mark.style.translate = ''; markM.style.opacity = ''; return; }
   // Ausgangspunkt: erster Eintrag (01) in der Mitte — dort steht »msmr.dev« vollständig
   const f = links[0], base = Math.max(0, f.offsetLeft + f.offsetWidth / 2 - nav.clientWidth / 2);
   const w = markM.offsetWidth, shift = Math.min(Math.max(0, nav.scrollLeft - base), w);
@@ -694,6 +699,7 @@ function settle(){
   relayout(); centerNav();
 }
 narrow.addEventListener('change', () => { slideMark(); relayout(); centerNav(false); });
+addEventListener('scroll', slideMark, { passive:true });   // beim Zurück zum Start sofort zurücksetzen
 let pending = null, idleT = 0;
 const commit = () => { if (pending !== null) setActive(pending); pending = null; };
 const waitIdle = () => { clearTimeout(idleT); idleT = setTimeout(commit, 140); };
@@ -902,6 +908,84 @@ document.querySelectorAll('.title a, .links a').forEach(a => {
   a.addEventListener('focus', () => { keyFocus = a.matches(':focus-visible'); });
   a.addEventListener('blur', () => { if (keyFocus && !a.matches(':hover')) leave(); keyFocus = false; });
 });
+
+/* ═══ Füllung als Flüssigkeit — zähflüssig (»Honig«) ═══
+   Beim Hover steigt der Pegel; die Oberfläche wölbt sich breit zum Cursor und fließt
+   träge zurück. Wenige Stützstellen und starke Kopplung: große, ruhige Wellen,
+   kaum kleine Nebenwellen. Nur mit Maus und ohne reduzierte Bewegung. */
+if (matchMedia('(hover:hover) and (pointer:fine)').matches && !calm.matches) {
+  root.classList.add('liquid');
+  const N = 28;               // Stützstellen der Oberfläche — wenige: keine kleinen Nebenwellen
+  const TENSION = .005;       // zieht jede Stelle zurück auf den Pegel (schwach: träge)
+  const SPREAD = .32;         // Kopplung an die Nachbarn: glättet
+  const DAMP = .986;          // Dämpfung pro Schritt
+  const TAU = .9;             // Sekunden: Pegel folgt dem Ziel
+  const PUSH = .018, PRESS = .025;   // seitliches Schieben / Drücken nahe der Oberfläche
+  const BULGE = .3, REACH = .18;     // Wölbung zum Cursor: Stärke, Breite (Anteil der Kartenbreite)
+  const FULL = 1.06;          // >1: Oberfläche über der Kante, Karte ganz gefüllt
+  const live = new Set(); let raf = 0, t0 = 0;
+
+  document.querySelectorAll('.card').forEach(card => {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'liq'); svg.setAttribute('aria-hidden', 'true'); svg.setAttribute('preserveAspectRatio', 'none');
+    const path = document.createElementNS(svg.namespaceURI, 'path'); svg.append(path);
+    card.prepend(svg);        // zuerst = unter Halbton, Nummer und Schrift
+    const s = { card, path, w:1, h:1, level:0, target:0, y:new Float32Array(N), v:new Float32Array(N), px:null, py:null, mx:null };
+    const size = () => { s.w = card.clientWidth; s.h = card.clientHeight; svg.setAttribute('viewBox', `0 0 ${s.w} ${s.h}`); draw(s); };
+    new ResizeObserver(size).observe(card);
+    const wake = () => { live.add(s); if (!raf) { t0 = 0; raf = requestAnimationFrame(loop); } };
+    card.addEventListener('pointerenter', e => { s.target = FULL; stir(s, e); wake(); });
+    card.addEventListener('pointerleave', e => { stir(s, e); s.target = 0; s.px = s.mx = null; wake(); });
+    card.addEventListener('pointermove', e => { stir(s, e); wake(); });
+    card.addEventListener('focusin', () => { s.target = FULL; wake(); });
+    card.addEventListener('focusout', () => setTimeout(() => { if (!card.matches(':hover, :focus-within')) { s.target = 0; wake(); } }));
+    size();
+  });
+
+  function stir(s, e){
+    const r = s.card.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    s.mx = x / s.w;
+    if (s.px !== null) {
+      const dx = x - s.px, dy = y - s.py, i = x / s.w * (N - 1);
+      const near = Math.exp(-(((y - (1 - s.level) * s.h) / 160) ** 2));   // nur nahe der Oberfläche
+      for (let j = 0; j < N; j++) {
+        const d = (j - i) / 3, g = Math.exp(-d * d);
+        s.v[j] += (dx * PUSH * d + dy * PRESS * near) * g;
+      }
+    }
+    s.px = x; s.py = y;
+  }
+  function step(s, dt){
+    const { y, v } = s;
+    s.level += (s.target - s.level) * (1 - Math.exp(-dt / TAU));
+    for (let i = 0; i < N; i++) {
+      const l = y[i > 0 ? i - 1 : 0], r = y[i < N - 1 ? i + 1 : N - 1];
+      let f = -TENSION * y[i] + SPREAD * (l + r - 2 * y[i]);
+      if (s.mx !== null) { const d = (i / (N - 1) - s.mx) / REACH; f -= BULGE * Math.exp(-d * d); }   // breite Wölbung zum Cursor
+      v[i] = (v[i] + f) * DAMP;
+    }
+    let e = Math.abs(s.target - s.level) + (s.mx !== null ? .01 : 0);
+    for (let i = 0; i < N; i++) { y[i] += v[i]; e += Math.abs(v[i]) + Math.abs(y[i]) * .01; }
+    return e > .002;
+  }
+  function draw(s){
+    const { w, h, y } = s, base = (1 - s.level) * h;
+    if (s.level < .001 && s.target === 0) { s.path.setAttribute('d', ''); return; }
+    const X = i => i / (N - 1) * w, Y = i => base + y[i];
+    let d = `M0 ${h}L0 ${Y(0).toFixed(1)}`;
+    for (let i = 1; i < N; i++) {             // Mittelpunkte als Stützen: weiche Kurve
+      const mx = (X(i - 1) + X(i)) / 2, my = (Y(i - 1) + Y(i)) / 2;
+      d += `Q${X(i - 1).toFixed(1)} ${Y(i - 1).toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)}`;
+    }
+    s.path.setAttribute('d', d + `L${w} ${Y(N - 1).toFixed(1)}L${w} ${h}Z`);
+  }
+  function loop(now){
+    const dt = Math.min(.05, t0 ? (now - t0) / 1000 : 1 / 60); t0 = now;
+    const n = Math.max(1, Math.round(dt * 60));   // Physik in festen 60-Hz-Schritten
+    for (const s of live) { let busy = false; for (let k = 0; k < n; k++) busy = step(s, dt / n) || busy; draw(s); if (!busy) live.delete(s); }
+    raf = live.size ? requestAnimationFrame(loop) : 0;
+  }
+}
 
 /* ═══ Cursor mit Spur aus 9 Kreisen — nur mit Maus ═══ */
 if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
