@@ -40,7 +40,7 @@ html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-snap-type:y man
 /* Touch (iPhone/iPad): die Karten scrollen in einem eigenen Bereich (.pager); das Einrasten
    steuert das Skript selbst — CSS-Snapping korrigiert auf iOS sichtbar nach oder schießt über. */
 @media (hover:none){
-  .nav,.bar::before{opacity:1}                          /* Leiste und Navigation gleiten ganz von oben herein — ohne Einblenden */
+  :root .bar .nav,:root .bar::before,:root .count{opacity:1}   /* Leiste und Navigation gleiten ganz von oben herein — ohne Einblenden (spezifischer als die Grundregeln weiter unten) */
   html{scroll-behavior:auto;scroll-snap-type:none}
   body{height:100svh;overflow:hidden}
   .pager{height:100svh;overflow-y:auto;scroll-snap-type:none;overscroll-behavior:none}   /* Einrasten übernimmt main.js (4, Touch) */
