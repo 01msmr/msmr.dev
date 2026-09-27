@@ -611,7 +611,7 @@ function placeHl(){
   const a = hovered || peek || choice || (atEndSafe() ? endLink : links[current]);
   links.forEach(l => l.classList.toggle('in-win', l === a));
   const b = box(a || links[0]);
-  const L = a ? b.l : 0, R = a ? b.r : box(links[0]).l;   // nichts aktiv: Fenster auf dem unsichtbaren Eintrag 0
+  const L = a ? b.l : 0, R = a ? b.r : box(links[0]).l - 2;   // nichts aktiv: Fenster auf dem unsichtbaren Eintrag 0 (2 px Abstand: kein Farbsaum an 01)
   hl.style.setProperty('--l', L + 'px');
   hl.style.setProperty('--r', (b.w - R) + 'px');
 }
