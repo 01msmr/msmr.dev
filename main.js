@@ -165,11 +165,19 @@ function setActive(i, now = false){           // now: Navigation sofort (Auswahl
   root.style.setProperty('--hl-now', i >= 0 ? getComputedStyle(slides[i]).getPropertyValue('--hl') : '');
   clearTimeout(navT);
   navT = setTimeout(() => {
+    // schmal: der neue Eintrag bleibt beim Umschalten genau dort, wo er gerade steht (kein Sprung durch
+    // aufklappenden Namen und verschwindende Nachbarn) — erst danach gleitet er in einem Zug zur Mitte
+    const t = links[current], before = narrow.matches && t ? t.getBoundingClientRect().left : null;
     links.forEach((a, j) => a.toggleAttribute('aria-current', j === current));
     count.textContent = String(current + 1).padStart(2, '0');
     count.classList.remove('tick'); void count.offsetWidth; count.classList.add('tick');
     markNeighbours();
-    requestAnimationFrame(() => { relayout(); centerNav(); });   // neue Breiten stehen: einmal messen, einmal zentrieren
+    if (before !== null) {
+      cancelAnimationFrame(navAnim);
+      nav.style.scrollSnapType = 'none';
+      nav.scrollLeft += t.getBoundingClientRect().left - before;
+    }
+    relayout(); centerNav();
   }, now ? 0 : navDelay());
 }
 function navDelay(){                          // Touch: ab Beginn der Füllung gerechnet; sonst voll
@@ -193,7 +201,7 @@ function centerNav(smooth = true){
   const to = Math.max(0, Math.min(nav.scrollWidth - nav.clientWidth, a.offsetLeft + a.offsetWidth / 2 - nav.clientWidth / 2));   // in die Mitte des Streifens
   cancelAnimationFrame(navAnim);
   const from = nav.scrollLeft;
-  if (!smooth || Math.abs(to - from) < 1) { nav.scrollLeft = to; return; }
+  if (!smooth || Math.abs(to - from) < 1) { nav.scrollLeft = to; nav.style.scrollSnapType = ''; return; }
   nav.style.scrollSnapType = 'none';
   const t0 = performance.now();
   const tick = now => {
