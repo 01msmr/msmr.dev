@@ -170,31 +170,20 @@ function setActive(i, now = false){           // now: Navigation sofort (Auswahl
   root.style.setProperty('--hl-now', i >= 0 ? getComputedStyle(slides[i]).getPropertyValue('--hl') : '');
   clearTimeout(navT);
   navT = setTimeout(() => {
-    const wOld = narrowWindowWidth();               // schmal: bisherige Fensterbreite
+    // schmal: der neue Eintrag bleibt im Moment des Umschaltens stehen (kein Sprung durch aufklappende
+    // Namen) — dann gleiten Streifen, Farbfenster und Farbe gemeinsam in NAV_MS zur Mitte
+    const t = links[current], before = narrow.matches && t ? t.getBoundingClientRect().left : null;
     links.forEach((a, j) => a.toggleAttribute('aria-current', j === current));
     count.textContent = String(current + 1).padStart(2, '0');
     count.classList.remove('tick'); void count.offsetWidth; count.classList.add('tick');
     markNeighbours();
-    relayout(); centerNav(false);                 // schmal: sofort mittig — der aktive Eintrag steht immer in der Mitte
-    if (wOld) growFromCentre(wOld);                // Fenster bleibt mittig und ändert nur seine Breite
+    if (before !== null) {
+      cancelAnimationFrame(navAnim);
+      nav.style.scrollSnapType = 'none';
+      nav.scrollLeft += t.getBoundingClientRect().left - before;
+    }
+    relayout(); centerNav();
   }, now ? 0 : navDelay());
-}
-/* Schmal: das Farbfenster verlässt die Mitte nie. Beim Wechsel beginnt es mittig in der alten Breite
-   und wächst/schrumpft symmetrisch auf die neue (Übergang aus dem CSS, 0,45 s). */
-function narrowWindowWidth(){
-  if (!narrow.matches) return 0;
-  const w = hl.getBoundingClientRect().width;
-  return w - parseFloat(hl.style.getPropertyValue('--l') || 0) - parseFloat(hl.style.getPropertyValue('--r') || 0);
-}
-function growFromCentre(wOld){
-  const a = links[current]; if (!a) return;
-  const b = box(a), c = (b.l + b.r) / 2;
-  hl.style.transition = 'none';
-  hl.style.setProperty('--l', c - wOld / 2 + 'px');
-  hl.style.setProperty('--r', b.w - (c + wOld / 2) + 'px');
-  void hl.offsetWidth;                           // Startzustand übernehmen
-  hl.style.transition = '';
-  placeHl();                                     // Ziel: genau der neue Eintrag
 }
 function navDelay(){                          // Touch: ab Beginn der Füllung gerechnet; sonst voll
   const since = performance.now() - fillStart;

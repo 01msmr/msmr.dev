@@ -141,7 +141,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .nav a.edge-r::before{content:">"}
   .mark{z-index:2}                                     /* über dem Streifen — ohne eigenen Hintergrund */
   .bar::before{border-bottom-color:transparent}          /* Leiste nahtlos: Grund und Kante gleich */
-  .nav__hl{transition:clip-path .45s cubic-bezier(.33,1,.68,1),background-color .15s linear}   /* schmal: Breite in 0,45 s, Farbe blendet schnell über */
+  .nav__hl{transition:clip-path .45s cubic-bezier(.33,1,.68,1),background-color .45s cubic-bezier(.33,1,.68,1)}   /* schmal: Fenster und Farbe im selben Takt wie der Streifen (NAV_MS, ease-out) */
 }
 
 /* ── Start ── */
