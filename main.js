@@ -552,20 +552,21 @@ if (!calm.matches) {
     const size = () => { s.w = card.clientWidth; s.h = card.clientHeight; svg.setAttribute('viewBox', `0 0 ${s.w} ${s.h}`); draw(s); };
     new ResizeObserver(size).observe(card);
     const wake = () => { live.add(s); if (!raf) { t0 = 0; raf = requestAnimationFrame(loop); } };
-    if (touch) {                              // Touch: steigt, sobald die Karte fast eingerastet ist (99,5 %)
+    if (touch) {
+      // Touch: Füllung, sobald die Karte eingerastet ist (ganz im Bild), leeren unter 50 %.
+      // Karten höher als der Bildschirm: bezogen auf den Anteil, der überhaupt ins Bild passt.
       const screen = card.closest('.slide, .end');
-      let on = false;
+      const fit = Math.min(1, innerHeight / screen.offsetHeight);
+      const IN = .999 * fit, OUT = .5 * fit;             // .999 statt 1: der Browser meldet oft 0,9999…
       new IntersectionObserver(([en]) => {
-        // sichtbarer Anteil — bei Karten höher als der Bildschirm bezogen auf die Bildschirmhöhe
-        const frac = en.intersectionRect.height / Math.min(en.boundingClientRect.height, en.rootBounds.height);
-        const now = on ? frac > .5 : frac >= .995;  // an ab 99,5 %, aus erst unter 50 % (kein Flackern)
-        if (now === on) return;
-        on = now;
+        const on = en.intersectionRatio >= IN;
+        if (!on && en.intersectionRatio >= OUT) return;   // dazwischen: Zustand halten
+        if ((s.target === FULL) === on) return;
         s.target = on ? FULL : 0;
         if (on) fillStart = performance.now();
         s.mx = on ? (s.mx ?? .5) : null;
         wake();
-      }, { threshold:[...Array.from({ length:101 }, (_, i) => i / 100), .995] }).observe(screen);   // Prüfpunkte in 1-%-Schritten + 99,5 %
+      }, { threshold:[OUT, IN] }).observe(screen);
       card.addEventListener('pointermove', e => { if (e.pointerType === 'touch') { stir(s, e); wake(); } });
       card.addEventListener('pointerup', () => { s.px = null; });
       size();
