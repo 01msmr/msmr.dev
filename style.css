@@ -113,7 +113,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   /* Streifen über die ganze Leiste; die Wortmarke liegt links darüber.
      Der Eintrag in der Mitte ist der aktive — wie ein Auswahlrad. */
   .bar .nav{
-    position:absolute;inset:0;margin:0;z-index:1;
+    position:absolute;top:0;bottom:0;right:0;left:calc(var(--pad) + var(--mark-w) - 16px);margin:0;z-index:1;   /* nur rechts der Wortmarke; aktiver Eintrag in dessen Mitte */
     overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
     scroll-snap-type:x mandatory;
     padding-inline:calc(50% - 1.1rem);                   /* erster und letzter Eintrag können in die Mitte */
