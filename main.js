@@ -530,13 +530,15 @@ document.querySelectorAll('.card[data-shot]').forEach(card => {
   };
   card.addEventListener('pointermove', arm, { passive:true });   // Bewegung in der Karte zählt als Aktion
   card.addEventListener('mousedown', ev => { if (ev.detail > 1 && !ev.target.closest('a')) ev.preventDefault(); });   // kein Markieren beim Doppelklick
+  // Touch: ein Tipp auf ein Detail (Technik) vergrößert nur das Detail — kein Tipp auf die Karte
+  const ignore = ev => ev.target.closest('a') || (pagerOn && ev.target.closest('.meta .d'));
   card.addEventListener('click', ev => {
-    if (ev.target.closest('a') || ev.detail > 1 || mode === 'full') return;
+    if (ignore(ev) || ev.detail > 1 || mode === 'full') return;
     clearTimeout(clickTimer);
     clickTimer = setTimeout(() => show(mode === 'shot' ? null : 'shot'), 240);   // auf möglichen Doppelklick warten
   });
   card.addEventListener('dblclick', ev => {
-    if (ev.target.closest('a')) return;
+    if (ignore(ev)) return;
     clearTimeout(clickTimer);
     if (mode === 'shot') { at(ev); show('full'); }          // öffnet sich vom Cursor aus …
     else if (mode === 'full') { at(ev); show('shot'); }     // … und schließt sich zum Cursor hin
