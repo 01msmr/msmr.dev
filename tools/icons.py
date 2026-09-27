@@ -5,7 +5,7 @@
     python3 tools/icons.py
 
 Schreibt nach icons/: fav-<n>.svg und fav-<n>-32.png (Browser, nur »m« — bei 16–32 px lesbar), touch-<n>.png
-(iOS, 180 px), icon-192.png / icon-512.png (Android/Manifest, erste Farbe).
+(iOS, 180 px), icon-192-<n>.png / icon-512-<n>.png (Android; site.webmanifest.php wählt per Zufall).
 Die Seite wählt beim Laden per Zufall eine Farbe.
 """
 import io, math, subprocess, pathlib
@@ -81,8 +81,8 @@ for n, (C, h) in enumerate(HUES):
     (OUT / f'fav-{n}.svg').write_text(fav)
     png(fav, 32, OUT / f'fav-{n}-32.png')
     png(svg(col, pad=18, paper=PAPER), 180, OUT / f'touch-{n}.png')   # iOS rundet selbst ab: Form mit Rand auf Papier
+    png(svg(col, pad=18, paper=PAPER), 192, OUT / f'icon-192-{n}.png')   # Android / Manifest
+    png(svg(col, pad=18, paper=PAPER), 512, OUT / f'icon-512-{n}.png')
     print(n, col)
 
-first = oklch_hex(.7, *HUES[0])
-png(svg(first, pad=18, paper=PAPER), 192, OUT / 'icon-192.png')
-png(svg(first, pad=18, paper=PAPER), 512, OUT / 'icon-512.png')
+
