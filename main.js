@@ -170,20 +170,39 @@ function setActive(i, now = false){           // now: Navigation sofort (Auswahl
   root.style.setProperty('--hl-now', i >= 0 ? getComputedStyle(slides[i]).getPropertyValue('--hl') : '');
   clearTimeout(navT);
   navT = setTimeout(() => {
-    // schmal: der neue Eintrag bleibt im Moment des Umschaltens stehen (kein Sprung durch aufklappende
-    // Namen) — dann gleiten Streifen, Farbfenster und Farbe gemeinsam in NAV_MS zur Mitte
-    const t = links[current], before = narrow.matches && t ? t.getBoundingClientRect().left : null;
+    // schmal: der aktive Eintrag steht sofort und immer mittig; ringsum bewegt sich alles im selben Takt
+    // (NAV_MS, ease-out): Fenster wächst/schrumpft mittig, Farbe blendet über, Nachbarn gleiten an ihren Platz
+    const was = narrow.matches ? new Map(links.map(a => [a, a.getBoundingClientRect().left])) : null;
+    const wOld = narrow.matches ? windowWidth() : 0;
     links.forEach((a, j) => a.toggleAttribute('aria-current', j === current));
     count.textContent = String(current + 1).padStart(2, '0');
     count.classList.remove('tick'); void count.offsetWidth; count.classList.add('tick');
     markNeighbours();
-    if (before !== null) {
-      cancelAnimationFrame(navAnim);
-      nav.style.scrollSnapType = 'none';
-      nav.scrollLeft += t.getBoundingClientRect().left - before;
+    relayout(); centerNav(false);
+    if (was) {
+      if (wOld) growFromCentre(wOld);
+      links.forEach(a => {
+        if (a === links[current]) return;               // der aktive bleibt fest in der Mitte
+        const dx = was.get(a) - a.getBoundingClientRect().left;
+        if (Math.abs(dx) > .5) a.animate([{ transform:`translateX(${dx}px)` }, { transform:'none' }], { duration:NAV_MS, easing:EASE_OUT });
+      });
     }
-    relayout(); centerNav();
   }, now ? 0 : navDelay());
+}
+const EASE_OUT = 'cubic-bezier(.33,1,.68,1)';   // wie .nav__hl im CSS
+function windowWidth(){                          // aktuelle Breite des Farbfensters
+  return hl.getBoundingClientRect().width
+    - parseFloat(hl.style.getPropertyValue('--l') || 0) - parseFloat(hl.style.getPropertyValue('--r') || 0);
+}
+function growFromCentre(wOld){                   // Fenster beginnt mittig in der alten Breite, Ziel: der neue Eintrag
+  const a = links[current]; if (!a) return;
+  const b = box(a), c = (b.l + b.r) / 2;
+  hl.style.transition = 'none';
+  hl.style.setProperty('--l', c - wOld / 2 + 'px');
+  hl.style.setProperty('--r', b.w - (c + wOld / 2) + 'px');
+  void hl.offsetWidth;
+  hl.style.transition = '';
+  placeHl();
 }
 function navDelay(){                          // Touch: ab Beginn der Füllung gerechnet; sonst voll
   const since = performance.now() - fillStart;
