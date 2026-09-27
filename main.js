@@ -497,16 +497,19 @@ function halftone(canvas, img){
 
 /* Touch: ein Tipp vergrößert ein Detail (Technik); solange eines groß ist, schließt der nächste
    Tipp — wo auch immer — nur dieses Detail und löst sonst nichts aus (kein Raster, kein Link). */
-if (pagerOn) {
-  let openD = null;
-  document.addEventListener('click', ev => {
-    const d = ev.target.closest('.meta .d');
-    if (!openD && !d) return;
-    ev.preventDefault(); ev.stopPropagation();
-    if (openD) { openD.classList.remove('on'); openD = null; }
-    else { d.classList.add('on'); openD = d; }
-  }, true);
-}
+let openD = null;
+const closeD = () => { if (openD) openD.classList.remove('on'); openD = null; };
+if (pagerOn) document.addEventListener('click', ev => {
+  const d = ev.target.closest('.meta .d');
+  if (!openD && !d) return;
+  ev.preventDefault(); ev.stopPropagation();
+  if (openD) closeD();
+  else { d.classList.add('on'); openD = d; }
+}, true);
+const detailIo = new IntersectionObserver(es => es.forEach(en => {   // weggeblättert: offenes Detail zu
+  if (!en.isIntersecting && openD && en.target.contains(openD)) closeD();
+}));
+document.querySelectorAll('.card').forEach(c => detailIo.observe(c));
 
 document.querySelectorAll('.card[data-shot]').forEach(card => {
   let clickTimer, hideTimer, mode = null;     // null | 'shot' | 'full'
@@ -541,6 +544,9 @@ document.querySelectorAll('.card[data-shot]').forEach(card => {
     card.classList.toggle('is-full', m === 'full');
     arm();
   };
+  new IntersectionObserver(([en]) => {       // weggeblättert: Raster/Bild aus
+    if (!en.isIntersecting && mode) { clearTimeout(clickTimer); show(null); }
+  }).observe(card);
   card.addEventListener('pointermove', arm, { passive:true });   // Bewegung in der Karte zählt als Aktion
   card.addEventListener('mousedown', ev => { if (ev.detail > 1 && !ev.target.closest('a')) ev.preventDefault(); });   // kein Markieren beim Doppelklick
   // Touch: ein Tipp auf ein Detail (Technik) vergrößert nur das Detail — kein Tipp auf die Karte
