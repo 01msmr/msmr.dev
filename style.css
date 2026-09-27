@@ -131,7 +131,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .nav a.edge-r::before{content:">"}
   .mark{z-index:2}                                     /* über dem Streifen — ohne eigenen Hintergrund */
   .bar::before{border-bottom-color:transparent}          /* Leiste nahtlos: Grund und Kante gleich */
-  .nav__hl{transition:none}                               /* schmal: Fenster wechselt zugleich mit dem Eintrag — alles bleibt mittig */
+  .nav__hl{transition:clip-path .45s cubic-bezier(.33,1,.68,1)}   /* schmal: Eintrag steht sofort mittig, das Farbfenster gleitet in 0,45 s nach */
 }
 
 /* ── Start ── */
