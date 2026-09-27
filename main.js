@@ -171,22 +171,14 @@ function setActive(i, now = false){           // now: Navigation sofort (Auswahl
   clearTimeout(navT);
   navT = setTimeout(() => {
     // schmal: der aktive Eintrag steht sofort und immer mittig; ringsum bewegt sich alles im selben Takt
-    // (NAV_MS, ease-out): Fenster wächst/schrumpft mittig, Farbe blendet über, Nachbarn gleiten an ihren Platz
-    const was = narrow.matches ? new Map(links.map(a => [a, a.getBoundingClientRect().left])) : null;
+    // (NAV_MS, ease-out): Fenster wächst/schrumpft mittig, Farbe blendet über, Nachbarn folgen den Fensterkanten
     const wOld = narrow.matches ? windowWidth() : 0;
     links.forEach((a, j) => a.toggleAttribute('aria-current', j === current));
     count.textContent = String(current + 1).padStart(2, '0');
     count.classList.remove('tick'); void count.offsetWidth; count.classList.add('tick');
     markNeighbours();
-    relayout(); centerNav(false);
-    if (was) {
-      if (wOld) growFromCentre(wOld);
-      links.forEach(a => {
-        if (a === links[current]) return;               // der aktive bleibt fest in der Mitte
-        const dx = was.get(a) - a.getBoundingClientRect().left;
-        if (Math.abs(dx) > .5) a.animate([{ transform:`translateX(${dx}px)` }, { transform:'none' }], { duration:NAV_MS, easing:EASE_OUT });
-      });
-    }
+    relayout(); centerNav();
+    if (wOld) followCentre(wOld);
   }, now ? 0 : navDelay());
 }
 const EASE_OUT = 'cubic-bezier(.33,1,.68,1)';   // wie .nav__hl im CSS
@@ -194,15 +186,25 @@ function windowWidth(){                          // aktuelle Breite des Farbfens
   return hl.getBoundingClientRect().width
     - parseFloat(hl.style.getPropertyValue('--l') || 0) - parseFloat(hl.style.getPropertyValue('--r') || 0);
 }
-function growFromCentre(wOld){                   // Fenster beginnt mittig in der alten Breite, Ziel: der neue Eintrag
-  const a = links[current]; if (!a) return;
-  const b = box(a), c = (b.l + b.r) / 2;
+/* Schmal, nach dem Umschalten: Fenster beginnt mittig in der alten Breite und wächst/schrumpft auf den
+   neuen Eintrag; die Nachbarn hängen an den Fensterkanten (um die halbe Breitenänderung versetzt) und
+   gleiten im selben Takt an ihren Platz. */
+function followCentre(wOld){
+  const act = atEnd ? endLink : links[current]; if (!act) return;
+  const b = box(act), c = (b.l + b.r) / 2;
   hl.style.transition = 'none';
   hl.style.setProperty('--l', c - wOld / 2 + 'px');
   hl.style.setProperty('--r', b.w - (c + wOld / 2) + 'px');
   void hl.offsetWidth;
   hl.style.transition = '';
   placeHl();
+  const r = act.getBoundingClientRect(), mid = r.left + r.width / 2, shift = (wOld - r.width) / 2;
+  if (Math.abs(shift) < .5) return;
+  links.forEach(a => {
+    if (a === act || a.classList.contains('far')) return;
+    const q = a.getBoundingClientRect(), side = Math.sign(q.left + q.width / 2 - mid);
+    a.animate([{ transform:`translateX(${side * shift}px)` }, { transform:'none' }], { duration:NAV_MS, easing:EASE_OUT });
+  });
 }
 function navDelay(){                          // Touch: ab Beginn der Füllung gerechnet; sonst voll
   const since = performance.now() - fillStart;
@@ -214,25 +216,12 @@ function navDelay(){                          // Touch: ab Beginn der Füllung g
    Loslassen: der Eintrag rastet ein, wird aktiv, zeigt seinen Namen, die Karte wechselt. */
 let scrubbing = false, settleT = 0;
 
-/* Streifen und Farbfenster bewegen sich gemeinsam: gleiche Dauer, gleiche Kurve
-   (--nav-ms / ease-out cubic), Einrasten des Streifens währenddessen aus. */
-const NAV_MS = 450;
-let navAnim = 0;
-function centerNav(smooth = true){
+const NAV_MS = 450;                             // Takt der Umschalt-Animation (wie .nav__hl im CSS)
+function centerNav(){                           // aktiven Eintrag sofort in die Mitte des Streifens
   if (!narrow.matches || scrubbing) return;
   const a = atEnd ? endLink : links[current];
   if (!a) return;
-  const to = Math.max(0, Math.min(nav.scrollWidth - nav.clientWidth, a.offsetLeft + a.offsetWidth / 2 - nav.clientWidth / 2));   // in die Mitte des Streifens
-  cancelAnimationFrame(navAnim);
-  const from = nav.scrollLeft;
-  if (!smooth || Math.abs(to - from) < 1) { nav.scrollLeft = to; return; }
-  const t0 = performance.now();
-  const tick = now => {
-    const k = Math.min(1, (now - t0) / NAV_MS), e = 1 - (1 - k) ** 3;
-    nav.scrollLeft = from + (to - from) * e;
-    if (k < 1) navAnim = requestAnimationFrame(tick);
-  };
-  navAnim = requestAnimationFrame(tick);
+  nav.scrollLeft = Math.max(0, Math.min(nav.scrollWidth - nav.clientWidth, a.offsetLeft + a.offsetWidth / 2 - nav.clientWidth / 2));
 }
 function centred(){                           // Eintrag, dessen Mitte der Streifenmitte am nächsten ist
   const mid = nav.getBoundingClientRect().left + nav.clientWidth / 2;
@@ -242,7 +231,6 @@ function centred(){                           // Eintrag, dessen Mitte der Strei
 }
 const startScrub = () => {
   if (!narrow.matches || scrubbing) return;
-  cancelAnimationFrame(navAnim);
   scrubbing = true; nav.classList.add('is-scrubbing');
   requestAnimationFrame(() => { peek = centred(); markNeighbours(peek); paintBand(); placeHl(); });   // nur Nummern: Band neu malen
 };
@@ -262,9 +250,9 @@ function settle(){
   if (!a) return relayout();
   if (a === endLink) endPage.scrollIntoView({ behavior:'smooth' });
   else { setActive(links.indexOf(a), true); slides[links.indexOf(a)].scrollIntoView({ behavior:'smooth' }); }
-  requestAnimationFrame(() => { relayout(); centerNav(false); });
+  requestAnimationFrame(() => { relayout(); centerNav(); });
 }
-narrow.addEventListener('change', () => { relayout(); centerNav(false); });
+narrow.addEventListener('change', () => { relayout(); centerNav(); });
 /* ═══ 4 Blättern: aktives Projekt — erst übernehmen, wenn der Bildlauf steht ═══ */
 let pending = null, idleT = 0;
 const commit = () => { if (pending !== null) setActive(pending); pending = null; choice = null; };   // Seite steht: Klick-Wahl erledigt
@@ -283,11 +271,14 @@ new ResizeObserver(relayout).observe(nav);   // Breite ändert sich (Schrift, sc
 /* ── Links/rechts wechselt das Projekt wie hoch/runter:
    Pfeiltasten, seitliches Wischen am Trackpad, Wischen am Touchscreen ═══ */
 new IntersectionObserver(([en]) => {
+  if (en.isIntersecting === atEnd) return;
+  const wOld = narrow.matches ? windowWidth() : 0;
   atEnd = en.isIntersecting;
   root.classList.toggle('at-end', atEnd);
   endLink.toggleAttribute('aria-current', atEnd);
   links.forEach((a, j) => { if (a !== endLink) a.toggleAttribute('aria-current', !atEnd && j === current); });
-  requestAnimationFrame(() => { relayout(); centerNav(false); });
+  relayout(); centerNav();
+  if (wOld) followCentre(wOld);
 }, { threshold:.5 }).observe(endPage);
 
 /* Start ↔ erstes Projekt: eigener, langsamer Bildlauf (≈ doppelte Dauer des
