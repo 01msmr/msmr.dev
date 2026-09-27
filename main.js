@@ -326,6 +326,17 @@ addEventListener('touchend', ev => {
   if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? 1 : -1);
 }, { passive:true });
 
+/* ── Seiteninterne Links (#…) gleiten per Skript — auf Touch gilt kein globales »smooth« ── */
+document.addEventListener('click', ev => {
+  const a = ev.target.closest('a[href^="#"]');
+  if (!a || ev.defaultPrevented) return;
+  const t = document.querySelector(a.getAttribute('href'));
+  if (!t) return;
+  ev.preventDefault();
+  t.scrollIntoView({ behavior:calm.matches ? 'auto' : 'smooth' });
+  history.replaceState(null, '', a.getAttribute('href'));
+});
+
 /* ═══ 5 Projektbild
    Klick: Raster ein/aus. Doppelklick (nur bei Raster): volles Farbbild ↔ Raster.
    Nach 11 s ohne Aktion in der Karte blendet jedes Bild aus (4 s); danach wieder mit Klick beginnen. ═══ */
@@ -478,13 +489,13 @@ if (!calm.matches) {
     const size = () => { s.w = card.clientWidth; s.h = card.clientHeight; svg.setAttribute('viewBox', `0 0 ${s.w} ${s.h}`); draw(s); };
     new ResizeObserver(size).observe(card);
     const wake = () => { live.add(s); if (!raf) { t0 = 0; raf = requestAnimationFrame(loop); } };
-    if (touch) {                              // Touch: steigt, sobald die Karte zu 98 % im Bild steht
+    if (touch) {                              // Touch: steigt, sobald die Karte zu 96 % im Bild steht
       const screen = card.closest('.slide, .end');
       let on = false;
       new IntersectionObserver(([en]) => {
         // sichtbarer Anteil — bei Karten höher als der Bildschirm bezogen auf die Bildschirmhöhe
         const frac = en.intersectionRect.height / Math.min(en.boundingClientRect.height, en.rootBounds.height);
-        const now = on ? frac > .5 : frac >= .98;   // an ab 98 %, aus erst unter 50 % (kein Flackern)
+        const now = on ? frac > .5 : frac >= .96;   // an ab 96 %, aus erst unter 50 % (kein Flackern)
         if (now === on) return;
         on = now;
         s.target = on ? FULL : 0;
