@@ -100,6 +100,9 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .count b.tick{animation:tick .5s var(--out)}
 @keyframes tick{from{transform:translateY(-.6em);opacity:0}}
 
+/* Platzhalter-Pfeile an den Enden des Streifens: nur schmal, unsichtbar und ohne Funktion —
+   so hat jeder Eintrag links und rechts einen Nachbarn, das Layout bleibt beim Wechsel gleich */
+.nav-pad{display:none}
 /* Nummern nur in der schmalen Ansicht */
 .nav a b{display:none;font:400 .75rem var(--mono);letter-spacing:0}
 /* schmal: nur Nummern, das aktive Projekt klappt seinen Namen aus */
@@ -121,6 +124,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .bar .nav::-webkit-scrollbar{display:none}
   .bar .nav::before,.bar .nav::after{content:"";flex:0 0 50%}   /* je halbe Streifenbreite: erster und letzter Eintrag können in die Mitte */
   .nav a{padding:0 .45rem;scroll-snap-align:center}      /* enger; rastet in der Mitte des Streifens ein */
+  .nav-pad{display:flex;align-items:center;padding:0 .45rem;font:400 .8125rem var(--mono);visibility:hidden;pointer-events:none}
   .nav.is-scrubbing a b{display:inline}                   /* beim Wischen nur Nummern — nichts verschiebt sich unter dem Finger */
   .nav.is-scrubbing a span{max-width:0}
   /* nur der aktive Eintrag; links und rechts davon ‹ bzw. › für den vorigen / nächsten */
