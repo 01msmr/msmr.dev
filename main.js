@@ -149,7 +149,7 @@ nav.addEventListener('pointerleave', () => { hovered = null; placeHl(); });
 /* Die Karte wechselt sofort (ihre Füllung beginnt); die Navigation folgt, wenn die
    Füllung zu 85 % steht — bei der Flüssigkeit auf Touch nach ≈ 390 ms. */
 const NAV_AFTER_FILL = 390;
-let navT = 0;
+let navT = 0, fillStart = 0;                    // fillStart: Beginn der Füllung auf Touch (Zeitpunkt)
 function setActive(i, now = false){           // now: Navigation sofort (Auswahl im Streifen)
   if (i === current) return;
   current = i;
@@ -162,7 +162,11 @@ function setActive(i, now = false){           // now: Navigation sofort (Auswahl
     count.classList.remove('tick'); void count.offsetWidth; count.classList.add('tick');
     markNeighbours();
     requestAnimationFrame(() => { relayout(); centerNav(); });   // neue Breiten stehen: einmal messen, einmal zentrieren
-  }, now ? 0 : NAV_AFTER_FILL);
+  }, now ? 0 : navDelay());
+}
+function navDelay(){                          // Touch: ab Beginn der Füllung gerechnet; sonst voll
+  const since = performance.now() - fillStart;
+  return since < 1000 ? Math.max(0, NAV_AFTER_FILL - since) : NAV_AFTER_FILL;
 }
 
 /* ═══ 3 Schmale Navigation: Auswahlrad ═══
@@ -474,16 +478,20 @@ if (!calm.matches) {
     const size = () => { s.w = card.clientWidth; s.h = card.clientHeight; svg.setAttribute('viewBox', `0 0 ${s.w} ${s.h}`); draw(s); };
     new ResizeObserver(size).observe(card);
     const wake = () => { live.add(s); if (!raf) { t0 = 0; raf = requestAnimationFrame(loop); } };
-    if (touch) {                              // Touch: Pegel folgt der eingerasteten Karte
-      const slide = card.closest('.slide');
-      const sync = () => {
-        const on = slide ? slide.classList.contains('is-active') : root.classList.contains('at-end');
+    if (touch) {                              // Touch: steigt, sobald die Karte zu 95 % im Bild steht
+      const screen = card.closest('.slide, .end');
+      let on = false;
+      new IntersectionObserver(([en]) => {
+        // sichtbarer Anteil — bei Karten höher als der Bildschirm bezogen auf die Bildschirmhöhe
+        const frac = en.intersectionRect.height / Math.min(en.boundingClientRect.height, en.rootBounds.height);
+        const now = on ? frac > .5 : frac >= .95;   // an ab 95 %, aus erst unter 50 % (kein Flackern)
+        if (now === on) return;
+        on = now;
         s.target = on ? FULL : 0;
-        if (on && s.mx === null) s.mx = .5;
-        if (!on) s.mx = null;
+        if (on) fillStart = performance.now();
+        s.mx = on ? (s.mx ?? .5) : null;
         wake();
-      };
-      new MutationObserver(sync).observe(slide || root, { attributes:true, attributeFilter:['class'] });
+      }, { threshold:Array.from({ length:41 }, (_, i) => i / 40) }).observe(screen);
       card.addEventListener('pointermove', e => { if (e.pointerType === 'touch') { stir(s, e); wake(); } });
       card.addEventListener('pointerup', () => { s.px = null; });
       size();
@@ -593,6 +601,7 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
     inv.style.clipPath = `inset(${r.top}px ${innerWidth - r.right}px ${innerHeight - r.bottom}px ${r.left}px)`;
   };
   onHeader.push(clipNav);                   // die Leiste bewegt sich nur mit dem Kopf
+  clipNav();                                // Anfangszustand (Seite kann mitten im Scrollen geladen werden)
   addEventListener('resize', clipNav);
   document.body.append(fx);
   root.classList.add('has-cursor', 'is-away');
@@ -631,7 +640,6 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
     cur.style.transform = cur2.style.transform = `translate3d(${mx}px,${my}px,0)`;   // sofort, ohne auf den nächsten Frame zu warten
     const link = !!ev.target.closest('a');
     cur.classList.toggle('is-link', link); cur2.classList.toggle('is-link', link);
-    clipNav();
     root.classList.remove('is-away');
     if (!running) { running = true; requestAnimationFrame(loop); }
   }, { passive:true });
