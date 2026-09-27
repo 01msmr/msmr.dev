@@ -589,9 +589,18 @@ const box = a => {                           // genaue Lage eines Eintrags im Ba
   const n = hl.getBoundingClientRect(), r = a.getBoundingClientRect();
   return { l:r.left - n.left, r:r.right - n.left, w:n.width };
 };
+/* Vor dem ersten Eintrag liegt ein unsichtbarer »Eintrag 0« (Startbildschirm): auf dem Rechner
+   die Fläche der Wortmarke, schmal so breit wie der erste Eintrag. Von dort gleitet das Fenster
+   in Eintrag 01 — die Farbe wechselt an der Kante von transparent zur Projektfarbe. */
+const zeroWidth = () => narrow.matches          // (erst nach dem Laden aufgerufen)
+  ? links[0].offsetWidth
+  : parseFloat(getComputedStyle(root).getPropertyValue('--mark-w')) || 160;
 function paintBand(){
-  hl.style.width = nav.scrollWidth + 'px';    // im scrollbaren Streifen: Band über die ganze Länge
-  const stops = [];
+  const V = zeroWidth();
+  hl.style.left = -V + 'px';
+  hl.style.width = nav.scrollWidth + V + 'px';    // im scrollbaren Streifen: Band über die ganze Länge (+ Eintrag 0)
+  const f = box(links[0]);
+  const stops = [`transparent 0px`, `transparent ${f.l}px`];
   links.forEach(a => {
     const c = getComputedStyle(a).getPropertyValue('--hl'), b = box(a);   // volle Projektfarbe
     stops.push(`${c} ${b.l}px`, `${c} ${b.r}px`);                          // harte Kanten, in px wie das Fenster
@@ -601,8 +610,8 @@ function paintBand(){
 function placeHl(){
   const a = hovered || peek || choice || (atEndSafe() ? endLink : links[current]);
   links.forEach(l => l.classList.toggle('in-win', l === a));
-  const t = a || links[0], b = box(t);
-  const L = a ? b.l : (b.l + b.r) / 2, R = a ? b.r : L;   // nichts aktiv: auf den ersten Eintrag zusammenziehen
+  const b = box(a || links[0]);
+  const L = a ? b.l : 0, R = a ? b.r : box(links[0]).l;   // nichts aktiv: Fenster auf dem unsichtbaren Eintrag 0
   hl.style.setProperty('--l', L + 'px');
   hl.style.setProperty('--r', (b.w - R) + 'px');
 }
