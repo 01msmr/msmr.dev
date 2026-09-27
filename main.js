@@ -1,499 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>msmr.dev — Projects</title>
-<meta name="description" content="web projects. One screen per project.">
-<meta property="og:title" content="msmr.dev — Projects">
-<meta property="og:description" content="web projects. Seven projects, one screen each.">
-<meta property="og:url" content="https://msmr.dev/">
-<meta name="theme-color" content="#fafaf8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0e0f10" media="(prefers-color-scheme: dark)">
+/* msmr.dev — Verhalten der Seite. Blöcke:
+   0 Grundlagen · 1 Wortmarke · 2 Navigation · 3 Schmale Navigation (Auswahlrad)
+   4 Blättern (aktives Projekt, Tasten, Wischen) · 5 Projektbild · 6 Link-Pille
+   7 Flüssigkeit · 8 Cursor */
 
-<link rel="preload" href="fonts/hanken-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="icon" href="app-icons/fav-0.svg" type="image/svg+xml">
-<link rel="icon" href="app-icons/fav-0-32.png" sizes="32x32" type="image/png">
-<link rel="apple-touch-icon" href="app-icons/touch-0.png">
-<link rel="manifest" href="site.webmanifest.php">
-<script>
-/* Icon in einer der Projektfarben — bei jedem Laden eine andere (iOS übernimmt die beim »Zum Home-Bildschirm«) */
-(() => {
-  const n = Math.floor(Math.random() * 7);
-  document.querySelectorAll('link[rel~="icon"], link[rel="apple-touch-icon"]')
-    .forEach(l => l.href = l.getAttribute('href').replace(/-0(\.|-)/, `-${n}$1`));
-})();
-</script>
+/* ═══ 0 Grundlagen: Elemente, Medienabfragen, gemeinsamer Zustand ═══ */
+const root    = document.documentElement;
+const calm    = matchMedia('(prefers-reduced-motion: reduce)');
+const narrow  = matchMedia('(max-width:1099px)');
+const bar     = document.querySelector('.bar');
+const mark    = document.querySelector('.mark');
+const markM   = document.querySelector('.mark__m');
+const slot    = document.querySelector('.mark-slot');
+const hero    = document.querySelector('.hero');
+const lede    = document.querySelector('.lede');
+const slides  = [...document.querySelectorAll('.slide')];
+const nav     = document.querySelector('.nav');
+const links   = [...nav.querySelectorAll('a')];
+const hl      = nav.querySelector('.nav__hl');
+const endLink = nav.querySelector('.nav-end');
+const count   = document.querySelector('.count b');
+const endPage = document.querySelector('.end');
+const screens = [hero, ...slides, endPage];     // Start, Projekte, Linkseite
+let atEnd = false;                              // Linkseite sichtbar
 
-<style>
-/* Schrift liegt auf dem eigenen Server (Latin-Teilmenge, SIL OFL — siehe fonts/OFL-HankenGrotesk.txt) */
-@font-face{font-family:"Hanken Grotesk";src:url(fonts/hanken-grotesk-latin.woff2) format("woff2");font-weight:100 900;font-display:swap}
-:root{
-  --bg:#fafaf8;
-  --ink:#191b1d;
-  --mute:rgb(25 27 29 / .5);
-  --line:rgb(25 27 29 / .12);
-  --pill:#fff;                          /* weiße Elemente — im Dunkelmodus schwarz */
-  --pill-ink:#191b1d;
-  --on:#191b1d;                         /* Schrift auf Projektfarbe, in beiden Modi dunkel */
-  --end-fill:#2c2e31;                   /* Linkseite: Füllung … */
-  --end-on:#fff;                        /* … und Schrift darauf (dunkel: umgekehrt) */
-  color-scheme:light dark;
-  --sans:"Hanken Grotesk",system-ui,sans-serif;
-  --mono:"Hanken Grotesk",system-ui,sans-serif;   /* auch die Details: eine Schrift für alles */
-  --pad:clamp(1rem,4vw,3rem);
-  --bar:58px;                           /* 30px Wortmarke + 2×14px */
-  --out:cubic-bezier(.16,1,.3,1);       /* expo-out: schnell rein, weich aus */
-  --inout:cubic-bezier(.65,0,.35,1);
-  --soft:cubic-bezier(.76,0,.24,1);    /* ease-in-out quart: zögert an, gleitet aus */
-  --p:1;                                /* Kopf groß → klein, von JS gesetzt */
-
-  /* Projektfarben: gleiche Helligkeit und Sättigung, nur der Farbton wandert */
-  --c-maker:oklch(70% .2 42);
-  --c-korr: oklch(70% .22 5);
-  --c-index:oklch(70% .18 255);
-  --c-doday:oklch(70% .19 155);
-  --c-a:    oklch(70% .17 88);
-  --c-chrom:oklch(70% .2 305);
-  --c-awp:  oklch(70% .15 210);
-}
-@media (prefers-color-scheme:dark){
-  :root{
-    --bg:#0e0f10;
-    --ink:#ecece8;
-    --mute:rgb(236 236 232 / .5);
-    --line:rgb(236 236 232 / .14);
-    --pill:#000;
-    --pill-ink:#ecece8;
-    --end-fill:#e4e4e0;
-    --end-on:#000;
-  }
-}
-*{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-snap-type:y mandatory}   /* auch auf dem Telefon: jede Karte rastet ein */
-body{
-  margin:0;background:var(--bg);color:var(--ink);
-  font:400 17px/1.55 var(--sans);letter-spacing:-.011em;
-  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
-}
-a{color:inherit;text-decoration:none}
-a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2px}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-
-/* ── Kopfleiste ── */
-.bar{
-  position:fixed;inset:0 0 auto;z-index:20;height:var(--bar);
-  display:flex;align-items:center;gap:clamp(1rem,2.5vw,2.25rem);padding:0 var(--pad);
-  pointer-events:none;
-}
-.bar::before{
-  content:"";position:absolute;inset:0;z-index:-1;opacity:var(--p);
-  transform:translateY(calc((1 - var(--p)) * -100%));   /* Startbildschirm: Leiste oben aus dem Bild, fährt mit dem Scrollen herein */
-  background:color-mix(in srgb,var(--bg) 94%,transparent);   /* ohne Blur: günstiger für schwache Grafik */
-  border-bottom:1px solid var(--line);
-}
-.mark{
-  position:absolute;left:var(--pad);top:14px;pointer-events:auto;white-space:nowrap;
-  font-size:30px;line-height:1;font-weight:600;letter-spacing:-.065em;
-  transform-origin:0 0;
-}
-.bar .nav{margin-left:var(--mark-w,160px)}              /* Platz hinter der kleinen Wortmarke */
-.mark i{font-style:normal;color:var(--mute);transition:color .6s var(--out)}
-.mark:hover i{color:var(--hl-now,var(--ink))}
-
-.nav{
-  position:relative;display:flex;gap:0;align-self:stretch;min-width:0;   /* volle Höhe der Kopfleiste */
-  font-size:.9375rem;letter-spacing:-.03em;
-  opacity:clamp(0,(var(--p) - .55) * 2.2,1);
-  transform:translateY(calc((1 - var(--p)) * -100%));   /* mit der Leiste aus dem Bild und wieder herein */
-  pointer-events:auto;
-}
-.nav a{position:relative;display:flex;align-items:center;padding:0 .75rem;color:var(--ink);white-space:nowrap;transition:color .5s var(--soft)}
-.nav a:not(:last-of-type)::after{                         /* feiner Trennstrich rechts */
-  content:"";position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--pill);   /* volle Höhe */
-}
-.nav a.in-win{color:var(--on)}
-.nav a.nav-end.in-win{color:var(--end-on)}                    /* dunkelgraues Fenster: helle Schrift */                          /* im Farbfenster: dunkle Schrift, auch im Dunkelmodus */
-/* Band aus Projektfarben, je Eintrag eine Fläche mit harter Kante; das Rechteck ist ein Fenster darauf.
-   Gleitet es über eine Kante, wandert der Farbwechsel mit durch das Rechteck. */
-.nav__hl{
-  position:absolute;inset:0 auto 0 0;width:100%;z-index:-1;
-  clip-path:inset(0 var(--r,50%) 0 var(--l,50%));
-  transition:clip-path .9s var(--out);                   /* startet sofort, läuft weich aus */
-}
-.count{margin-left:auto;font:400 .8125rem var(--mono);color:var(--mute);letter-spacing:0;opacity:var(--p);transform:translateY(calc((1 - var(--p)) * -150%));font-variant-numeric:tabular-nums;white-space:nowrap}
-.count b{font-weight:400;color:var(--ink);display:inline-block}
-.at-end .count{opacity:0;transition:opacity .4s}          /* letzte Seite: keine Seitenzahl */
-.count b.tick{animation:tick .5s var(--out)}
-@keyframes tick{from{transform:translateY(-.6em);opacity:0}}
-
-/* Nummern nur in der schmalen Ansicht */
-.nav a b{display:none;font:400 .75rem var(--mono);letter-spacing:0}
-/* schmal: nur Nummern, das aktive Projekt klappt seinen Namen aus */
-@media (max-width:1099px){
-  .nav a b{display:inline}
-  .nav a[aria-current] b{display:none}
-  .nav a span{max-width:0;overflow:hidden}                /* sofort: sonst verschiebt sich der Streifen zweimal */
-  .nav a[aria-current] span{max-width:10em}
-  .count{display:none}
-
-  /* Streifen über die ganze Leiste; die Wortmarke liegt links darüber.
-     Der Eintrag in der Mitte ist der aktive — wie ein Auswahlrad. */
-  .bar .nav{
-    position:absolute;inset:0;margin:0;z-index:1;
-    overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
-    scroll-snap-type:x mandatory;
-    padding-inline:calc(50% - 1.1rem);                   /* erster und letzter Eintrag können in die Mitte */
-  }
-  .bar .nav::-webkit-scrollbar{display:none}
-  .nav a{padding:0 .45rem;scroll-snap-align:center}      /* enger */
-  .nav.is-scrubbing a b{display:inline}                   /* beim Wischen nur Nummern — nichts verschiebt sich unter dem Finger */
-  .nav.is-scrubbing a span{max-width:0}
-  /* nur je ein Nachbar links und rechts; gibt es dahinter noch mehr, steht dort ‹ bzw. › */
-  .nav a.far{opacity:0;pointer-events:none}
-  .nav a:is(.edge-l,.edge-r) :is(b,span){display:none}
-  .nav a.edge-l::before,.nav a.edge-r::before{font:400 .8125rem var(--mono);color:var(--mute)}
-  .nav a.edge-l::before{content:"<"}
-  .nav a.edge-r::before{content:">"}
-  .mark{z-index:2;background:var(--bg);padding-right:.5rem}   /* über dem Streifen */
-  .mark::after{content:"";position:absolute;left:100%;top:0;bottom:0;width:1.25rem;background:linear-gradient(to right,var(--bg),transparent)}
-  .mark__m{display:inline-block;transition:opacity .2s}
-  .bar::before{border-bottom-color:transparent}          /* Leiste nahtlos: Grund und Kante gleich */
-  .nav__hl{transition:clip-path .45s cubic-bezier(.33,1,.68,1)}   /* synchron mit dem Zentrieren des Streifens */
-}
-
-/* ── Start ── */
-.hero{
-  min-height:100svh;padding:calc(var(--bar) + 12vh) var(--pad) 2.5rem;
-  display:flex;flex-direction:column;scroll-snap-align:start;
-}
-.mark-slot{height:0;margin:0}
-.lede{
-  transform-origin:0 0;
-  margin:clamp(1.5rem,4vh,3rem) 0 0;max-width:24ch;
-  font-size:clamp(1.5rem,3vw,2.25rem);font-weight:500;line-height:1.14;letter-spacing:-.05em;
-}
-.lede span{color:var(--mute)}
-.cue{
-  margin-top:auto;display:flex;justify-content:space-between;
-  font:400 .8125rem var(--mono);color:var(--mute);letter-spacing:0;
-}
-.cue a:hover{color:var(--ink)}
-
-/* ── Projekt: ein Bildschirm pro Projekt ── */
-.slide{
-  min-height:100svh;padding:calc(var(--bar) + 1rem) var(--pad) 1rem;
-  display:grid;scroll-snap-align:start;
-}
-.card{
-  position:relative;isolation:isolate;overflow:hidden;background:var(--bg);   /* Grund, auch für die Invertierung der Linkseite */
-  display:grid;grid-template-rows:auto 1fr auto;gap:1.5rem;
-  --t:clamp(2.6rem,7.4vw,7rem);                          /* Titelgröße */
-  padding:clamp(1.25rem,3.5vw,3rem);
-  box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--hl) 40%,transparent);   /* Kontur liegt unter der Füllung und verschwindet darin */
-  --r:140px;                                             /* Rechner */
-  border-radius:0 var(--r) var(--r) var(--r);
-  clip-path:inset(0 round 0 var(--r) var(--r) var(--r));   /* schneidet auch die gleitende Füllung rund zu */
-}
-@media (max-width:1199px){.card{--r:24px}}              /* iPad: kleine Geräteecken (~18 pt) */
-@media (max-width:699px){.card{--r:40px}}               /* Smartphone */
-@media (min-width:700px) and (max-width:1199px){          /* iPad: Karte dicht an den Geräterand, Ecken laufen parallel */
-  .slide,.end{padding-left:10px;padding-right:10px;padding-bottom:10px}
-}
-.card::before{
-  content:"";position:absolute;inset:0;z-index:-1;background:var(--hl);
-  transform:translateY(101%);transition:transform 1.8s cubic-bezier(0,.9,.1,1);   /* gleitet von unten ein (GPU); steiler Start, sehr langes Auslaufen */
-}
-/* Schrift an der Füllkante — ohne Zeitsteuerung:
-   Projektkarten wechseln die Schriftfarbe nicht (hell: dunkel, dunkel: weiß).
-   Die Linkseite (dunkelgraue Füllung) nutzt »difference«: Schwarz wird an der Kante exakt zu Weiß. */
-@media (prefers-color-scheme:dark){
-  .slide .card{color:#fff}
-  .slide .card .meta{color:#fff}
-  .slide .card .tagline{color:rgb(255 255 255 / .6)}
-}
-.inv :is(.meta,.title,.body,.end__head,.links){color:#fff;mix-blend-mode:difference}
-.inv :is(.meta,.end__head span){color:rgb(255 255 255 / .6)}
-.inv .title:has(a:is(:hover,:focus-visible)),
-.inv .links:has(a:is(:hover,:focus-visible)){mix-blend-mode:normal;color:var(--end-on)}   /* Pille sichtbar: normal, Schrift wie auf der gefüllten Karte */
-.inv .meta .d:hover{color:#fff}
-
-/* Projektbild: Klick = Halbton-Raster (im Browser aus dem Bildschirmfoto gezeichnet),
-   Doppelklick = volles Bild. Über der Farbfläche, hinter der Schrift. */
-.shot{
-  position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;
-  opacity:.24;mix-blend-mode:multiply;
-  clip-path:circle(0 at var(--cx,50%) var(--cy,50%));
-  transition:clip-path .5s cubic-bezier(.5,0,.75,0);
-}
-.shot.full{background:var(--full,none) center/cover no-repeat;opacity:1;mix-blend-mode:normal}
-/* Raster: blendet einfach ein und aus */
-.shot:not(.full){opacity:0;clip-path:none;transition:opacity .6s ease}           /* Ausblenden per Klick: zügig */
-.card.slow-out .shot:not(.full){transition:opacity 4s ease}                         /* Ausblenden nach Ablauf: langsam */
-.card:is(.is-shot,.is-full) .shot:not(.full){opacity:.15;transition:opacity .8s ease}
-.card.is-full .shot.full{clip-path:circle(150% at var(--cx,50%) var(--cy,50%));transition:clip-path 1.6s cubic-bezier(0,.9,.1,1)}
-.card:hover::before,.card:focus-within::before{transform:none}
-/* Touch (kein Hover): die Karte auf dem Bildschirm füllt sich nach dem Einrasten */
-@media (hover:none){
-  .slide.is-active .card::before,.at-end .card--end::before{transform:none}
-  .card{touch-action:manipulation}                       /* Doppeltippen = Doppelklick, kein Zoom */
-}
-
-.meta{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:1.4em 1.25rem;max-width:calc(100% - 12rem);font:400 .8125rem/1.4 var(--mono);color:var(--ink);letter-spacing:0}   /* voll deckend */
-.meta .d{position:relative;display:inline-flex}          /* Trefferfläche bleibt in Normalgröße … */
-.meta .d:hover{z-index:3;color:var(--pill)}
-.meta .dx{                                                 /* … nur die innere Schrift wächst und fängt keine Maus */
-  display:inline-flex;align-items:center;pointer-events:none;
-  transform-origin:0 50%;transition:transform .33s var(--out);   /* 1,8× so schnell wie zuvor (0,6 s) */
-}
-.meta .d:hover .dx{transform:scale(4)}
-/* Trefferfläche: waagerecht bis zur Mitte der Lücke zum Nachbarn (Lücke 1,25 rem),
-   senkrecht 50 % der Höhe darüber und darunter — Zeilenabstand = eine Zeilenhöhe (1,4 em),
-   so stoßen die Flächen zweier Zeilen genau aneinander, ohne sich zu überlappen */
-.meta .d::after{content:"";position:absolute;inset:-50% -.625rem}
-
-.num{
-  position:absolute;right:calc(clamp(1rem,3vw,2.5rem) + .3em);top:clamp(.5rem,2vw,1.5rem);z-index:-1;   /* .3em ≈ halbe Ziffernbreite */
-  font-size:clamp(7rem,22vw,20rem);font-weight:600;line-height:.8;letter-spacing:-.08em;
-  /* immer: Kontur in Projektfarbe, Füllung im Seitengrund — keine Animation.
-     Füllt sich die Karte, verschwindet die Kontur in der Farbe und die Zahl steht weiß darin. */
-  color:var(--bg);-webkit-text-stroke:3px var(--hl);
-  paint-order:stroke fill;                                /* Füllung über der Kontur: innere Überlappungen der Glyphen verschwinden, außen bleiben 1,5 px */
-}
-
-.main{align-self:end;display:grid;gap:1.1rem;max-width:62rem}
-.title{margin:0;font-size:var(--t);font-weight:500;line-height:.95;letter-spacing:-.065em}
-.title a{position:relative;display:inline-block;padding:0 .3em .06em;margin-left:-.3em}
-:is(.title,.links) a::before,.pill-ghost{
-  content:"";position:absolute;z-index:-1;border-radius:0 .54em .54em .54em;background:var(--pill);
-}
-:is(.title,.links) a::before{
-  inset:.1em .3em .08em;opacity:0;                        /* Ruhe: Textgröße, unsichtbar — ohne Übergang */
-}
-/* Verlassen: eine Kopie der Pille fährt nach links aus dem Bild (JS), die echte ist sofort weg.
-   So läuft sie auch bei schnellem Wiederbetreten weiter, und eine neue Pille erscheint. */
-.pill-ghost{inset:-.02em 0 -.04em;pointer-events:none}
-:is(.title,.links) a:is(:hover,:focus-visible){color:var(--pill-ink)}
-:is(.title,.links) a:is(:hover,:focus-visible)::before{
-  opacity:1;inset:-.02em 0 -.04em;transform:none;         /* Hover: erscheint in Textgröße, wächst etwas darüber */
-  transition:transform 0s,opacity .12s linear,inset 1.1s var(--out);
-}
-
-.body{margin:0;max-width:60ch}
-.tagline{margin:0;max-width:30ch;font-size:clamp(1.25rem,2.2vw,1.75rem);line-height:1.15;letter-spacing:-.05em;color:var(--mute)}
-
-
-
-/* ── Füllung als Flüssigkeit (nur mit Maus): ersetzt die glatte Fläche ── */
-.liquid .card::before{display:none}
-.liq{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
-.liq path{fill:var(--hl)}
-
-/* ── Cursor: Kreis, oberes linkes Viertel eckig = Zeigerspitze ── */
-.has-cursor,.has-cursor *{cursor:none !important}
-/* Cursor liegt über der Spur und deckt sie ab; Farbe schwarz oder weiß, je nach Grund */
-.fx{position:fixed;inset:0;z-index:100;pointer-events:none;transition:opacity .3s;--cur:#000;
-  --cur-inv:#fff;--cur-line-inv:rgb(0 0 0 / .7)}         /* umgekehrte Farben für den Teil über der Navigation */
-@media (prefers-color-scheme:dark){.fx{--cur-line:rgb(0 0 0 / .7);--cur-inv:#000;--cur-line-inv:rgb(255 255 255 / .7)}}
-/* Nur der Teil des Cursors, der die Navigation überdeckt, erscheint invertiert:
-   eine zweite Cursor-Kopie, zugeschnitten auf die Fläche der Navigation; die Spur bleibt normal */
-.fx-inv{position:absolute;inset:0;clip-path:inset(100%)}
-.fx-inv .cursor svg{fill:var(--cur-inv);stroke:var(--cur-line-inv)}
-.cursor,.trail{position:absolute;left:0;top:0;will-change:transform}
-.cursor{width:22px;height:22px}
-.cursor svg{display:block;width:100%;height:100%;overflow:visible;fill:var(--cur);
-  stroke:var(--cur-line,rgb(255 255 255 / .7));stroke-width:2;paint-order:stroke fill;   /* Kontur 1 px außen, Gegenfarbe zum Cursor */
-  transition:width .45s var(--out),height .45s var(--out),fill .25s}
-.cursor svg path{vector-effect:non-scaling-stroke;shape-rendering:geometricPrecision;stroke-linejoin:miter}   /* Kontur bleibt 1 px, egal wie groß der Cursor ist */
-.cursor.is-link svg{width:160%;height:160%}             /* Größe über die Maße statt transform: Kontur skaliert nicht mit */
-.trail{width:var(--sz);height:var(--sz);margin:calc(var(--sz) / -2) 0 0 calc(var(--sz) / -2);border-radius:50%;background:var(--cur);transition:background .25s}
-.is-away .fx{opacity:0}
-
-/* ── Fuß ── */
-.end{
-  min-height:100svh;scroll-snap-align:start;
-  padding:calc(var(--bar) + 1rem) var(--pad) 1rem;
-  display:grid;
-}
-.card--end{--hl:var(--end-fill);grid-template-rows:auto 1fr}   /* hell: dunkelgrau füllen, dunkel: hellgrau */
-/* Unterzeile wird beim letzten Scrollen zur großen Überschrift */
-.end__head{
-  margin:0;font-size:var(--t);font-weight:500;line-height:.95;letter-spacing:-.065em;
-  transform-origin:0 0;
-}
-.end__head span{color:var(--mute)}
-/* Projektlinks: große Schrift, beim Hover die Link-Pille wie bei den Projekttiteln */
-.links{
-  align-self:end;display:flex;flex-wrap:wrap;gap:.1em .9em;
-  font-size:clamp(1.8rem,4.4vw,4.4rem);font-weight:500;line-height:1.05;letter-spacing:-.06em;
-}
-.links a{position:relative;display:inline-block;padding:0 .3em .06em;margin-left:-.3em}
-.links a::before,.links .pill-ghost{background:var(--hl)}     /* Pille in der Projektfarbe */
-.links a:is(:hover,:focus-visible){color:inherit}              /* Schrift bleibt wie auf der gefüllten Karte */
-@media (prefers-reduced-motion:no-preference){
-  @supports (animation-timeline:view()){
-    .end__head{animation:grow linear both;animation-timeline:view();animation-range:entry 0% entry 100%}
-    @keyframes grow{from{transform:scale(.28)}}
-  }
-}
-
-/* ── Bewegung: an den Scroll gekoppelt, keine getakteten Effekte ── */
-@media (prefers-reduced-motion:no-preference){
-  @supports (animation-timeline:view()){
-    .title,.tagline{animation:drift linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
-    .tagline{animation-name:drift-s}
-    @keyframes drift-s{from{transform:translateY(2rem)}to{transform:translateY(-2rem)}}
-    .num{animation:drift-l linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
-    @keyframes drift  {from{transform:translateY(3.5rem)}to{transform:translateY(-3.5rem)}}
-    @keyframes drift-l{from{translate:0 22%}to{translate:0 -22%}}
-  }
-}
-@media (prefers-reduced-motion:reduce){
-  html{scroll-behavior:auto}
-  *,*::before,*::after{transition-duration:.01ms !important;animation:none !important}
-}
-</style>
-</head>
-<body>
-
-<header class="bar">
-  <a class="mark" href="#top" aria-label="msmr.dev, back to top"><span class="mark__m">msmr</span><i>.dev</i></a>
-  <nav class="nav" aria-label="Projects">
-    <i class="nav__hl" aria-hidden="true"></i>
-    <a href="#msmrdev" style="--hl:var(--c-index)"><b>01</b><span>msmr.dev</span></a>
-    <a href="#korrekturen" style="--hl:var(--c-korr)"><b>02</b><span>korrekturen</span></a>
-    <a href="#afterworkphotos" style="--hl:var(--c-awp)"><b>03</b><span>afterworkphotos</span></a>
-    <a href="#doday" style="--hl:var(--c-doday)"><b>04</b><span>Do Day</span></a>
-    <a href="#chromachron" style="--hl:var(--c-chrom)"><b>05</b><span>Chromachron</span></a>
-    <a href="#makerspaces" style="--hl:var(--c-maker)"><b>06</b><span>makerspac.es</span></a>
-    <a href="#amsmr" style="--hl:var(--c-a)"><b>07</b><span>a.msmr</span></a>
-    <a href="#links" class="nav-end" style="--hl:var(--end-fill)"><b>↗</b><span>project urls</span></a>
-  </nav>
-  <span class="count" aria-hidden="true"><b>00</b> / 07</span>
-</header>
-
-<main>
-
-  <section class="hero" id="top">
-    <h1 class="mark-slot"><span class="sr">msmr.dev</span></h1>
-    <p class="lede">web projects.</p>
-    <div class="cue"><a href="#msmrdev">↓ Seven projects</a><span>Lake Constance</span></div>
-  </section>
-
-  <section class="slide" id="msmrdev" style="--hl:var(--c-index)">
-    <article class="card" data-shot="img/msmrdev.webp?v=2">
-      <canvas class="shot" aria-hidden="true"></canvas><span class="shot full" aria-hidden="true"></span>
-      <div class="meta"><span class="d"><span class="dx">HTML</span></span><span class="d"><span class="dx">CSS</span></span><span class="d"><span class="dx">Vanilla JS</span></span><span class="d"><span class="dx">PHP</span></span><span class="d"><span class="dx">Claude</span></span></div>
-      <span class="num" aria-hidden="true">01</span>
-      <div class="main">
-        <h2 class="title">msmr.dev</h2>
-        <p class="tagline">clean portfolio site: one screen per project and a few small UI hacks.</p>
-      </div>
-    </article>
-  </section>
-
-  <section class="slide" id="korrekturen" style="--hl:var(--c-korr)">
-    <article class="card" data-shot="img/korrekturen.webp?v=2">
-      <canvas class="shot" aria-hidden="true"></canvas><span class="shot full" aria-hidden="true"></span>
-      <div class="meta"><span class="d"><span class="dx">TypeScript</span></span><span class="d"><span class="dx">Hono</span></span><span class="d"><span class="dx">Drizzle</span></span><span class="d"><span class="dx">SQLite</span></span><span class="d"><span class="dx">IMAP</span></span><span class="d"><span class="dx">Claude</span></span></div>
-      <span class="num" aria-hidden="true">02</span>
-      <div class="main">
-        <h2 class="title"><a href="https://korrekturen.msmr.co" target="_blank" rel="noopener">korrekturen</a></h2>
-        <p class="tagline">Report typos to newsrooms and collect accepted fixes.</p>
-      </div>
-    </article>
-  </section>
-
-  <section class="slide" id="afterworkphotos" style="--hl:var(--c-awp)">
-    <article class="card" data-shot="img/afterworkphotos.webp?v=2">
-      <canvas class="shot" aria-hidden="true"></canvas><span class="shot full" aria-hidden="true"></span>
-      <div class="meta"><span class="d"><span class="dx">HTML</span></span><span class="d"><span class="dx">CSS</span></span><span class="d"><span class="dx">Vanilla JS</span></span><span class="d"><span class="dx">three.js</span></span><span class="d"><span class="dx">Swift</span></span><span class="d"><span class="dx">PHP</span></span><span class="d"><span class="dx">GitHub Actions</span></span><span class="d"><span class="dx">Claude</span></span></div>
-      <span class="num" aria-hidden="true">03</span>
-      <div class="main">
-        <h2 class="title"><a href="https://afterworkphotos.com" target="_blank" rel="noopener">afterworkphotos</a> <a href="https://snap.afterworkphotos.com" target="_blank" rel="noopener">Snap Cam</a> <a href="https://afterworkphotos.com/gallery/" target="_blank" rel="noopener">WebXR gallery</a></h2>
-        <p class="tagline">square photos, unedited. made with custom Snap Cam, published straight away. On desktop, phone, tablet and VR.</p>
-      </div>
-    </article>
-  </section>
-
-  <section class="slide" id="doday" style="--hl:var(--c-doday)">
-    <article class="card" data-shot="img/doday.webp?v=2">
-      <canvas class="shot" aria-hidden="true"></canvas><span class="shot full" aria-hidden="true"></span>
-      <div class="meta"><span class="d"><span class="dx">TypeScript</span></span><span class="d"><span class="dx">Hono</span></span><span class="d"><span class="dx">CalDAV/WebDAV</span></span><span class="d"><span class="dx">PWA</span></span><span class="d"><span class="dx">Claude</span></span></div>
-      <span class="num" aria-hidden="true">04</span>
-      <div class="main">
-        <h2 class="title"><a href="https://github.com/01msmr/doday/blob/main/README.md" target="_blank" rel="noopener">Do Day</a></h2>
-        <p class="tagline">Tasks and appointments with tagging, data hosted on a Nextcloud instance.</p>
-      </div>
-    </article>
-  </section>
-
-  <section class="slide" id="chromachron" style="--hl:var(--c-chrom)">
-    <article class="card" data-shot="img/chromachron.webp?v=2">
-      <canvas class="shot" aria-hidden="true"></canvas><span class="shot full" aria-hidden="true"></span>
-      <div class="meta"><span class="d"><span class="dx">p5.js</span></span><span class="d"><span class="dx">iOS Web App</span></span><span class="d"><span class="dx">Rhino</span></span><span class="d"><span class="dx">Claude</span></span></div>
-      <span class="num" aria-hidden="true">05</span>
-      <div class="main">
-        <h2 class="title"><a href="https://time.msmr.co" target="_blank" rel="noopener">Chromachron</a></h2>
-        <p class="tagline">a watch with colours instead of hands.</p>
-      </div>
-    </article>
-  </section>
-
-  <section class="slide" id="makerspaces" style="--hl:var(--c-maker)">
-    <article class="card" data-shot="img/makerspaces.webp?v=2">
-      <canvas class="shot" aria-hidden="true"></canvas><span class="shot full" aria-hidden="true"></span>
-      <div class="meta"><span class="d"><span class="dx">Vanilla JS</span></span><span class="d"><span class="dx">Leaflet</span></span><span class="d"><span class="dx">MapLibre</span></span><span class="d"><span class="dx">SpaceAPI</span></span><span class="d"><span class="dx">Claude</span></span></div>
-      <span class="num" aria-hidden="true">06</span>
-      <div class="main">
-        <h2 class="title"><a href="https://makerspac.es" target="_blank" rel="noopener">makerspac.es</a></h2>
-        <p class="tagline">makerspaces in the EU on a map, with workshops and live opening status.</p>
-      </div>
-    </article>
-  </section>
-
-  <section class="slide" id="amsmr" style="--hl:var(--c-a)">
-    <article class="card" data-shot="img/amsmr.webp?v=1">
-      <canvas class="shot" aria-hidden="true"></canvas><span class="shot full" aria-hidden="true"></span>
-      <div class="meta"><span class="d"><span class="dx">HTML</span></span><span class="d"><span class="dx">CSS</span></span><span class="d"><span class="dx">Vanilla JS</span></span><span class="d"><span class="dx">PHP</span></span><span class="d"><span class="dx">JSON</span></span><span class="d"><span class="dx">Claude</span></span></div>
-      <span class="num" aria-hidden="true">07</span>
-      <div class="main">
-        <h2 class="title"><a href="https://a.msmr.co" target="_blank" rel="noopener">a.msmr</a></h2>
-        <p class="tagline">a simple start page: clean layout, inline editable.</p>
-      </div>
-    </article>
-  </section>
-
-</main>
-
-<footer class="end" id="links">
-  <div class="card card--end inv">
-    <h2 class="end__head">Made at Lake Constance. <span>All projects:</span></h2>
-    <nav class="links" aria-label="All projects">
-        <a href="https://msmr.dev" style="--hl:var(--c-index)">msmr.dev</a>
-        <a href="https://korrekturen.msmr.co" style="--hl:var(--c-korr)" target="_blank" rel="noopener">korrekturen</a>
-        <a href="https://afterworkphotos.com" style="--hl:var(--c-awp)" target="_blank" rel="noopener">afterworkphotos</a>
-        <a href="https://github.com/01msmr/doday/blob/main/README.md" style="--hl:var(--c-doday)" target="_blank" rel="noopener">Do Day</a>
-        <a href="https://time.msmr.co" style="--hl:var(--c-chrom)" target="_blank" rel="noopener">Chromachron</a>
-        <a href="https://makerspac.es" style="--hl:var(--c-maker)" target="_blank" rel="noopener">makerspac.es</a>
-        <a href="https://a.msmr.co" style="--hl:var(--c-a)" target="_blank" rel="noopener">a.msmr</a>
-    </nav>
-  </div>
-</footer>
-
-<script>
-const root = document.documentElement;
 root.classList.add('js');
 
-/* ═══ Wortmarke: bildschirmbreit auf dem Start, schrumpft links oben
+/* ═══ 1 Wortmarke: bildschirmbreit auf dem Start, schrumpft links oben
    in die Kopfleiste (30 px). Ohne JS steht sie gleich klein dort. ═══ */
-const bar  = document.querySelector('.bar');
-const mark = document.querySelector('.mark');
-const slot = document.querySelector('.mark-slot');
-const hero = document.querySelector('.hero');
 const TOP  = 14;
 let big = 1, slotTop = 0, travel = 1, padX = 0, markW = 0, ledeTop = 0, ledeH = 0, ledeEnd = 0;
-const lede = document.querySelector('.lede');
+
 
 /* Echte Schrift-Transition: die Schriftgröße selbst läuft mit (nicht transform:scale).
    Der Browser setzt die Buchstaben bei jeder Größe neu — scharf, ohne Umschalten. */
@@ -552,16 +88,10 @@ document.fonts.ready.then(measure);
 document.fonts.addEventListener('loadingdone', measure);   // Webfont kommt später: neu messen
 measure();
 
-/* ═══ Aktives Projekt und Navigation ═══
+/* ═══ 2 Navigation: aktives Projekt, Farbband, Fenster ═══
    Hinter der Navigation liegt ein Band aus Projekttönen (je Eintrag voll,
    über die Lücke verlaufend). Das Rechteck ist ein Ausschnitt davon und
    gleitet zum Eintrag unter der Maus, sonst zum aktiven Projekt. */
-const slides = [...document.querySelectorAll('.slide')];
-const nav    = document.querySelector('.nav');
-const links  = [...nav.querySelectorAll('a')];
-const hl     = nav.querySelector('.nav__hl');
-const endLink = nav.querySelector('.nav-end');
-const count  = document.querySelector('.count b');
 let current = -2, hovered = null, peek = null, choice = null;   // choice: angeklickter Eintrag, solange die Seite noch unterwegs ist
 
 const box = a => {                           // genaue Lage eines Eintrags im Band (Bruchteile von Pixeln)
@@ -571,7 +101,7 @@ const box = a => {                           // genaue Lage eines Eintrags im Ba
 /* Vor dem ersten Eintrag liegt ein unsichtbarer »Eintrag 0« (Startbildschirm): auf dem Rechner
    die Fläche der Wortmarke, schmal so breit wie der erste Eintrag. Von dort gleitet das Fenster
    in Eintrag 01 — die Farbe wechselt an der Kante von transparent zur Projektfarbe. */
-const zeroWidth = () => narrow.matches          // (erst nach dem Laden aufgerufen)
+const zeroWidth = () => narrow.matches
   ? links[0].offsetWidth
   : parseFloat(getComputedStyle(root).getPropertyValue('--mark-w')) || 160;
 let navColors = null;                        // Projektfarben der Einträge — ändern sich nie, einmal lesen
@@ -589,7 +119,7 @@ function paintBand(){
   hl.style.background = `linear-gradient(to right, ${stops.join(',')})`;
 }
 function placeHl(){
-  const a = hovered || peek || choice || (atEndSafe() ? endLink : links[current]);
+  const a = hovered || peek || choice || (atEnd ? endLink : links[current]);
   links.forEach(l => l.classList.toggle('in-win', l === a));
   const b = box(a || links[0]);
   const L = a ? b.l : 0, R = a ? b.r : box(links[0]).l - 2;   // nichts aktiv: Fenster auf dem unsichtbaren Eintrag 0 (2 px Abstand: kein Farbsaum an 01)
@@ -598,7 +128,7 @@ function placeHl(){
 }
 function relayout(){ markNeighbours(); paintBand(); placeHl(); }
 function markNeighbours(c){                   // schmal: aktiv (oder Mitte beim Wischen) ± 1, dahinter ‹ ›
-  const i = links.indexOf(c || peek || (atEndSafe() ? endLink : links[current]));
+  const i = links.indexOf(c || peek || (atEnd ? endLink : links[current]));
   links.forEach((a, j) => {
     const d = j - i;
     a.classList.toggle('far', i >= 0 && Math.abs(d) > 2);
@@ -635,12 +165,10 @@ function setActive(i, now = false){           // now: Navigation sofort (Auswahl
   }, now ? 0 : NAV_AFTER_FILL);
 }
 
-/* ═══ Schmale Ansicht: Navigation als Auswahlrad ═══
+/* ═══ 3 Schmale Navigation: Auswahlrad ═══
    Wischen: nur Nummern, das Farbfenster folgt dem Eintrag in der Mitte.
    Loslassen: der Eintrag rastet ein, wird aktiv, zeigt seinen Namen, die Karte wechselt.
    »msmr« gleitet dabei aus der Leiste, ».dev« bleibt links stehen. */
-const narrow = matchMedia('(max-width:1099px)');
-const markM = document.querySelector('.mark__m');
 let scrubbing = false, settleT = 0;
 
 /* Streifen und Farbfenster bewegen sich gemeinsam: gleiche Dauer, gleiche Kurve
@@ -649,7 +177,7 @@ const NAV_MS = 450;
 let navAnim = 0;
 function centerNav(smooth = true){
   if (!narrow.matches || scrubbing) return;
-  const a = atEndSafe() ? endLink : links[current];
+  const a = atEnd ? endLink : links[current];
   if (!a) return;
   const to = Math.max(0, Math.min(nav.scrollWidth - nav.clientWidth, a.offsetLeft + a.offsetWidth / 2 - nav.clientWidth / 2));
   cancelAnimationFrame(navAnim);
@@ -665,7 +193,6 @@ function centerNav(smooth = true){
   };
   navAnim = requestAnimationFrame(tick);
 }
-const atEndSafe = () => typeof atEnd !== 'undefined' && atEnd;   // atEnd wird weiter unten angelegt
 function centred(){                           // Eintrag, dessen Mitte der Streifenmitte am nächsten ist
   const mid = nav.getBoundingClientRect().left + nav.clientWidth / 2;
   let best = null, d = Infinity;
@@ -708,6 +235,7 @@ function settle(){
 }
 narrow.addEventListener('change', () => { slideMark(); relayout(); centerNav(false); });
 onHeader.push(slideMark);                     // beim Zurück zum Start sofort zurücksetzen
+/* ═══ 4 Blättern: aktives Projekt — erst übernehmen, wenn der Bildlauf steht ═══ */
 let pending = null, idleT = 0;
 const commit = () => { if (pending !== null) setActive(pending); pending = null; choice = null; };   // Seite steht: Klick-Wahl erledigt
 const waitIdle = () => { clearTimeout(idleT); idleT = setTimeout(commit, 140); };
@@ -722,11 +250,8 @@ addEventListener('resize', relayout);
 document.fonts.ready.then(relayout);
 new ResizeObserver(relayout).observe(nav);   // Breite ändert sich (Schrift, schmale Ansicht): Band neu malen
 
-/* ═══ Links/rechts wechselt das Projekt wie hoch/runter:
+/* ── Links/rechts wechselt das Projekt wie hoch/runter:
    Pfeiltasten, seitliches Wischen am Trackpad, Wischen am Touchscreen ═══ */
-const endPage = document.querySelector('.end');
-const screens = [hero, ...slides, endPage];         // letzte Seite mit den Links gehört dazu
-let atEnd = false;
 new IntersectionObserver(([en]) => {
   atEnd = en.isIntersecting;
   root.classList.toggle('at-end', atEnd);
@@ -797,7 +322,7 @@ addEventListener('touchend', ev => {
   if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? 1 : -1);
 }, { passive:true });
 
-/* ═══ Projektbild
+/* ═══ 5 Projektbild
    Klick: Raster ein/aus. Doppelklick (nur bei Raster): volles Farbbild ↔ Raster.
    Nach 11 s ohne Aktion in der Karte blendet jedes Bild aus (4 s); danach wieder mit Klick beginnen. ═══ */
 const SHOW_FOR = 11000;                     // danach blendet das Bild aus
@@ -899,8 +424,7 @@ document.querySelectorAll('.card[data-shot]').forEach(card => {
   });
 });
 
-/* ═══ Pille beim Verlassen: Kopie fährt nach links hinaus ═══ */
-const calm = matchMedia('(prefers-reduced-motion: reduce)');
+/* ═══ 6 Link-Pille beim Verlassen: Kopie fährt nach links hinaus ═══ */
 document.querySelectorAll('.title a, .links a').forEach(a => {
   const leave = () => {
     if (calm.matches) return;
@@ -917,7 +441,7 @@ document.querySelectorAll('.title a, .links a').forEach(a => {
   a.addEventListener('blur', () => { if (keyFocus && !a.matches(':hover')) leave(); keyFocus = false; });
 });
 
-/* ═══ Füllung als Flüssigkeit — zähflüssig (»Honig«) ═══
+/* ═══ 7 Füllung als Flüssigkeit — zähflüssig (»Honig«) ═══
    Beim Hover steigt der Pegel; die Oberfläche wölbt sich breit zum Cursor und fließt
    träge zurück. Wenige Stützstellen und starke Kopplung: große, ruhige Wellen,
    kaum kleine Nebenwellen. Ohne reduzierte Bewegung.
@@ -1038,7 +562,7 @@ if (!calm.matches) {
   }
 }
 
-/* ═══ Cursor mit Spur aus 9 Kreisen — nur mit Maus ═══ */
+/* ═══ 8 Cursor mit Spur aus 9 Kreisen — nur mit Maus ═══ */
 if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
   const N = 9, R = 11;                       // R = halbe Cursorgröße: Spur hängt an der Mitte
   const fx = document.createElement('div');
@@ -1073,9 +597,6 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
   document.body.append(fx);
   root.classList.add('has-cursor', 'is-away');
 
-  /* Schwarz oder Weiß — was auf dem Grund unter dem Cursor mehr Kontrast hat */
-  const dark = matchMedia('(prefers-color-scheme: dark)');
-  const tone = () => dark.matches ? '#fff' : '#000';   // hell: schwarz, dunkel: weiß — überall
 
   let mx = -99, my = -99, running = false, last = 0;
   const c = { x:-99, y:-99 };                 // Cursorposition (= Maus)
@@ -1111,13 +632,9 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
     const link = !!ev.target.closest('a');
     cur.classList.toggle('is-link', link); cur2.classList.toggle('is-link', link);
     clipNav();
-    fx.style.setProperty('--cur', tone());
     root.classList.remove('is-away');
     if (!running) { running = true; requestAnimationFrame(loop); }
   }, { passive:true });
   document.addEventListener('pointerleave', () => root.classList.add('is-away'));
   addEventListener('blur', () => root.classList.add('is-away'));
 }
-</script>
-</body>
-</html>

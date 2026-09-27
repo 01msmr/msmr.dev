@@ -18,8 +18,9 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUT = ROOT / 'app-icons'   # nicht »icons/«: Apache belegt /icons/ für eigene Grafiken
 OUT.mkdir(exist_ok=True)
 
-# Projektfarben wie in index.html (oklch 70 % …), Reihenfolge = Zeitleiste
-HUES = [(.18, 255), (.22, 5), (.15, 210), (.19, 155), (.2, 305), (.2, 42), (.17, 88)]
+# Projektfarben (oklch 70 % …), Reihenfolge = Zeitleiste
+import json
+HUES = [tuple(p['hue']) for p in json.load(open(ROOT / 'projects.json'))]   # eine Quelle: projects.json
 INK, PAPER = '#191b1d', '#fafaf8'
 
 

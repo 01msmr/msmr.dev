@@ -1,0 +1,76 @@
+[
+  {
+    "id": "msmrdev",
+    "name": "msmr.dev",
+    "hue": [0.18, 255],
+    "url": "https://msmr.dev",
+    "title": [{ "label": "msmr.dev" }],
+    "text": "clean portfolio site: one screen per project and a few small UI hacks.",
+    "tech": ["HTML", "CSS", "Vanilla JS", "PHP", "Claude"],
+    "shot": "img/msmrdev.webp?v=2"
+  },
+  {
+    "id": "korrekturen",
+    "name": "korrekturen",
+    "hue": [0.22, 5],
+    "url": "https://korrekturen.msmr.co",
+    "title": [{ "label": "korrekturen", "url": "https://korrekturen.msmr.co" }],
+    "text": "Report typos to newsrooms and collect accepted fixes.",
+    "tech": ["TypeScript", "Hono", "Drizzle", "SQLite", "IMAP", "Claude"],
+    "shot": "img/korrekturen.webp?v=2"
+  },
+  {
+    "id": "afterworkphotos",
+    "name": "afterworkphotos",
+    "hue": [0.15, 210],
+    "url": "https://afterworkphotos.com",
+    "title": [
+      { "label": "afterworkphotos", "url": "https://afterworkphotos.com" },
+      { "label": "Snap Cam", "url": "https://snap.afterworkphotos.com" },
+      { "label": "WebXR gallery", "url": "https://afterworkphotos.com/gallery/" }
+    ],
+    "text": "square photos, unedited. made with custom Snap Cam, published straight away. On desktop, phone, tablet and VR.",
+    "tech": ["HTML", "CSS", "Vanilla JS", "three.js", "Swift", "PHP", "GitHub Actions", "Claude"],
+    "shot": "img/afterworkphotos.webp?v=2"
+  },
+  {
+    "id": "doday",
+    "name": "Do Day",
+    "hue": [0.19, 155],
+    "url": "https://github.com/01msmr/doday/blob/main/README.md",
+    "title": [{ "label": "Do Day", "url": "https://github.com/01msmr/doday/blob/main/README.md" }],
+    "text": "Tasks and appointments with tagging, data hosted on a Nextcloud instance.",
+    "tech": ["TypeScript", "Hono", "CalDAV/WebDAV", "PWA", "Claude"],
+    "shot": "img/doday.webp?v=2"
+  },
+  {
+    "id": "chromachron",
+    "name": "Chromachron",
+    "hue": [0.2, 305],
+    "url": "https://time.msmr.co",
+    "title": [{ "label": "Chromachron", "url": "https://time.msmr.co" }],
+    "text": "a watch with colours instead of hands.",
+    "tech": ["p5.js", "iOS Web App", "Rhino", "Claude"],
+    "shot": "img/chromachron.webp?v=2"
+  },
+  {
+    "id": "makerspaces",
+    "name": "makerspac.es",
+    "hue": [0.2, 42],
+    "url": "https://makerspac.es",
+    "title": [{ "label": "makerspac.es", "url": "https://makerspac.es" }],
+    "text": "makerspaces in the EU on a map, with workshops and live opening status.",
+    "tech": ["Vanilla JS", "Leaflet", "MapLibre", "SpaceAPI", "Claude"],
+    "shot": "img/makerspaces.webp?v=2"
+  },
+  {
+    "id": "amsmr",
+    "name": "a.msmr",
+    "hue": [0.17, 88],
+    "url": "https://a.msmr.co",
+    "title": [{ "label": "a.msmr", "url": "https://a.msmr.co" }],
+    "text": "a simple start page: clean layout, inline editable.",
+    "tech": ["HTML", "CSS", "Vanilla JS", "PHP", "JSON", "Claude"],
+    "shot": "img/amsmr.webp?v=1"
+  }
+]

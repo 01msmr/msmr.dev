@@ -1,0 +1,320 @@
+/* msmr.dev — Gestaltung */
+/* Schrift liegt auf dem eigenen Server (Latin-Teilmenge, SIL OFL — siehe fonts/OFL-HankenGrotesk.txt) */
+@font-face{font-family:"Hanken Grotesk";src:url(fonts/hanken-grotesk-latin.woff2) format("woff2");font-weight:100 900;font-display:swap}
+:root{
+  --bg:#fafaf8;
+  --ink:#191b1d;
+  --mute:rgb(25 27 29 / .5);
+  --line:rgb(25 27 29 / .12);
+  --pill:#fff;                          /* weiße Elemente — im Dunkelmodus schwarz */
+  --pill-ink:#191b1d;
+  --on:#191b1d;                         /* Schrift auf Projektfarbe, in beiden Modi dunkel */
+  --end-fill:#2c2e31;                   /* Linkseite: Füllung … */
+  --end-on:#fff;                        /* … und Schrift darauf (dunkel: umgekehrt) */
+  color-scheme:light dark;
+  --sans:"Hanken Grotesk",system-ui,sans-serif;
+  --mono:"Hanken Grotesk",system-ui,sans-serif;   /* auch die Details: eine Schrift für alles */
+  --pad:clamp(1rem,4vw,3rem);
+  --bar:58px;                           /* 30px Wortmarke + 2×14px */
+  --out:cubic-bezier(.16,1,.3,1);       /* expo-out: schnell rein, weich aus */
+  --inout:cubic-bezier(.65,0,.35,1);
+  --soft:cubic-bezier(.76,0,.24,1);    /* ease-in-out quart: zögert an, gleitet aus */
+  --p:1;                                /* Kopf groß → klein, von JS gesetzt */
+
+  /* Projektfarben kommen aus projects.json (oklch 70 % …), direkt an den Elementen */
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0e0f10;
+    --ink:#ecece8;
+    --mute:rgb(236 236 232 / .5);
+    --line:rgb(236 236 232 / .14);
+    --pill:#000;
+    --pill-ink:#ecece8;
+    --end-fill:#e4e4e0;
+    --end-on:#000;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-snap-type:y mandatory}   /* auch auf dem Telefon: jede Karte rastet ein */
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font:400 17px/1.55 var(--sans);letter-spacing:-.011em;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+a{color:inherit;text-decoration:none}
+a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+/* ── Kopfleiste ── */
+.bar{
+  position:fixed;inset:0 0 auto;z-index:20;height:var(--bar);
+  display:flex;align-items:center;gap:clamp(1rem,2.5vw,2.25rem);padding:0 var(--pad);
+  pointer-events:none;
+}
+.bar::before{
+  content:"";position:absolute;inset:0;z-index:-1;opacity:var(--p);
+  transform:translateY(calc((1 - var(--p)) * -100%));   /* Startbildschirm: Leiste oben aus dem Bild, fährt mit dem Scrollen herein */
+  background:color-mix(in srgb,var(--bg) 94%,transparent);   /* ohne Blur: günstiger für schwache Grafik */
+  border-bottom:1px solid var(--line);
+}
+.mark{
+  position:absolute;left:var(--pad);top:14px;pointer-events:auto;white-space:nowrap;
+  font-size:30px;line-height:1;font-weight:600;letter-spacing:-.065em;
+  transform-origin:0 0;
+}
+.bar .nav{margin-left:var(--mark-w,160px)}              /* Platz hinter der kleinen Wortmarke */
+.mark i{font-style:normal;color:var(--mute);transition:color .6s var(--out)}
+.mark:hover i{color:var(--hl-now,var(--ink))}
+
+.nav{
+  position:relative;display:flex;gap:0;align-self:stretch;min-width:0;   /* volle Höhe der Kopfleiste */
+  font-size:.9375rem;letter-spacing:-.03em;
+  opacity:clamp(0,(var(--p) - .55) * 2.2,1);
+  transform:translateY(calc((1 - var(--p)) * -100%));   /* mit der Leiste aus dem Bild und wieder herein */
+  pointer-events:auto;
+}
+.nav a{position:relative;display:flex;align-items:center;padding:0 .75rem;color:var(--ink);white-space:nowrap;transition:color .5s var(--soft)}
+.nav a:not(:last-of-type)::after{                         /* feiner Trennstrich rechts */
+  content:"";position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--pill);   /* volle Höhe */
+}
+.nav a.in-win{color:var(--on)}
+.nav a.nav-end.in-win{color:var(--end-on)}                    /* dunkelgraues Fenster: helle Schrift */                          /* im Farbfenster: dunkle Schrift, auch im Dunkelmodus */
+/* Band aus Projektfarben, je Eintrag eine Fläche mit harter Kante; das Rechteck ist ein Fenster darauf.
+   Gleitet es über eine Kante, wandert der Farbwechsel mit durch das Rechteck. */
+.nav__hl{
+  position:absolute;inset:0 auto 0 0;width:100%;z-index:-1;
+  clip-path:inset(0 var(--r,50%) 0 var(--l,50%));
+  transition:clip-path .9s var(--out);                   /* startet sofort, läuft weich aus */
+}
+.count{margin-left:auto;font:400 .8125rem var(--mono);color:var(--mute);letter-spacing:0;opacity:var(--p);transform:translateY(calc((1 - var(--p)) * -150%));font-variant-numeric:tabular-nums;white-space:nowrap}
+.count b{font-weight:400;color:var(--ink);display:inline-block}
+.at-end .count{opacity:0;transition:opacity .4s}          /* letzte Seite: keine Seitenzahl */
+.count b.tick{animation:tick .5s var(--out)}
+@keyframes tick{from{transform:translateY(-.6em);opacity:0}}
+
+/* Nummern nur in der schmalen Ansicht */
+.nav a b{display:none;font:400 .75rem var(--mono);letter-spacing:0}
+/* schmal: nur Nummern, das aktive Projekt klappt seinen Namen aus */
+@media (max-width:1099px){
+  .nav a b{display:inline}
+  .nav a[aria-current] b{display:none}
+  .nav a span{max-width:0;overflow:hidden}                /* sofort: sonst verschiebt sich der Streifen zweimal */
+  .nav a[aria-current] span{max-width:10em}
+  .count{display:none}
+
+  /* Streifen über die ganze Leiste; die Wortmarke liegt links darüber.
+     Der Eintrag in der Mitte ist der aktive — wie ein Auswahlrad. */
+  .bar .nav{
+    position:absolute;inset:0;margin:0;z-index:1;
+    overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
+    scroll-snap-type:x mandatory;
+    padding-inline:calc(50% - 1.1rem);                   /* erster und letzter Eintrag können in die Mitte */
+  }
+  .bar .nav::-webkit-scrollbar{display:none}
+  .nav a{padding:0 .45rem;scroll-snap-align:center}      /* enger */
+  .nav.is-scrubbing a b{display:inline}                   /* beim Wischen nur Nummern — nichts verschiebt sich unter dem Finger */
+  .nav.is-scrubbing a span{max-width:0}
+  /* nur je ein Nachbar links und rechts; gibt es dahinter noch mehr, steht dort ‹ bzw. › */
+  .nav a.far{opacity:0;pointer-events:none}
+  .nav a:is(.edge-l,.edge-r) :is(b,span){display:none}
+  .nav a.edge-l::before,.nav a.edge-r::before{font:400 .8125rem var(--mono);color:var(--mute)}
+  .nav a.edge-l::before{content:"<"}
+  .nav a.edge-r::before{content:">"}
+  .mark{z-index:2;background:var(--bg);padding-right:.5rem}   /* über dem Streifen */
+  .mark::after{content:"";position:absolute;left:100%;top:0;bottom:0;width:1.25rem;background:linear-gradient(to right,var(--bg),transparent)}
+  .mark__m{display:inline-block;transition:opacity .2s}
+  .bar::before{border-bottom-color:transparent}          /* Leiste nahtlos: Grund und Kante gleich */
+  .nav__hl{transition:clip-path .45s cubic-bezier(.33,1,.68,1)}   /* synchron mit dem Zentrieren des Streifens */
+}
+
+/* ── Start ── */
+.hero{
+  min-height:100svh;padding:calc(var(--bar) + 12vh) var(--pad) 2.5rem;
+  display:flex;flex-direction:column;scroll-snap-align:start;
+}
+.mark-slot{height:0;margin:0}
+.lede{
+  transform-origin:0 0;
+  margin:clamp(1.5rem,4vh,3rem) 0 0;max-width:24ch;
+  font-size:clamp(1.5rem,3vw,2.25rem);font-weight:500;line-height:1.14;letter-spacing:-.05em;
+}
+.lede span{color:var(--mute)}
+.cue{
+  margin-top:auto;display:flex;justify-content:space-between;
+  font:400 .8125rem var(--mono);color:var(--mute);letter-spacing:0;
+}
+.cue a:hover{color:var(--ink)}
+
+/* ── Projekt: ein Bildschirm pro Projekt ── */
+.slide{
+  min-height:100svh;padding:calc(var(--bar) + 1rem) var(--pad) 1rem;
+  display:grid;scroll-snap-align:start;
+}
+.card{
+  position:relative;isolation:isolate;overflow:hidden;background:var(--bg);   /* Grund, auch für die Invertierung der Linkseite */
+  display:grid;grid-template-rows:auto 1fr auto;gap:1.5rem;
+  --t:clamp(2.6rem,7.4vw,7rem);                          /* Titelgröße */
+  padding:clamp(1.25rem,3.5vw,3rem);
+  box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--hl) 40%,transparent);   /* Kontur liegt unter der Füllung und verschwindet darin */
+  --r:140px;                                             /* Rechner */
+  border-radius:0 var(--r) var(--r) var(--r);
+  clip-path:inset(0 round 0 var(--r) var(--r) var(--r));   /* schneidet auch die gleitende Füllung rund zu */
+}
+@media (max-width:1199px){.card{--r:24px}}              /* iPad: kleine Geräteecken (~18 pt) */
+@media (max-width:699px){.card{--r:40px}}               /* Smartphone */
+@media (min-width:700px) and (max-width:1199px){          /* iPad: Karte dicht an den Geräterand, Ecken laufen parallel */
+  .slide,.end{padding-left:10px;padding-right:10px;padding-bottom:10px}
+}
+.card::before{
+  content:"";position:absolute;inset:0;z-index:-1;background:var(--hl);
+  transform:translateY(101%);transition:transform 1.8s cubic-bezier(0,.9,.1,1);   /* gleitet von unten ein (GPU); steiler Start, sehr langes Auslaufen */
+}
+/* Schrift an der Füllkante — ohne Zeitsteuerung:
+   Projektkarten wechseln die Schriftfarbe nicht (hell: dunkel, dunkel: weiß).
+   Die Linkseite (dunkelgraue Füllung) nutzt »difference«: Schwarz wird an der Kante exakt zu Weiß. */
+@media (prefers-color-scheme:dark){
+  .slide .card{color:#fff}
+  .slide .card .meta{color:#fff}
+  .slide .card .tagline{color:rgb(255 255 255 / .6)}
+}
+.inv :is(.meta,.title,.body,.end__head,.links){color:#fff;mix-blend-mode:difference}
+.inv :is(.meta,.end__head span){color:rgb(255 255 255 / .6)}
+.inv .title:has(a:is(:hover,:focus-visible)),
+.inv .links:has(a:is(:hover,:focus-visible)){mix-blend-mode:normal;color:var(--end-on)}   /* Pille sichtbar: normal, Schrift wie auf der gefüllten Karte */
+.inv .meta .d:hover{color:#fff}
+
+/* Projektbild: Klick = Halbton-Raster (im Browser aus dem Bildschirmfoto gezeichnet),
+   Doppelklick = volles Bild. Über der Farbfläche, hinter der Schrift. */
+.shot{
+  position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;
+  opacity:.24;mix-blend-mode:multiply;
+  clip-path:circle(0 at var(--cx,50%) var(--cy,50%));
+  transition:clip-path .5s cubic-bezier(.5,0,.75,0);
+}
+.shot.full{background:var(--full,none) center/cover no-repeat;opacity:1;mix-blend-mode:normal}
+/* Raster: blendet einfach ein und aus */
+.shot:not(.full){opacity:0;clip-path:none;transition:opacity .6s ease}           /* Ausblenden per Klick: zügig */
+.card.slow-out .shot:not(.full){transition:opacity 4s ease}                         /* Ausblenden nach Ablauf: langsam */
+.card:is(.is-shot,.is-full) .shot:not(.full){opacity:.15;transition:opacity .8s ease}
+.card.is-full .shot.full{clip-path:circle(150% at var(--cx,50%) var(--cy,50%));transition:clip-path 1.6s cubic-bezier(0,.9,.1,1)}
+.card:hover::before,.card:focus-within::before{transform:none}
+/* Touch (kein Hover): die Karte auf dem Bildschirm füllt sich nach dem Einrasten */
+@media (hover:none){
+  .slide.is-active .card::before,.at-end .card--end::before{transform:none}
+  .card{touch-action:manipulation}                       /* Doppeltippen = Doppelklick, kein Zoom */
+}
+
+.meta{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:1.4em 1.25rem;max-width:calc(100% - 12rem);font:400 .8125rem/1.4 var(--mono);color:var(--ink);letter-spacing:0}   /* voll deckend */
+.meta .d{position:relative;display:inline-flex}          /* Trefferfläche bleibt in Normalgröße … */
+.meta .d:hover{z-index:3;color:var(--pill)}
+.meta .dx{                                                 /* … nur die innere Schrift wächst und fängt keine Maus */
+  display:inline-flex;align-items:center;pointer-events:none;
+  transform-origin:0 50%;transition:transform .33s var(--out);   /* 1,8× so schnell wie zuvor (0,6 s) */
+}
+.meta .d:hover .dx{transform:scale(4)}
+/* Trefferfläche: waagerecht bis zur Mitte der Lücke zum Nachbarn (Lücke 1,25 rem),
+   senkrecht 50 % der Höhe darüber und darunter — Zeilenabstand = eine Zeilenhöhe (1,4 em),
+   so stoßen die Flächen zweier Zeilen genau aneinander, ohne sich zu überlappen */
+.meta .d::after{content:"";position:absolute;inset:-50% -.625rem}
+
+.num{
+  position:absolute;right:calc(clamp(1rem,3vw,2.5rem) + .3em);top:clamp(.5rem,2vw,1.5rem);z-index:-1;   /* .3em ≈ halbe Ziffernbreite */
+  font-size:clamp(7rem,22vw,20rem);font-weight:600;line-height:.8;letter-spacing:-.08em;
+  /* immer: Kontur in Projektfarbe, Füllung im Seitengrund — keine Animation.
+     Füllt sich die Karte, verschwindet die Kontur in der Farbe und die Zahl steht weiß darin. */
+  color:var(--bg);-webkit-text-stroke:3px var(--hl);
+  paint-order:stroke fill;                                /* Füllung über der Kontur: innere Überlappungen der Glyphen verschwinden, außen bleiben 1,5 px */
+}
+
+.main{align-self:end;display:grid;gap:1.1rem;max-width:62rem}
+.title{margin:0;font-size:var(--t);font-weight:500;line-height:.95;letter-spacing:-.065em}
+.title a{position:relative;display:inline-block;padding:0 .3em .06em;margin-left:-.3em}
+:is(.title,.links) a::before,.pill-ghost{
+  content:"";position:absolute;z-index:-1;border-radius:0 .54em .54em .54em;background:var(--pill);
+}
+:is(.title,.links) a::before{
+  inset:.1em .3em .08em;opacity:0;                        /* Ruhe: Textgröße, unsichtbar — ohne Übergang */
+}
+/* Verlassen: eine Kopie der Pille fährt nach links aus dem Bild (JS), die echte ist sofort weg.
+   So läuft sie auch bei schnellem Wiederbetreten weiter, und eine neue Pille erscheint. */
+.pill-ghost{inset:-.02em 0 -.04em;pointer-events:none}
+:is(.title,.links) a:is(:hover,:focus-visible){color:var(--pill-ink)}
+:is(.title,.links) a:is(:hover,:focus-visible)::before{
+  opacity:1;inset:-.02em 0 -.04em;transform:none;         /* Hover: erscheint in Textgröße, wächst etwas darüber */
+  transition:transform 0s,opacity .12s linear,inset 1.1s var(--out);
+}
+
+.body{margin:0;max-width:60ch}
+.tagline{margin:0;max-width:30ch;font-size:clamp(1.25rem,2.2vw,1.75rem);line-height:1.15;letter-spacing:-.05em;color:var(--mute)}
+
+
+
+/* ── Füllung als Flüssigkeit (nur mit Maus): ersetzt die glatte Fläche ── */
+.liquid .card::before{display:none}
+.liq{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+.liq path{fill:var(--hl)}
+
+/* ── Cursor: Kreis, oberes linkes Viertel eckig = Zeigerspitze ── */
+.has-cursor,.has-cursor *{cursor:none !important}
+/* Cursor liegt über der Spur und deckt sie ab; Farbe schwarz oder weiß, je nach Grund */
+.fx{position:fixed;inset:0;z-index:100;pointer-events:none;transition:opacity .3s;--cur:#000;
+  --cur-inv:#fff;--cur-line-inv:rgb(0 0 0 / .7)}         /* umgekehrte Farben für den Teil über der Navigation */
+@media (prefers-color-scheme:dark){.fx{--cur:#fff;--cur-line:rgb(0 0 0 / .7);--cur-inv:#000;--cur-line-inv:rgb(255 255 255 / .7)}}   /* Cursor: hell schwarz, dunkel weiß */
+/* Nur der Teil des Cursors, der die Navigation überdeckt, erscheint invertiert:
+   eine zweite Cursor-Kopie, zugeschnitten auf die Fläche der Navigation; die Spur bleibt normal */
+.fx-inv{position:absolute;inset:0;clip-path:inset(100%)}
+.fx-inv .cursor svg{fill:var(--cur-inv);stroke:var(--cur-line-inv)}
+.cursor,.trail{position:absolute;left:0;top:0;will-change:transform}
+.cursor{width:22px;height:22px}
+.cursor svg{display:block;width:100%;height:100%;overflow:visible;fill:var(--cur);
+  stroke:var(--cur-line,rgb(255 255 255 / .7));stroke-width:2;paint-order:stroke fill;   /* Kontur 1 px außen, Gegenfarbe zum Cursor */
+  transition:width .45s var(--out),height .45s var(--out),fill .25s}
+.cursor svg path{vector-effect:non-scaling-stroke;shape-rendering:geometricPrecision;stroke-linejoin:miter}   /* Kontur bleibt 1 px, egal wie groß der Cursor ist */
+.cursor.is-link svg{width:160%;height:160%}             /* Größe über die Maße statt transform: Kontur skaliert nicht mit */
+.trail{width:var(--sz);height:var(--sz);margin:calc(var(--sz) / -2) 0 0 calc(var(--sz) / -2);border-radius:50%;background:var(--cur);transition:background .25s}
+.is-away .fx{opacity:0}
+
+/* ── Fuß ── */
+.end{
+  min-height:100svh;scroll-snap-align:start;
+  padding:calc(var(--bar) + 1rem) var(--pad) 1rem;
+  display:grid;
+}
+.card--end{--hl:var(--end-fill);grid-template-rows:auto 1fr}   /* hell: dunkelgrau füllen, dunkel: hellgrau */
+/* Unterzeile wird beim letzten Scrollen zur großen Überschrift */
+.end__head{
+  margin:0;font-size:var(--t);font-weight:500;line-height:.95;letter-spacing:-.065em;
+  transform-origin:0 0;
+}
+.end__head span{color:var(--mute)}
+/* Projektlinks: große Schrift, beim Hover die Link-Pille wie bei den Projekttiteln */
+.links{
+  align-self:end;display:flex;flex-wrap:wrap;gap:.1em .9em;
+  font-size:clamp(1.8rem,4.4vw,4.4rem);font-weight:500;line-height:1.05;letter-spacing:-.06em;
+}
+.links a{position:relative;display:inline-block;padding:0 .3em .06em;margin-left:-.3em}
+.links a::before,.links .pill-ghost{background:var(--hl)}     /* Pille in der Projektfarbe */
+.links a:is(:hover,:focus-visible){color:inherit}              /* Schrift bleibt wie auf der gefüllten Karte */
+@media (prefers-reduced-motion:no-preference){
+  @supports (animation-timeline:view()){
+    .end__head{animation:grow linear both;animation-timeline:view();animation-range:entry 0% entry 100%}
+    @keyframes grow{from{transform:scale(.28)}}
+  }
+}
+
+/* ── Bewegung: an den Scroll gekoppelt, keine getakteten Effekte ── */
+@media (prefers-reduced-motion:no-preference){
+  @supports (animation-timeline:view()){
+    .title,.tagline{animation:drift linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
+    .tagline{animation-name:drift-s}
+    @keyframes drift-s{from{transform:translateY(2rem)}to{transform:translateY(-2rem)}}
+    .num{animation:drift-l linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
+    @keyframes drift  {from{transform:translateY(3.5rem)}to{transform:translateY(-3.5rem)}}
+    @keyframes drift-l{from{translate:0 22%}to{translate:0 -22%}}
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:.01ms !important;animation:none !important}
+}

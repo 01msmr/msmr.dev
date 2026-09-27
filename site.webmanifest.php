@@ -2,7 +2,7 @@
 // Web-App-Manifest mit Icon in einer zufälligen Projektfarbe (wie Favicon und iOS-Icon)
 header('Content-Type: application/manifest+json');
 header('Cache-Control: no-store');
-$n = random_int(0, 6);
+$n = random_int(0, count(json_decode(file_get_contents(__DIR__ . '/projects.json'), true)) - 1);
 echo json_encode([
   'name'             => 'msmr.dev',
   'short_name'       => 'msmr',
