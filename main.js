@@ -122,7 +122,9 @@ function paintBand(){
     const c = navColors[j], b = box(a);                                   // volle Projektfarbe
     stops.push(`${c} ${b.l}px`, `${c} ${b.r}px`);                          // harte Kanten, in px wie das Fenster
   });
-  hl.style.background = `linear-gradient(to right, ${stops.join(',')})`;
+  if (narrow.matches) { hl.style.backgroundImage = 'none'; return; }   // schmal: eine Farbe, die überblendet (placeHl)
+  hl.style.backgroundColor = '';
+  hl.style.backgroundImage = `linear-gradient(to right, ${stops.join(',')})`;
 }
 function placeHl(){
   const a = hovered || peek || choice || (atEnd ? endLink : links[current]);
@@ -131,6 +133,8 @@ function placeHl(){
   const L = a ? b.l : 0, R = a ? b.r : box(links[0]).l - 2;   // nichts aktiv: Fenster auf dem unsichtbaren Eintrag 0 (2 px Abstand: kein Farbsaum an 01)
   hl.style.setProperty('--l', L + 'px');
   hl.style.setProperty('--r', (b.w - R) + 'px');
+  // schmal: Fenster in der Farbe des Eintrags — der Wechsel blendet schnell über (CSS)
+  if (narrow.matches) hl.style.backgroundColor = a ? navColors[links.indexOf(a)] : 'transparent';
 }
 function relayout(){ markNeighbours(); paintBand(); placeHl(); }
 function markNeighbours(c){                   // schmal: nur der aktive Eintrag (oder die Mitte beim Wischen), daneben ‹ ›
