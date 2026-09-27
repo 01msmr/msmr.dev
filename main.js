@@ -40,7 +40,6 @@ root.classList.add('js');
 const TOP  = 14;
 let big = 1, slotTop = 0, travel = 1, padX = 0, markW = 0, ledeTop = 0, ledeH = 0, ledeEnd = 0, barH = 58;
 
-
 /* Echte Schrift-Transition: die Schriftgröße selbst läuft mit (nicht transform:scale).
    Der Browser setzt die Buchstaben bei jeder Größe neu — scharf, ohne Umschalten. */
 function measure(){
@@ -305,6 +304,7 @@ new IntersectionObserver(([en]) => {
 let gliding = false, lastWheel = 0;
 const easeOutC = k => 1 - (1 - k) ** 3;
 function glide(to, dur){
+  if (calm.matches) return toY(to);              // reduzierte Bewegung: sofort an der Kante
   const from = Y(), t0 = performance.now();
   gliding = true;
   snapEl.style.scrollSnapType = 'none'; snapEl.style.scrollBehavior = 'auto';
@@ -326,7 +326,7 @@ const here = () => {                             // Bildschirm, dessen Anfang de
 function go(dir, speed = 0){                     // speed: Tempo der Geste in px/ms (0 = unbekannt)
   if (gliding) return;
   const from = here(), i = Math.max(0, Math.min(screens.length - 1, from + dir));
-  const to = Math.min(screens[i].offsetTop, document.documentElement.scrollHeight - innerHeight);
+  const to = Math.min(screens[i].offsetTop, root.scrollHeight - innerHeight);
   const d = Math.abs(to - Y());
   if (d < 1) return;
   const most = (from <= 1 && i <= 1) ? 1050 : 650;
@@ -375,18 +375,16 @@ if (pagerOn) {
   const tops = () => screens.map(el => el.offsetTop);
   const maxY = () => pager.scrollHeight - pager.clientHeight;
   let startY = 0, samples = [], anim = 0, x0 = 0, y0 = 0;
-  const current = y => { const t = tops(); let i = 0; while (i + 1 < t.length && t[i + 1] <= y + 2) i++; return i; };   // Bildschirm, in dem y liegt
-  const easeOut = k => 1 - (1 - k) ** 3;          // kubisch: Anfangstempo 3·Weg/Dauer, am Ende 0
-  function glideTo(to, dur = null, ease = easeOut){
+  const screenAt = y => { const t = tops(); let i = 0; while (i + 1 < t.length && t[i + 1] <= y + 2) i++; return i; };   // Bildschirm, in dem y liegt
+  function glideTo(to, dur){                      // ease-out cubic (easeOutC): Anfangstempo 3·Weg/Dauer, am Ende 0
     cancelAnimationFrame(anim);
     const from = pager.scrollTop, d = to - from;
-    if (Math.abs(d) < 1) { pager.style.overflowY = ''; return; }
+    if (Math.abs(d) < 1 || calm.matches) { pager.scrollTop = to; pager.style.overflowY = ''; return; }
     pager.style.overflowY = 'hidden';                  // stoppt den iOS-Schwung
-    dur = dur ?? Math.min(520, 260 + Math.abs(d) * .3);
     const t0 = performance.now();
     const tick = now => {
-      const k = Math.min(1, (now - t0) / dur), e = ease(k);
-      pager.scrollTop = from + d * e;
+      const k = Math.min(1, (now - t0) / dur);
+      pager.scrollTop = from + d * easeOutC(k);
       if (k < 1) anim = requestAnimationFrame(tick); else pager.style.overflowY = '';
     };
     anim = requestAnimationFrame(tick);
@@ -408,7 +406,7 @@ if (pagerOn) {
     const a = samples[0], b = samples[samples.length - 1];
     const v = b && a && b.t > a.t ? (a.y - b.y) / (b.t - a.t) : 0;   // px/ms, positiv = nach unten blättern
     const y = pager.scrollTop, vh = pager.clientHeight, t = tops();
-    const i = current(startY), h = (t[i + 1] ?? pager.scrollHeight) - t[i];
+    const i = screenAt(startY), h = (t[i + 1] ?? pager.scrollHeight) - t[i];
     // hohe Karte: innen frei scrollen, solange wir nicht über ihre Enden hinaus wollen
     if (h > vh + 4 && y > t[i] && y < t[i] + h - vh) return;
     let target = i;
@@ -428,7 +426,7 @@ if (pagerOn) {
     // (Start ↔ 01: bis 0,9 s, die Wortmarke braucht Zeit für ihren Bogen).
     const most = (i === 0 && target === 1) || (i === 1 && target === 0) ? 900 : 520;
     const v0 = Math.sign(v) === Math.sign(d) ? Math.abs(v) : 0;
-    glideTo(y2, v0 > 0 ? Math.min(most, Math.max(250, 3 * Math.abs(d) / v0)) : most, easeOut);
+    glideTo(y2, v0 > 0 ? Math.min(most, Math.max(250, 3 * Math.abs(d) / v0)) : most);
   }, { passive:true });
 }
 
@@ -698,8 +696,7 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
   const cur = document.createElement('div');
   cur.className = 'cursor';
   cur.innerHTML = '<svg viewBox="0 0 22 22" aria-hidden="true"><path d="M0 0H11A11 11 0 1 1 0 11Z"/></svg>';
-  const moving = !matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const dots = moving ? Array.from({ length:N }, (_, i) => {
+  const dots = !calm.matches ? Array.from({ length:N }, (_, i) => {
     const d = document.createElement('div');
     d.className = 'trail';
     d.style.setProperty('--sz', (16.2 * .77 ** i).toFixed(1) + 'px');   // Durchmesser wie die Deckkraft: 16,2 px (18 × 0,9), jeder weitere × 0,77
@@ -713,10 +710,9 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
   const cur2 = cur.cloneNode(true);
   inv.append(cur2);
   fx.append(inv);
-  const navEl = document.querySelector('.nav');
   const clipNav = () => {                     // Ausschnitt = Fläche der Navigation, sobald sie sichtbar ist
     if (lastP < .6) { inv.style.clipPath = 'inset(100%)'; return; }
-    const r = navEl.getBoundingClientRect();
+    const r = nav.getBoundingClientRect();
     inv.style.clipPath = `inset(${r.top}px ${innerWidth - r.right}px ${innerHeight - r.bottom}px ${r.left}px)`;
   };
   onHeader.push(clipNav);                   // die Leiste bewegt sich nur mit dem Kopf
@@ -724,7 +720,6 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
   addEventListener('resize', clipNav);
   document.body.append(fx);
   root.classList.add('has-cursor', 'is-away');
-
 
   let mx = -99, my = -99, running = false, last = 0;
   const c = { x:-99, y:-99 };                 // Cursorposition (= Maus)

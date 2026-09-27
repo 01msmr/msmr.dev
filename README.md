@@ -61,9 +61,9 @@ Push to `main`. A GitHub webhook tells the netcup server to pull.
 
 ## Behaviour
 
-**Scrolling: one project per gesture.** Neither desktop nor touch relies on the browser's scroll snapping; the script moves the page, so every gesture lands exactly on a card edge.
+**Scrolling: one project per gesture.** The script moves the page, so every gesture lands exactly on a card edge. On desktop, CSS scroll snapping stays only as a backstop, for example when you drag the scrollbar.
 
-- **Desktop:** a mouse-wheel notch or trackpad swipe moves one card; trackpad momentum is ignored. The glide takes over the speed of the gesture (ease-out, duration = 3 × distance ÷ speed), 0.3–0.65 s, start ↔ 01 up to 1.05 s. Arrow keys, Page Up/Down and Space move one card; ← → as well.
+- **Desktop:** a mouse-wheel notch or trackpad swipe moves one card; trackpad momentum is ignored. The glide takes over the speed of the gesture (ease-out, duration = 3 × distance ÷ speed), 0.3–0.65 s, start ↔ 01 up to 1.05 s. Arrow keys (↑ ↓ ← →), Page Up/Down and Space move one card, and so does a sideways trackpad swipe.
 - **Touch (iPhone/iPad):** the page scrolls inside `.pager` (iOS snaps the whole page only after the momentum and then corrects visibly). The finger drives the page 1:1; on release a quick swipe or a quarter-screen drag moves one card, otherwise it springs back. The glide continues at the finger's release speed and settles on the edge, 0.25–0.52 s, start ↔ 01 up to 0.9 s. Sideways swipes switch projects. Cards taller than the screen scroll freely inside.
 
 **Header.** The wordmark shrinks along one Bézier curve (left first, then up) from the full-width start screen into the header, as a real font-size transition. The header bar and nav slide in by one bar height at the same speed as the wordmark's last rise and arrive with it; on touch devices without fading.
@@ -79,13 +79,12 @@ Push to `main`. A GitHub webhook tells the netcup server to pull.
 
 In the narrow nav the active item always sits in the centre. On a switch the colour window resizes around it and crossfades, and the neighbours follow the window's edges, all in 0.45 s. Swiping the strip works like a picker: numbers only while swiping, the centred item becomes active on release.
 
-**Cards.** Hover (desktop) fills a card like a thick liquid that bulges toward the cursor. On touch devices the card fills once it has settled and stays full while it leaves the screen; the nav switches at the same moment. Click shows a halftone of the screenshot drawn in the browser, and a double-click shows the full screenshot.
+**Cards.** Hover (desktop) fills a card like a thick liquid that bulges toward the cursor. On touch devices the card fills once it has settled and stays full while it leaves the screen; the nav switches at the same moment. Keyboard focus fills a card as well. A click shows a halftone of the screenshot, drawn in the browser, and a double-click on the halftone shows the full screenshot. After 11 s without activity the image fades out.
 
 ## Notes
 
 - External project links open in a new tab; links to msmr.dev itself don't. Do Day links to its README, because the app itself is private.
 - Colours follow the system's light or dark mode.
 - Images load only when a card is first touched or hovered, and fonts come from this site, not from Google.
-- On touch screens, the card on screen fills with its colour once it snaps into place.
-- Motion respects `prefers-reduced-motion`.
+- Motion respects `prefers-reduced-motion`: pages jump instead of gliding, cards fill plainly instead of as a liquid, and the cursor has no trail.
 - Without JavaScript the page still reads top to bottom, with a small static wordmark.
