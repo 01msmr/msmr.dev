@@ -177,7 +177,7 @@ function navDelay(){                          // Touch: ab Beginn der Füllung g
   return since < 1000 ? Math.max(0, NAV_AFTER_FILL - since) : NAV_AFTER_FILL;
 }
 
-/* ═══ 3 Schmale Navigation: Auswahlrad ═══
+/* ═══ 3 Schmale Navigation: Auswahlrad (rechtsbündig) ═══
    Wischen: nur Nummern, das Farbfenster folgt dem Eintrag in der Mitte.
    Loslassen: der Eintrag rastet ein, wird aktiv, zeigt seinen Namen, die Karte wechselt. */
 let scrubbing = false, settleT = 0;
@@ -190,7 +190,8 @@ function centerNav(smooth = true){
   if (!narrow.matches || scrubbing) return;
   const a = atEnd ? endLink : links[current];
   if (!a) return;
-  const to = Math.max(0, Math.min(nav.scrollWidth - nav.clientWidth, a.offsetLeft + a.offsetWidth / 2 - nav.clientWidth / 2));
+  const next = links[links.indexOf(a) + 1];              // rechtsbündig: aktiver Eintrag + › stehen am rechten Rand
+  const to = Math.max(0, Math.min(nav.scrollWidth - nav.clientWidth, a.offsetLeft + a.offsetWidth + (next ? next.offsetWidth : 0) - nav.clientWidth));
   cancelAnimationFrame(navAnim);
   const from = nav.scrollLeft;
   if (!smooth || Math.abs(to - from) < 1) { nav.scrollLeft = to; return; }
@@ -204,10 +205,10 @@ function centerNav(smooth = true){
   };
   navAnim = requestAnimationFrame(tick);
 }
-function centred(){                           // Eintrag, dessen Mitte der Streifenmitte am nächsten ist
-  const mid = nav.getBoundingClientRect().left + nav.clientWidth / 2;
+function centred(){                           // Eintrag, dessen rechte Kante dem Ankerpunkt (rechts, vor dem ›) am nächsten ist
+  const anchor = nav.getBoundingClientRect().right - parseFloat(getComputedStyle(nav).scrollPaddingInlineEnd || 0);
   let best = null, d = Infinity;
-  links.forEach(a => { const r = a.getBoundingClientRect(), dd = Math.abs(r.left + r.width / 2 - mid); if (dd < d) { d = dd; best = a; } });
+  links.forEach(a => { const r = a.getBoundingClientRect(), dd = Math.abs(r.right - anchor); if (dd < d) { d = dd; best = a; } });
   return best;
 }
 const startScrub = () => {
