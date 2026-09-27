@@ -9,7 +9,6 @@ const calm    = matchMedia('(prefers-reduced-motion: reduce)');
 const narrow  = matchMedia('(max-width:1099px)');
 const bar     = document.querySelector('.bar');
 const mark    = document.querySelector('.mark');
-const markM   = document.querySelector('.mark__m');
 const slot    = document.querySelector('.mark-slot');
 const hero    = document.querySelector('.hero');
 const lede    = document.querySelector('.lede');
@@ -180,8 +179,7 @@ function navDelay(){                          // Touch: ab Beginn der Füllung g
 
 /* ═══ 3 Schmale Navigation: Auswahlrad ═══
    Wischen: nur Nummern, das Farbfenster folgt dem Eintrag in der Mitte.
-   Loslassen: der Eintrag rastet ein, wird aktiv, zeigt seinen Namen, die Karte wechselt.
-   »msmr« gleitet dabei aus der Leiste, ».dev« bleibt links stehen. */
+   Loslassen: der Eintrag rastet ein, wird aktiv, zeigt seinen Namen, die Karte wechselt. */
 let scrubbing = false, settleT = 0;
 
 /* Streifen und Farbfenster bewegen sich gemeinsam: gleiche Dauer, gleiche Kurve
@@ -212,16 +210,6 @@ function centred(){                           // Eintrag, dessen Mitte der Strei
   links.forEach(a => { const r = a.getBoundingClientRect(), dd = Math.abs(r.left + r.width / 2 - mid); if (dd < d) { d = dd; best = a; } });
   return best;
 }
-function slideMark(){                         // »msmr« weicht, sobald der Streifen gescrollt wird
-  // nur mit kleiner Marke in der Kopfleiste — auf dem Startbildschirm steht »msmr.dev« vollständig links
-  if (!narrow.matches || lastP < 1) { mark.style.translate = ''; markM.style.opacity = ''; return; }
-  // Ausgangspunkt: erster Eintrag (01) in der Mitte — dort steht »msmr.dev« vollständig
-  const f = links[0], base = Math.max(0, f.offsetLeft + f.offsetWidth / 2 - nav.clientWidth / 2);
-  // nie halb: ganz da oder ganz weg — sobald der Streifen über 01 hinaus steht, gleitet »msmr« als Ganzes hinaus
-  const hide = nav.scrollLeft - base > 8;
-  mark.style.translate = hide ? `${-markM.offsetWidth}px 0` : '0 0';
-  markM.style.opacity = hide ? '0' : '1';
-}
 const startScrub = () => {
   if (!narrow.matches || scrubbing) return;
   cancelAnimationFrame(navAnim); nav.style.scrollSnapType = '';
@@ -232,7 +220,6 @@ nav.addEventListener('touchstart', startScrub, { passive:true });
 nav.addEventListener('wheel', startScrub, { passive:true });
 nav.addEventListener('touchend', () => { if (!scrubbing) return; clearTimeout(settleT); settleT = setTimeout(settle, 160); }, { passive:true });   // nur getippt: Zustand zurücksetzen
 nav.addEventListener('scroll', () => {
-  slideMark();
   if (!scrubbing) return;
   const c = centred();
   if (c !== peek) { peek = c; markNeighbours(c); placeHl(); }
@@ -247,8 +234,7 @@ function settle(){
   else { setActive(links.indexOf(a), true); slides[links.indexOf(a)].scrollIntoView({ behavior:'smooth' }); }
   requestAnimationFrame(() => { relayout(); centerNav(); });
 }
-narrow.addEventListener('change', () => { slideMark(); relayout(); centerNav(false); });
-onHeader.push(slideMark);                     // beim Zurück zum Start sofort zurücksetzen
+narrow.addEventListener('change', () => { relayout(); centerNav(false); });
 /* ═══ 4 Blättern: aktives Projekt — erst übernehmen, wenn der Bildlauf steht ═══ */
 let pending = null, idleT = 0;
 const commit = () => { if (pending !== null) setActive(pending); pending = null; choice = null; };   // Seite steht: Klick-Wahl erledigt

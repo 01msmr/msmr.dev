@@ -130,8 +130,6 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .nav a.edge-r::before{content:">"}
   .mark{z-index:2;background:var(--bg);padding-right:.5rem}   /* über dem Streifen */
   .mark::after{content:"";position:absolute;left:100%;top:0;bottom:0;width:1.25rem;background:linear-gradient(to right,var(--bg),transparent)}
-  .mark__m{display:inline-block;transition:opacity .3s var(--out)}
-  .mark{transition:translate .45s var(--out)}              /* »msmr« gleitet als Ganzes hinaus/herein */
   .bar::before{border-bottom-color:transparent}          /* Leiste nahtlos: Grund und Kante gleich */
   .nav__hl{transition:clip-path .45s cubic-bezier(.33,1,.68,1)}   /* synchron mit dem Zentrieren des Streifens */
 }

@@ -42,7 +42,7 @@ $icon = random_int(0, $n - 1);               // Icon in einer der Projektfarben 
 <body>
 
 <header class="bar">
-  <a class="mark" href="#top" aria-label="msmr.dev, back to top"><span class="mark__m">msmr</span><i>.dev</i></a>
+  <a class="mark" href="#top" aria-label="msmr.dev, back to top">msmr<i>.dev</i></a>
   <nav class="nav" aria-label="Projects">
     <i class="nav__hl" aria-hidden="true"></i>
 <?php foreach ($projects as $i => $p): ?>
