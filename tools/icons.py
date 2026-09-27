@@ -19,7 +19,7 @@ OUT = ROOT / 'icons'
 OUT.mkdir(exist_ok=True)
 
 # Projektfarben wie in index.html (oklch 70 % …), Reihenfolge = Zeitleiste
-HUES = [(.18, 255), (.22, 5), (.15, 210), (.19, 155), (.2, 305), (.17, 88), (.2, 42)]
+HUES = [(.18, 255), (.22, 5), (.15, 210), (.19, 155), (.2, 305), (.2, 42), (.17, 88)]
 INK, PAPER = '#191b1d', '#fafaf8'
 
 
