@@ -11,7 +11,7 @@ echo json_encode([
   'background_color' => '#fafaf8',
   'theme_color'      => '#fafaf8',
   'icons'            => [
-    ['src' => "icons/icon-192-$n.png", 'sizes' => '192x192', 'type' => 'image/png'],
-    ['src' => "icons/icon-512-$n.png", 'sizes' => '512x512', 'type' => 'image/png'],
+    ['src' => "app-icons/icon-192-$n.png", 'sizes' => '192x192', 'type' => 'image/png'],
+    ['src' => "app-icons/icon-512-$n.png", 'sizes' => '512x512', 'type' => 'image/png'],
   ],
 ], JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);

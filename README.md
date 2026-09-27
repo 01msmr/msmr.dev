@@ -12,7 +12,7 @@ A single static HTML file with no build step and no framework. The wordmark shri
 | `img/<name>.webp` | screenshot of a project: shown on double-click, and drawn as a halftone on click |
 | `fonts/` | Hanken Grotesk (Latin subset, SIL OFL), served from this site; used for everything |
 | `.htaccess` | caching and compression rules for the server |
-| `icons/`, `site.webmanifest.php` | favicons, iOS and Android icons in every project colour; the page (and, for Android, the PHP manifest) picks one at random on each load |
+| `app-icons/`, `site.webmanifest.php` | favicons, iOS and Android icons in every project colour; the page (and, for Android, the PHP manifest) picks one at random on each load |
 | `tools/icons.py` | regenerates the icons (needs fontTools and ImageMagick) |
 
 ## Local preview

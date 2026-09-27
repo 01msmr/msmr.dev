@@ -4,7 +4,7 @@
 
     python3 tools/icons.py
 
-Schreibt nach icons/: fav-<n>.svg und fav-<n>-32.png (Browser, nur »m« — bei 16–32 px lesbar), touch-<n>.png
+Schreibt nach app-icons/: fav-<n>.svg und fav-<n>-32.png (Browser, nur »m« — bei 16–32 px lesbar), touch-<n>.png
 (iOS, 180 px), icon-192-<n>.png / icon-512-<n>.png (Android; site.webmanifest.php wählt per Zufall).
 Die Seite wählt beim Laden per Zufall eine Farbe.
 """
@@ -15,7 +15,7 @@ from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.pens.transformPen import TransformPen
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-OUT = ROOT / 'icons'
+OUT = ROOT / 'app-icons'   # nicht »icons/«: Apache belegt /icons/ für eigene Grafiken
 OUT.mkdir(exist_ok=True)
 
 # Projektfarben wie in index.html (oklch 70 % …), Reihenfolge = Zeitleiste
