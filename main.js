@@ -562,6 +562,8 @@ if (!calm.matches) {
       new IntersectionObserver(([en]) => {
         if (en.intersectionRatio >= IN && s.target !== FULL) {
           s.target = FULL; fillStart = performance.now(); s.mx = s.mx ?? .5; wake();
+          const i = slides.indexOf(screen);
+          if (i >= 0) setActive(i, true);                  // Navigation startet zugleich mit dem Steigen
         } else if (en.intersectionRatio < GONE && s.target === FULL) {   // »isIntersecting« bleibt an der Kante wahr
           s.target = 0; s.level = 0; s.lv = 0; s.mx = null; s.y.fill(0); s.v.fill(0); draw(s);   // außer Sicht: leer
         }
