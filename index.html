@@ -1061,7 +1061,7 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
   const dots = moving ? Array.from({ length:N }, (_, i) => {
     const d = document.createElement('div');
     d.className = 'trail';
-    d.style.setProperty('--sz', (18 * (1 - i / (N + 1))).toFixed(1) + 'px');
+    d.style.setProperty('--sz', (16.2 * .77 ** i).toFixed(1) + 'px');   // Durchmesser wie die Deckkraft: 16,2 px (18 × 0,9), jeder weitere × 0,77
     d.style.opacity = (.9 * .77 ** i).toFixed(3);   // erster Kreis 90 %, jeder weitere × 0,77
     fx.append(d);
     return { el:d, x:-99, y:-99 };
