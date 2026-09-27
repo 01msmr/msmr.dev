@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- deploy check 2026-09-27 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -913,16 +912,19 @@ document.querySelectorAll('.title a, .links a').forEach(a => {
 /* ═══ Füllung als Flüssigkeit — zähflüssig (»Honig«) ═══
    Beim Hover steigt der Pegel; die Oberfläche wölbt sich breit zum Cursor und fließt
    träge zurück. Wenige Stützstellen und starke Kopplung: große, ruhige Wellen,
-   kaum kleine Nebenwellen. Nur mit Maus und ohne reduzierte Bewegung. */
-if (matchMedia('(hover:hover) and (pointer:fine)').matches && !calm.matches) {
+   kaum kleine Nebenwellen. Ohne reduzierte Bewegung.
+   Touch (iPhone/iPad, kein Cursor): die eingerastete Karte füllt sich; die Wölbung
+   wandert zu zufälligen Stellen, dazu leichte Stöße — Finger auf der Karte bewegt das Wasser auch. */
+if (!calm.matches) {
+  const touch = !matchMedia('(hover:hover) and (pointer:fine)').matches;
   root.classList.add('liquid');
-  const N = 28;               // Stützstellen der Oberfläche — wenige: keine kleinen Nebenwellen
-  const TENSION = .005;       // zieht jede Stelle zurück auf den Pegel (schwach: träge)
+  const N = 20;               // Stützstellen der Oberfläche — wenige: breite Wellen, keine kleinen Nebenwellen
+  const TENSION = .004;       // zieht jede Stelle zurück auf den Pegel (schwach: langsame Wellen)
   const SPREAD = .32;         // Kopplung an die Nachbarn: glättet
-  const DAMP = .986;          // Dämpfung pro Schritt
-  const TAU = .9;             // Sekunden: Pegel folgt dem Ziel
-  const PUSH = .018, PRESS = .025;   // seitliches Schieben / Drücken nahe der Oberfläche
-  const BULGE = .3, REACH = .18;     // Wölbung zum Cursor: Stärke, Breite (Anteil der Kartenbreite)
+  const DAMP = .988;          // Dämpfung pro Schritt (wenig: Wellen tragen weit)
+  const TAU = touch ? .17 : .6;   // Sekunden: Pegel folgt dem Ziel (Touch: 85 % nach ≈ 0,32 s, passend zur Navigation)
+  const PUSH = .03, PRESS = .04;     // seitliches Schieben / Drücken nahe der Oberfläche
+  const BULGE = .5, REACH = .24;     // Wölbung zum Cursor: Stärke (hoch), Breite (Anteil der Kartenbreite)
   const FULL = 1.06;          // >1: Oberfläche über der Kante, Karte ganz gefüllt
   const live = new Set(); let raf = 0, t0 = 0;
 
@@ -931,10 +933,25 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches && !calm.matches) {
     svg.setAttribute('class', 'liq'); svg.setAttribute('aria-hidden', 'true'); svg.setAttribute('preserveAspectRatio', 'none');
     const path = document.createElementNS(svg.namespaceURI, 'path'); svg.append(path);
     card.prepend(svg);        // zuerst = unter Halbton, Nummer und Schrift
-    const s = { card, path, w:1, h:1, level:0, target:0, y:new Float32Array(N), v:new Float32Array(N), px:null, py:null, mx:null };
+    const s = { card, path, w:1, h:1, level:0, target:0, y:new Float32Array(N), v:new Float32Array(N), px:null, py:null, mx:null, goal:.5, wait:0 };
     const size = () => { s.w = card.clientWidth; s.h = card.clientHeight; svg.setAttribute('viewBox', `0 0 ${s.w} ${s.h}`); draw(s); };
     new ResizeObserver(size).observe(card);
     const wake = () => { live.add(s); if (!raf) { t0 = 0; raf = requestAnimationFrame(loop); } };
+    if (touch) {                              // Touch: Pegel folgt der eingerasteten Karte
+      const slide = card.closest('.slide');
+      const sync = () => {
+        const on = slide ? slide.classList.contains('is-active') : root.classList.contains('at-end');
+        s.target = on ? FULL : 0;
+        if (on && s.mx === null) { s.mx = s.goal = .3 + Math.random() * .4; s.wait = 0; }
+        if (!on) s.mx = null;
+        wake();
+      };
+      new MutationObserver(sync).observe(slide || root, { attributes:true, attributeFilter:['class'] });
+      card.addEventListener('pointermove', e => { if (e.pointerType === 'touch') { stir(s, e); wake(); } });
+      card.addEventListener('pointerup', () => { s.px = null; });
+      size();
+      return;
+    }
     card.addEventListener('pointerenter', e => { s.target = FULL; stir(s, e); wake(); });
     card.addEventListener('pointerleave', e => { stir(s, e); s.target = 0; s.px = s.mx = null; wake(); });
     card.addEventListener('pointermove', e => { stir(s, e); wake(); });
@@ -959,13 +976,22 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches && !calm.matches) {
   function step(s, dt){
     const { y, v } = s;
     s.level += (s.target - s.level) * (1 - Math.exp(-dt / TAU));
+    if (touch && s.mx !== null) {             // kein Cursor: Wölbung wandert, ab und zu ein leichter Stoß
+      if ((s.wait -= dt) <= 0) {
+        s.goal = .12 + Math.random() * .76;
+        s.wait = 1 + Math.random() * 1.6;
+        const j = Math.floor(Math.random() * N);
+        v[j] += (Math.random() - .5) * 12;
+      }
+      s.mx += (s.goal - s.mx) * (1 - Math.exp(-dt / .8));
+    }
     for (let i = 0; i < N; i++) {
       const l = y[i > 0 ? i - 1 : 0], r = y[i < N - 1 ? i + 1 : N - 1];
       let f = -TENSION * y[i] + SPREAD * (l + r - 2 * y[i]);
       if (s.mx !== null) { const d = (i / (N - 1) - s.mx) / REACH; f -= BULGE * Math.exp(-d * d); }   // breite Wölbung zum Cursor
       v[i] = (v[i] + f) * DAMP;
     }
-    let e = Math.abs(s.target - s.level) + (s.mx !== null ? .01 : 0);
+    let e = Math.abs(s.target - s.level) + (s.mx !== null ? .01 : 0);   // solange gefüllt, lebt die Oberfläche
     for (let i = 0; i < N; i++) { y[i] += v[i]; e += Math.abs(v[i]) + Math.abs(y[i]) * .01; }
     return e > .002;
   }
