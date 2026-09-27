@@ -617,7 +617,7 @@ nav.addEventListener('pointerleave', () => { hovered = null; placeHl(); });
    Füllung zu 85 % steht — bei cubic-bezier(0,.9,.1,1) über 1,8 s nach ≈ 316 ms. */
 const NAV_AFTER_FILL = 316;
 let navT = 0;
-function setActive(i){
+function setActive(i, now = false){           // now: Navigation sofort (Auswahl im Streifen)
   if (i === current) return;
   current = i;
   slides.forEach((s, j) => s.classList.toggle('is-active', j === i));
@@ -629,7 +629,7 @@ function setActive(i){
     count.classList.remove('tick'); void count.offsetWidth; count.classList.add('tick');
     markNeighbours();
     requestAnimationFrame(() => { relayout(); centerNav(); });   // neue Breiten stehen: einmal messen, einmal zentrieren
-  }, NAV_AFTER_FILL);
+  }, now ? 0 : NAV_AFTER_FILL);
 }
 
 /* ═══ Schmale Ansicht: Navigation als Auswahlrad ═══
@@ -678,7 +678,12 @@ function slideMark(){                         // »msmr« weicht, sobald der Str
   mark.style.translate = `${-shift}px 0`;
   markM.style.opacity = (1 - shift / w).toFixed(3);
 }
-const startScrub = () => { if (!narrow.matches) return; cancelAnimationFrame(navAnim); nav.style.scrollSnapType = ''; scrubbing = true; nav.classList.add('is-scrubbing'); };
+const startScrub = () => {
+  if (!narrow.matches || scrubbing) return;
+  cancelAnimationFrame(navAnim); nav.style.scrollSnapType = '';
+  scrubbing = true; nav.classList.add('is-scrubbing');
+  requestAnimationFrame(() => { peek = centred(); markNeighbours(peek); paintBand(); placeHl(); });   // nur Nummern: Band neu malen
+};
 nav.addEventListener('touchstart', startScrub, { passive:true });
 nav.addEventListener('wheel', startScrub, { passive:true });
 nav.addEventListener('touchend', () => { if (!scrubbing) return; clearTimeout(settleT); settleT = setTimeout(settle, 160); }, { passive:true });   // nur getippt: Zustand zurücksetzen
@@ -695,8 +700,8 @@ function settle(){
   nav.classList.remove('is-scrubbing');
   if (!a) return relayout();
   if (a === endLink) endPage.scrollIntoView({ behavior:'smooth' });
-  else { setActive(links.indexOf(a)); slides[links.indexOf(a)].scrollIntoView({ behavior:'smooth' }); }
-  relayout(); centerNav();
+  else { setActive(links.indexOf(a), true); slides[links.indexOf(a)].scrollIntoView({ behavior:'smooth' }); }
+  requestAnimationFrame(() => { relayout(); centerNav(); });
 }
 narrow.addEventListener('change', () => { slideMark(); relayout(); centerNav(false); });
 addEventListener('scroll', slideMark, { passive:true });   // beim Zurück zum Start sofort zurücksetzen
