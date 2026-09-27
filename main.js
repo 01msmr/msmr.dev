@@ -495,6 +495,19 @@ function halftone(canvas, img){
   canvas.dataset.size = w + 'x' + h;
 }
 
+/* Touch: ein Tipp vergrößert ein Detail (Technik); solange eines groß ist, schließt der nächste
+   Tipp — wo auch immer — nur dieses Detail und löst sonst nichts aus (kein Raster, kein Link). */
+if (pagerOn) {
+  let openD = null;
+  document.addEventListener('click', ev => {
+    const d = ev.target.closest('.meta .d');
+    if (!openD && !d) return;
+    ev.preventDefault(); ev.stopPropagation();
+    if (openD) { openD.classList.remove('on'); openD = null; }
+    else { d.classList.add('on'); openD = d; }
+  }, true);
+}
+
 document.querySelectorAll('.card[data-shot]').forEach(card => {
   let clickTimer, hideTimer, mode = null;     // null | 'shot' | 'full'
   const canvas = card.querySelector('canvas.shot');

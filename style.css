@@ -201,7 +201,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .inv :is(.meta,.end__head span){color:rgb(255 255 255 / .6)}
 .inv .title:has(a:is(:hover,:focus-visible)),
 .inv .links:has(a:is(:hover,:focus-visible)){mix-blend-mode:normal;color:var(--end-on)}   /* Pille sichtbar: normal, Schrift wie auf der gefüllten Karte */
-.inv .meta .d:hover{color:#fff}
+.inv .meta .d.on{color:#fff}
 
 /* Projektbild: Klick = Halbton-Raster (im Browser aus dem Bildschirmfoto gezeichnet),
    Doppelklick = volles Bild. Über der Farbfläche, hinter der Schrift. */
@@ -226,12 +226,17 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 
 .meta{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:1.4em 1.25rem;max-width:calc(100% - 12rem);font:400 .8125rem/1.4 var(--mono);color:var(--ink);letter-spacing:0}   /* voll deckend */
 .meta .d{position:relative;display:inline-flex}          /* Trefferfläche bleibt in Normalgröße … */
-.meta .d:hover{z-index:3;color:var(--pill)}
+.meta .d.on{z-index:3;color:var(--pill)}   /* .on: angetipptes Detail (Touch, main.js 5) */
 .meta .dx{                                                 /* … nur die innere Schrift wächst und fängt keine Maus */
   display:inline-flex;align-items:center;pointer-events:none;
   transform-origin:0 50%;transition:transform .33s var(--out);   /* 1,8× so schnell wie zuvor (0,6 s) */
 }
-.meta .d:hover .dx{transform:scale(4)}
+.meta .d.on .dx{transform:scale(4)}
+@media (hover:hover){                                       /* Maus: beim Überfahren; Touch nicht (:hover bleibt dort hängen) */
+  .inv .meta .d:hover{color:#fff}
+  .meta .d:hover{z-index:3;color:var(--pill)}
+  .meta .d:hover .dx{transform:scale(4)}
+}
 /* Trefferfläche: waagerecht bis zur Mitte der Lücke zum Nachbarn (Lücke 1,25 rem),
    senkrecht 50 % der Höhe darüber und darunter — Zeilenabstand = eine Zeilenhöhe (1,4 em),
    so stoßen die Flächen zweier Zeilen genau aneinander, ohne sich zu überlappen */
