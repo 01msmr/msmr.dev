@@ -217,9 +217,10 @@ function slideMark(){                         // »msmr« weicht, sobald der Str
   if (!narrow.matches || lastP < 1) { mark.style.translate = ''; markM.style.opacity = ''; return; }
   // Ausgangspunkt: erster Eintrag (01) in der Mitte — dort steht »msmr.dev« vollständig
   const f = links[0], base = Math.max(0, f.offsetLeft + f.offsetWidth / 2 - nav.clientWidth / 2);
-  const w = markM.offsetWidth, shift = Math.min(Math.max(0, nav.scrollLeft - base), w);
-  mark.style.translate = `${-shift}px 0`;
-  markM.style.opacity = (1 - shift / w).toFixed(3);
+  // nie halb: ganz da oder ganz weg — sobald der Streifen über 01 hinaus steht, gleitet »msmr« als Ganzes hinaus
+  const hide = nav.scrollLeft - base > 8;
+  mark.style.translate = hide ? `${-markM.offsetWidth}px 0` : '0 0';
+  markM.style.opacity = hide ? '0' : '1';
 }
 const startScrub = () => {
   if (!narrow.matches || scrubbing) return;
