@@ -45,12 +45,12 @@ $icon = random_int(0, $n - 1);               // Icon in einer der Projektfarben 
   <a class="mark" href="#top" aria-label="msmr.dev, back to top">msmr<i>.dev</i></a>
   <nav class="nav" aria-label="Projects">
     <i class="nav__hl" aria-hidden="true"></i>
-    <span class="nav-pad" aria-hidden="true">&lt;</span>   <!-- unsichtbarer Platzhalter: 01 hat links immer einen Nachbarn -->
+    <span class="nav-pad" aria-hidden="true">&lt;</span><span class="nav-pad" aria-hidden="true">00</span>   <!-- unsichtbare Platzhalter (Telefon): links von 01 stehen immer ‹ und ein Nachbar -->
 <?php foreach ($projects as $i => $p): ?>
     <a href="#<?= e($p['id']) ?>" style="--hl:<?= color($p) ?>"><b><?= two($i + 1) ?></b><span><?= e($p['name']) ?></span></a>
 <?php endforeach; ?>
     <a href="#links" class="nav-end" style="--hl:var(--end-fill)"><b>↗</b><span>project urls</span></a>
-    <span class="nav-pad" aria-hidden="true">&gt;</span>   <!-- … und das letzte rechts -->
+    <span class="nav-pad" aria-hidden="true">00</span><span class="nav-pad" aria-hidden="true">&gt;</span>   <!-- … und rechts vom letzten -->
   </nav>
   <span class="count" aria-hidden="true"><b>00</b> / <?= two($n) ?></span>
 </header>
