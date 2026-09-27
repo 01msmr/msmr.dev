@@ -558,13 +558,14 @@ if (!calm.matches) {
       // Karten höher als der Bildschirm: bezogen auf den Anteil, der überhaupt ins Bild passt.
       const screen = card.closest('.slide, .end');
       const IN = .996 * Math.min(1, innerHeight / screen.offsetHeight);   // Start bei 99,6 % im Bild
+      const GONE = .002;                                  // außer Sicht: unter 0,2 % (< 2 px)
       new IntersectionObserver(([en]) => {
         if (en.intersectionRatio >= IN && s.target !== FULL) {
           s.target = FULL; fillStart = performance.now(); s.mx = s.mx ?? .5; wake();
-        } else if (!en.isIntersecting && s.target === FULL) {
+        } else if (en.intersectionRatio < GONE && s.target === FULL) {   // »isIntersecting« bleibt an der Kante wahr
           s.target = 0; s.level = 0; s.lv = 0; s.mx = null; s.y.fill(0); s.v.fill(0); draw(s);   // außer Sicht: leer
         }
-      }, { threshold:[0, IN] }).observe(screen);
+      }, { threshold:[GONE, IN] }).observe(screen);
       card.addEventListener('pointermove', e => { if (e.pointerType === 'touch') { stir(s, e); wake(); } });
       card.addEventListener('pointerup', () => { s.px = null; });
       size();
