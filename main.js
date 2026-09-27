@@ -359,7 +359,7 @@ addEventListener('touchend', ev => {
 if (pagerOn) {
   const tops = () => screens.map(el => el.offsetTop);
   const maxY = () => pager.scrollHeight - pager.clientHeight;
-  let startY = 0, samples = [], anim = 0;
+  let startY = 0, samples = [], anim = 0, x0 = 0, y0 = 0;
   const current = y => { const t = tops(); let i = 0; while (i + 1 < t.length && t[i + 1] <= y + 2) i++; return i; };   // Bildschirm, in dem y liegt
   function glideTo(to){
     cancelAnimationFrame(anim);
@@ -377,14 +377,17 @@ if (pagerOn) {
   pager.addEventListener('touchstart', ev => {
     cancelAnimationFrame(anim); pager.style.overflowY = '';
     startY = pager.scrollTop;
-    samples = [{ y:ev.touches[0].clientY, t:performance.now() }];
+    x0 = ev.touches[0].clientX; y0 = ev.touches[0].clientY;
+    samples = [{ y:y0, t:performance.now() }];
   }, { passive:true });
   pager.addEventListener('touchmove', ev => {
     const now = performance.now();
     samples.push({ y:ev.touches[0].clientY, t:now });
     while (samples.length > 2 && now - samples[0].t > 90) samples.shift();   // nur die letzten ~90 ms zählen
   }, { passive:true });
-  pager.addEventListener('touchend', () => {
+  pager.addEventListener('touchend', ev => {
+    const f = ev.changedTouches[0], dx = f.clientX - x0, dy = f.clientY - y0;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) return;   // seitliche Geste: die blättert (4), nicht hier einrasten
     const a = samples[0], b = samples[samples.length - 1];
     const v = b && a && b.t > a.t ? (a.y - b.y) / (b.t - a.t) : 0;   // px/ms, positiv = nach unten blättern
     const y = pager.scrollTop, vh = pager.clientHeight, t = tops();
