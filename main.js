@@ -365,7 +365,7 @@ if (pagerOn) {
   const maxY = () => pager.scrollHeight - pager.clientHeight;
   let startY = 0, samples = [], anim = 0, x0 = 0, y0 = 0;
   const current = y => { const t = tops(); let i = 0; while (i + 1 < t.length && t[i + 1] <= y + 2) i++; return i; };   // Bildschirm, in dem y liegt
-  const easeOut = k => 1 - (1 - k) ** 3, easeIn = k => k ** 3;   // kubisch
+  const easeOut = k => 1 - (1 - k) ** 3;          // kubisch: Anfangstempo 3·Weg/Dauer, am Ende 0
   function glideTo(to, dur = null, ease = easeOut){
     cancelAnimationFrame(anim);
     const from = pager.scrollTop, d = to - from;
@@ -410,11 +410,14 @@ if (pagerOn) {
       const ht = (t[target + 1] ?? pager.scrollHeight) - t[target];
       if (ht > vh + 4 && target < i) to = t[target] + ht - vh;
     }
-    const y2 = Math.max(0, Math.min(maxY(), to));
-    // Start ↔ 01: 0,9 s — hinein mit ease-in, zurück mit ease-out (Wortmarke hat Zeit für ihren Bogen)
-    if (i === 0 && target === 1) glideTo(y2, 900, easeIn);
-    else if (i === 1 && target === 0) glideTo(y2, 900, easeOut);
-    else glideTo(y2);
+    const y2 = Math.max(0, Math.min(maxY(), to)), d = y2 - pager.scrollTop;
+    // Die Karte nimmt die Geschwindigkeit des Fingers mit (wie bei den afterworkphotos-Karten):
+    // ease-out cubic startet mit 3·d/T — also T = 3·|d| / v, dann weich auf die Kante.
+    // Schneller Wisch landet schnell, langsamer langsam; mindestens 0,25 s, höchstens 0,52 s
+    // (Start ↔ 01: bis 0,9 s, die Wortmarke braucht Zeit für ihren Bogen).
+    const most = (i === 0 && target === 1) || (i === 1 && target === 0) ? 900 : 520;
+    const v0 = Math.sign(v) === Math.sign(d) ? Math.abs(v) : 0;
+    glideTo(y2, v0 > 0 ? Math.min(most, Math.max(250, 3 * Math.abs(d) / v0)) : most, easeOut);
   }, { passive:true });
 }
 
