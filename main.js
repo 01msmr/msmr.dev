@@ -333,6 +333,59 @@ addEventListener('touchend', ev => {
   if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? 1 : -1);
 }, { passive:true });
 
+/* ── Touch: Einrasten per Skript ──
+   Finger führt 1:1; beim Loslassen entscheidet die Wischbewegung: schnell oder mehr als ¼ Bildschirm
+   = eine Karte weiter/zurück, sonst zurück zur aktuellen. Dann wird der iOS-Schwung gestoppt und die
+   Seite gleitet exakt auf die Kartenkante. Karten höher als der Bildschirm lassen sich innen frei scrollen. */
+if (pagerOn) {
+  const tops = () => screens.map(el => el.offsetTop);
+  const maxY = () => pager.scrollHeight - pager.clientHeight;
+  let startY = 0, samples = [], anim = 0;
+  const current = y => { const t = tops(); let i = 0; while (i + 1 < t.length && t[i + 1] <= y + 2) i++; return i; };   // Bildschirm, in dem y liegt
+  function glideTo(to){
+    cancelAnimationFrame(anim);
+    const from = pager.scrollTop, d = to - from;
+    if (Math.abs(d) < 1) { pager.style.overflowY = ''; return; }
+    pager.style.overflowY = 'hidden';                  // stoppt den iOS-Schwung
+    const dur = Math.min(520, 260 + Math.abs(d) * .3), t0 = performance.now();
+    const tick = now => {
+      const k = Math.min(1, (now - t0) / dur), e = 1 - (1 - k) ** 3;   // ease-out cubic
+      pager.scrollTop = from + d * e;
+      if (k < 1) anim = requestAnimationFrame(tick); else pager.style.overflowY = '';
+    };
+    anim = requestAnimationFrame(tick);
+  }
+  pager.addEventListener('touchstart', ev => {
+    cancelAnimationFrame(anim); pager.style.overflowY = '';
+    startY = pager.scrollTop;
+    samples = [{ y:ev.touches[0].clientY, t:performance.now() }];
+  }, { passive:true });
+  pager.addEventListener('touchmove', ev => {
+    const now = performance.now();
+    samples.push({ y:ev.touches[0].clientY, t:now });
+    while (samples.length > 2 && now - samples[0].t > 90) samples.shift();   // nur die letzten ~90 ms zählen
+  }, { passive:true });
+  pager.addEventListener('touchend', () => {
+    const a = samples[0], b = samples[samples.length - 1];
+    const v = b && a && b.t > a.t ? (a.y - b.y) / (b.t - a.t) : 0;   // px/ms, positiv = nach unten blättern
+    const y = pager.scrollTop, vh = pager.clientHeight, t = tops();
+    const i = current(startY), h = (t[i + 1] ?? pager.scrollHeight) - t[i];
+    // hohe Karte: innen frei scrollen, solange wir nicht über ihre Enden hinaus wollen
+    if (h > vh + 4 && y > t[i] && y < t[i] + h - vh) return;
+    let target = i;
+    if (Math.abs(v) > .35) target = i + Math.sign(v);
+    else if (Math.abs(y - startY) > vh / 4) target = i + Math.sign(y - startY);
+    target = Math.max(0, Math.min(screens.length - 1, target));
+    // hohe Karte beim Hochwischen: an ihrem unteren Ende landen, nicht am Anfang
+    let to = t[target];
+    if (target < i || (target === i && y < t[i])) {
+      const ht = (t[target + 1] ?? pager.scrollHeight) - t[target];
+      if (ht > vh + 4 && target < i) to = t[target] + ht - vh;
+    }
+    glideTo(Math.max(0, Math.min(maxY(), to)));
+  }, { passive:true });
+}
+
 /* ── Seiteninterne Links (#…) gleiten per Skript — auf Touch gilt kein globales »smooth« ── */
 document.addEventListener('click', ev => {
   const a = ev.target.closest('a[href^="#"]');
