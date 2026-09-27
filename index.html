@@ -59,8 +59,7 @@
   }
 }
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-snap-type:y proximity}
-@media (min-width:700px) and (min-height:560px){html{scroll-snap-type:y mandatory}}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-snap-type:y mandatory}   /* auch auf dem Telefon: jede Karte rastet ein */
 body{
   margin:0;background:var(--bg);color:var(--ink);
   font:400 17px/1.55 var(--sans);letter-spacing:-.011em;
@@ -107,7 +106,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 /* Band aus Projektfarben, je Eintrag eine Fläche mit harter Kante; das Rechteck ist ein Fenster darauf.
    Gleitet es über eine Kante, wandert der Farbwechsel mit durch das Rechteck. */
 .nav__hl{
-  position:absolute;inset:0;z-index:-1;
+  position:absolute;inset:0 auto 0 0;width:100%;z-index:-1;
   clip-path:inset(0 var(--r,50%) 0 var(--l,50%));
   transition:clip-path .9s var(--out);                   /* startet sofort, läuft weich aus */
 }
@@ -123,9 +122,27 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 @media (max-width:1099px){
   .nav a b{display:inline}
   .nav a[aria-current] b{display:none}
-  .nav a span{max-width:0;overflow:hidden;transition:max-width .6s var(--out)}
-  .nav a[aria-current] span{max-width:8em}
+  .nav a span{max-width:0;overflow:hidden;transition:max-width .5s var(--out)}
+  .nav a[aria-current] span{max-width:10em}
   .count{display:none}
+
+  /* Streifen über die ganze Leiste; die Wortmarke liegt links darüber.
+     Der Eintrag in der Mitte ist der aktive — wie ein Auswahlrad. */
+  .bar .nav{
+    position:absolute;inset:0;margin:0;z-index:1;
+    overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
+    scroll-snap-type:x mandatory;
+    padding-inline:calc(50% - 1.1rem);                   /* erster und letzter Eintrag können in die Mitte */
+    mask-image:linear-gradient(to right,transparent calc(50% - 9.5rem),#000 calc(50% - 7.5rem),#000 calc(50% + 7.5rem),transparent calc(50% + 9.5rem));   /* um die Mitte: aktiver Name + 1–2 Nachbarn je Seite */
+  }
+  .bar .nav::-webkit-scrollbar{display:none}
+  .nav a{padding:0 .45rem;scroll-snap-align:center}      /* enger */
+  .nav.is-scrubbing a b{display:inline}                   /* beim Wischen nur Nummern — nichts verschiebt sich unter dem Finger */
+  .nav.is-scrubbing a span{max-width:0}
+  .mark{z-index:2;background:var(--bg);padding-right:.5rem}   /* über dem Streifen */
+  .mark::after{content:"";position:absolute;left:100%;top:0;bottom:0;width:1.25rem;background:linear-gradient(to right,var(--bg),transparent)}
+  .mark__m{display:inline-block;transition:opacity .2s}
+  .bar::before{border-bottom-color:transparent}          /* Leiste nahtlos: Grund und Kante gleich */
 }
 
 /* ── Start ── */
@@ -159,6 +176,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--hl) 40%,transparent);   /* Kontur liegt unter der Füllung und verschwindet darin */
   --r:100px;                                             /* Rechner */
   border-radius:0 var(--r) var(--r) var(--r);
+  clip-path:inset(0 round 0 var(--r) var(--r) var(--r));   /* schneidet auch die gleitende Füllung rund zu */
 }
 @media (max-width:1199px){.card{--r:64px}}              /* iPad */
 @media (max-width:699px){.card{--r:40px}}               /* Smartphone */
@@ -324,7 +342,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 <body>
 
 <header class="bar">
-  <a class="mark" href="#top" aria-label="msmr.dev, back to top">msmr<i>.dev</i></a>
+  <a class="mark" href="#top" aria-label="msmr.dev, back to top"><span class="mark__m">msmr</span><i>.dev</i></a>
   <nav class="nav" aria-label="Projects">
     <i class="nav__hl" aria-hidden="true"></i>
     <a href="#msmrdev" style="--hl:var(--c-index)"><b>01</b><span>msmr.dev</span></a>
@@ -533,13 +551,14 @@ const links  = [...nav.querySelectorAll('a')];
 const hl     = nav.querySelector('.nav__hl');
 const endLink = nav.querySelector('.nav-end');
 const count  = document.querySelector('.count b');
-let current = -2, hovered = null;
+let current = -2, hovered = null, peek = null;
 
 const box = a => {                           // genaue Lage eines Eintrags im Band (Bruchteile von Pixeln)
   const n = hl.getBoundingClientRect(), r = a.getBoundingClientRect();
   return { l:r.left - n.left, r:r.right - n.left, w:n.width };
 };
 function paintBand(){
+  hl.style.width = nav.scrollWidth + 'px';    // im scrollbaren Streifen: Band über die ganze Länge
   const stops = [];
   links.forEach(a => {
     const c = getComputedStyle(a).getPropertyValue('--hl'), b = box(a);   // volle Projektfarbe
@@ -548,7 +567,7 @@ function paintBand(){
   hl.style.background = `linear-gradient(to right, ${stops.join(',')})`;
 }
 function placeHl(){
-  const a = hovered || (atEnd ? endLink : links[current]);
+  const a = hovered || peek || (atEnd ? endLink : links[current]);
   links.forEach(l => l.classList.toggle('in-win', l === a));
   const t = a || links[0], b = box(t);
   const L = a ? b.l : (b.l + b.r) / 2, R = a ? b.r : L;   // nichts aktiv: auf den ersten Eintrag zusammenziehen
@@ -568,8 +587,58 @@ function setActive(i){
   count.textContent = String(i + 1).padStart(2, '0');
   count.classList.remove('tick'); void count.offsetWidth; count.classList.add('tick');
   relayout();
-  setTimeout(relayout, 650);                  // schmale Ansicht: Name klappt erst aus
+  centerNav();
+  setTimeout(() => { relayout(); centerNav(); }, 520);   // schmale Ansicht: Name klappt erst aus
 }
+
+/* ═══ Schmale Ansicht: Navigation als Auswahlrad ═══
+   Wischen: nur Nummern, das Farbfenster folgt dem Eintrag in der Mitte.
+   Loslassen: der Eintrag rastet ein, wird aktiv, zeigt seinen Namen, die Karte wechselt.
+   »msmr« gleitet dabei aus der Leiste, ».dev« bleibt links stehen. */
+const narrow = matchMedia('(max-width:1099px)');
+const markM = document.querySelector('.mark__m');
+let scrubbing = false, settleT = 0;
+
+function centerNav(smooth = true){
+  if (!narrow.matches || scrubbing) return;
+  const a = atEndSafe() ? endLink : links[current];
+  if (!a) return;
+  nav.scrollTo({ left:a.offsetLeft + a.offsetWidth / 2 - nav.clientWidth / 2, behavior:smooth ? 'smooth' : 'auto' });
+}
+const atEndSafe = () => typeof atEnd !== 'undefined' && atEnd;   // atEnd wird weiter unten angelegt
+function centred(){                           // Eintrag, dessen Mitte der Streifenmitte am nächsten ist
+  const mid = nav.getBoundingClientRect().left + nav.clientWidth / 2;
+  let best = null, d = Infinity;
+  links.forEach(a => { const r = a.getBoundingClientRect(), dd = Math.abs(r.left + r.width / 2 - mid); if (dd < d) { d = dd; best = a; } });
+  return best;
+}
+function slideMark(){                         // »msmr« weicht, sobald der Streifen gescrollt wird
+  if (!narrow.matches) { mark.style.translate = ''; markM.style.opacity = ''; return; }
+  const w = markM.offsetWidth, shift = Math.min(nav.scrollLeft, w);
+  mark.style.translate = `${-shift}px 0`;
+  markM.style.opacity = (1 - shift / w).toFixed(3);
+}
+const startScrub = () => { if (!narrow.matches) return; scrubbing = true; nav.classList.add('is-scrubbing'); };
+nav.addEventListener('touchstart', startScrub, { passive:true });
+nav.addEventListener('wheel', startScrub, { passive:true });
+nav.addEventListener('touchend', () => { if (!scrubbing) return; clearTimeout(settleT); settleT = setTimeout(settle, 160); }, { passive:true });   // nur getippt: Zustand zurücksetzen
+nav.addEventListener('scroll', () => {
+  slideMark();
+  if (!scrubbing) return;
+  const c = centred();
+  if (c !== peek) { peek = c; placeHl(); }
+  clearTimeout(settleT);
+  settleT = setTimeout(settle, 160);          // kurz nach dem letzten Scrollschritt gilt es als losgelassen
+}, { passive:true });
+function settle(){
+  const a = peek; peek = null; scrubbing = false;
+  nav.classList.remove('is-scrubbing');
+  if (!a) return relayout();
+  if (a === endLink) endPage.scrollIntoView({ behavior:'smooth' });
+  else { setActive(links.indexOf(a)); slides[links.indexOf(a)].scrollIntoView({ behavior:'smooth' }); }
+  relayout(); centerNav();
+}
+narrow.addEventListener('change', () => { slideMark(); relayout(); centerNav(false); });
 const io = new IntersectionObserver(entries => entries.forEach(en => {
   if (!en.isIntersecting) return;
   setActive(slides.indexOf(en.target));
@@ -590,6 +659,7 @@ new IntersectionObserver(([en]) => {
   endLink.toggleAttribute('aria-current', atEnd);
   links.forEach((a, j) => { if (a !== endLink) a.toggleAttribute('aria-current', !atEnd && j === current); });
   relayout();
+  setTimeout(() => { relayout(); centerNav(); }, 520);
 }, { threshold:.5 }).observe(endPage);
 
 /* Start ↔ erstes Projekt: eigener, langsamer Bildlauf (≈ doppelte Dauer des
@@ -638,6 +708,7 @@ addEventListener('wheel', ev => {             // senkrecht: nur der Übergang St
 document.querySelector('.cue a').addEventListener('click', ev => { ev.preventDefault(); glide(first()); });
 let wheelLock = 0;
 addEventListener('wheel', ev => {
+  if (ev.target.closest && ev.target.closest('.nav')) return;   // der Streifen scrollt selbst
   if (Math.abs(ev.deltaX) < 30 || Math.abs(ev.deltaX) < Math.abs(ev.deltaY) * 1.5) return;
   const now = Date.now();
   if (now < wheelLock) return;                // eine Geste = ein Projekt
@@ -645,7 +716,7 @@ addEventListener('wheel', ev => {
   go(ev.deltaX > 0 ? 1 : -1);
 }, { passive:true });
 let touch = null;
-addEventListener('touchstart', ev => { const t = ev.touches[0]; touch = { x:t.clientX, y:t.clientY }; }, { passive:true });
+addEventListener('touchstart', ev => { if (ev.target.closest('.nav')) { touch = null; return; } const t = ev.touches[0]; touch = { x:t.clientX, y:t.clientY }; }, { passive:true });
 addEventListener('touchend', ev => {
   if (!touch) return;
   const t = ev.changedTouches[0], dx = t.clientX - touch.x, dy = t.clientY - touch.y;
