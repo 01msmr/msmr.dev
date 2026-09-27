@@ -365,12 +365,12 @@ if (pagerOn) {
   const maxY = () => pager.scrollHeight - pager.clientHeight;
   let startY = 0, samples = [], anim = 0, x0 = 0, y0 = 0;
   const current = y => { const t = tops(); let i = 0; while (i + 1 < t.length && t[i + 1] <= y + 2) i++; return i; };   // Bildschirm, in dem y liegt
-  function glideTo(to){
+  function glideTo(to, slow = 1){
     cancelAnimationFrame(anim);
     const from = pager.scrollTop, d = to - from;
     if (Math.abs(d) < 1) { pager.style.overflowY = ''; return; }
     pager.style.overflowY = 'hidden';                  // stoppt den iOS-Schwung
-    const dur = Math.min(520, 260 + Math.abs(d) * .3), t0 = performance.now();
+    const dur = Math.min(520, 260 + Math.abs(d) * .3) * slow, t0 = performance.now();
     const tick = now => {
       const k = Math.min(1, (now - t0) / dur), e = 1 - (1 - k) ** 3;   // ease-out cubic
       pager.scrollTop = from + d * e;
@@ -408,7 +408,7 @@ if (pagerOn) {
       const ht = (t[target + 1] ?? pager.scrollHeight) - t[target];
       if (ht > vh + 4 && target < i) to = t[target] + ht - vh;
     }
-    glideTo(Math.max(0, Math.min(maxY(), to)));
+    glideTo(Math.max(0, Math.min(maxY(), to)), i === 0 && target === 1 ? 1.5 : 1);   // Start → 01: 1,5× so lang (Wortmarke hat Zeit für ihren Bogen)
   }, { passive:true });
 }
 
