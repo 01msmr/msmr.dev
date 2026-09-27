@@ -609,16 +609,23 @@ function markNeighbours(c){                   // schmal: aktiv (oder Mitte beim 
 links.forEach(a => a.addEventListener('pointerenter', () => { hovered = a; placeHl(); }));
 nav.addEventListener('pointerleave', () => { hovered = null; placeHl(); });
 
+/* Die Karte wechselt sofort (ihre Füllung beginnt); die Navigation folgt, wenn die
+   Füllung zu 85 % steht — bei cubic-bezier(0,.9,.1,1) über 1,8 s nach ≈ 316 ms. */
+const NAV_AFTER_FILL = 316;
+let navT = 0;
 function setActive(i){
   if (i === current) return;
   current = i;
-  links.forEach((a, j) => a.toggleAttribute('aria-current', j === i));
   slides.forEach((s, j) => s.classList.toggle('is-active', j === i));
   root.style.setProperty('--hl-now', i >= 0 ? getComputedStyle(slides[i]).getPropertyValue('--hl') : '');
-  count.textContent = String(i + 1).padStart(2, '0');
-  count.classList.remove('tick'); void count.offsetWidth; count.classList.add('tick');
-  markNeighbours();
-  requestAnimationFrame(() => { relayout(); centerNav(); });   // neue Breiten stehen: einmal messen, einmal zentrieren
+  clearTimeout(navT);
+  navT = setTimeout(() => {
+    links.forEach((a, j) => a.toggleAttribute('aria-current', j === current));
+    count.textContent = String(current + 1).padStart(2, '0');
+    count.classList.remove('tick'); void count.offsetWidth; count.classList.add('tick');
+    markNeighbours();
+    requestAnimationFrame(() => { relayout(); centerNav(); });   // neue Breiten stehen: einmal messen, einmal zentrieren
+  }, NAV_AFTER_FILL);
 }
 
 /* ═══ Schmale Ansicht: Navigation als Auswahlrad ═══
