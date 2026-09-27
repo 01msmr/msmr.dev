@@ -70,9 +70,14 @@ def svg(color, size=100, pad=0, paper=None, word='msmr', fill=1.3):
             f'<path transform="translate({tx:.2f} {ty:.2f})" d="{d}" fill="{INK}"/></svg>')
 
 
+# iOS: Rand, damit die eckige Ecke oben links die Maske übersteht (+ 3 px Luft):
+#   iOS rundet mit ≈ 22,4 % der Seite → Ecke sichtbar ab 22,4 % · (1 − 1/√2) ≈ 6,6 %
+IOS_PAD = 100 * .224 * (1 - 1 / math.sqrt(2)) + 100 * 3 / 180       # in Einheiten von 100
+
+
 def maskable(color, size=100):
-    """Android »maskable«: Farbe füllt die ganze Fläche (das System schneidet die Form zu),
-    »msmr« bleibt in der sicheren Mitte (Kreis mit 80 % Durchmesser)."""
+    """Android »maskable«: die Farbe füllt die ganze Fläche — so nimmt das Icon die Form
+    des Telefons an (Kreis, Squircle …). »msmr« bleibt in der sicheren Mitte (Kreis, 80 %)."""
     d, w, xh = word_path('msmr', 1)
     fs = size * .5 / w                                         # Wort ≈ 50 % der Breite: sicher im Kreis
     d, w, xh = word_path('msmr', fs)
@@ -92,9 +97,9 @@ for n, (C, h) in enumerate(HUES):
     fav = svg(col, pad=0, word='m', fill=.95)                  # klein: nur »m«, sonst unlesbar
     (OUT / f'fav-{n}.svg').write_text(fav)
     png(fav, 32, OUT / f'fav-{n}-32.png')
-    png(svg(col, pad=0, paper=PAPER), 180, OUT / f'touch-{n}.png')   # ohne Rand: Form füllt die ganze Fläche, iOS/Android maskieren selbst
-    png(svg(col, pad=0, paper=PAPER), 192, OUT / f'icon-192-{n}.png')   # Android / Manifest
-    png(svg(col, pad=0, paper=PAPER), 512, OUT / f'icon-512-{n}.png')
+    png(svg(col, pad=IOS_PAD, paper=PAPER), 180, OUT / f'touch-{n}.png')   # iOS: gerade so viel Rand, dass die eckige Ecke bleibt
+    png(svg(col, pad=IOS_PAD, paper=PAPER), 192, OUT / f'icon-192-{n}.png')   # Android ohne Maske / Manifest
+    png(svg(col, pad=IOS_PAD, paper=PAPER), 512, OUT / f'icon-512-{n}.png')
     png(maskable(col), 192, OUT / f'maskable-192-{n}.png')        # Android: maskierbar
     png(maskable(col), 512, OUT / f'maskable-512-{n}.png')
     print(n, col)
