@@ -173,7 +173,8 @@ function setActive(i, now = false){           // now: Navigation sofort (Auswahl
     // schmal: der aktive Eintrag steht sofort und immer mittig; ringsum bewegt sich alles im selben Takt
     // (NAV_MS, ease-out): Fenster wächst/schrumpft mittig, Farbe blendet über, Nachbarn folgen den Fensterkanten
     const wOld = narrow.matches ? windowWidth() : 0;
-    links.forEach((a, j) => a.toggleAttribute('aria-current', j === current));
+    const on = atEnd ? endLink : links[current];    // Linkseite sichtbar: »project urls« bleibt aktiv
+    links.forEach(a => a.toggleAttribute('aria-current', a === on));
     count.textContent = String(current + 1).padStart(2, '0');
     count.classList.remove('tick'); void count.offsetWidth; count.classList.add('tick');
     markNeighbours();
