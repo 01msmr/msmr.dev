@@ -209,12 +209,12 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
    Die Linkseite (dunkelgraue Füllung) nutzt »difference«: Schwarz wird an der Kante exakt zu Weiß. */
 @media (prefers-color-scheme:dark){
   .slide .card{color:#fff}
-  .slide .card .tagline{color:rgb(255 255 255 / .6)}
   .slide .card .meta{color:#fff}
+  .slide .card .tagline{color:rgb(255 255 255 / .6)}
   .slide .card .meta .no{color:#fff}
 }
-.inv :is(.meta,.title,.tagline,.body,.end__head,.links){color:#fff;mix-blend-mode:difference}
-.inv :is(.meta,.tagline,.end__head span){color:rgb(255 255 255 / .6)}
+.inv :is(.meta,.title,.body,.end__head,.links){color:#fff;mix-blend-mode:difference}
+.inv :is(.meta,.end__head span){color:rgb(255 255 255 / .6)}
 .inv .meta .no{color:#fff}
 .inv .title:has(a:is(:hover,:focus-visible)),
 .inv .links:has(a:is(:hover,:focus-visible)){mix-blend-mode:normal;color:var(--end-on)}   /* Pille sichtbar: normal, Schrift wie auf der gefüllten Karte */
@@ -288,9 +288,9 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   opacity:1;inset:-.02em 0 -.04em;transform:none;         /* Hover: erscheint in Textgröße, wächst etwas darüber */
   transition:transform 0s,opacity .12s linear,inset 1.1s var(--out);
 }
-.tagline{margin:0;max-width:30ch;font-size:clamp(1.25rem,2.2vw,1.75rem);line-height:1.15;letter-spacing:-.05em;color:var(--mute)}
 
 .body{margin:0;max-width:60ch}
+.tagline{margin:0;max-width:30ch;font-size:clamp(1.25rem,2.2vw,1.75rem);line-height:1.15;letter-spacing:-.05em;color:var(--mute)}
 
 
 
@@ -352,9 +352,9 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   @supports (animation-timeline:view()){
     .title,.tagline{animation:drift linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
     .tagline{animation-name:drift-s}
+    @keyframes drift-s{from{transform:translateY(2rem)}to{transform:translateY(-2rem)}}
     .num{animation:drift-l linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
     @keyframes drift  {from{transform:translateY(3.5rem)}to{transform:translateY(-3.5rem)}}
-    @keyframes drift-s{from{transform:translateY(2rem)}to{transform:translateY(-2rem)}}
     @keyframes drift-l{from{translate:0 22%}to{translate:0 -22%}}
   }
 }
@@ -397,9 +397,8 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
       <span class="num" aria-hidden="true">01</span>
       <div class="main">
         <h2 class="title">msmr.dev</h2>
-        <p class="tagline">This project overview.</p>
+        <p class="tagline">clean portfolio site: one screen per project and a few small UI hacks.</p>
       </div>
-      <p class="body">clean portfolio site: one screen per project and a few small UI hacks.</p>
     </article>
   </section>
 
@@ -410,9 +409,8 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
       <span class="num" aria-hidden="true">02</span>
       <div class="main">
         <h2 class="title"><a href="https://korrekturen.msmr.co" target="_blank" rel="noopener">korrekturen</a></h2>
-        <p class="tagline">Reporting and tracking corrections sent to newsrooms.</p>
+        <p class="tagline">Report typos to newsrooms and collect accepted fixes.</p>
       </div>
-      <p class="body">Report typos to newsrooms and collect accepted fixes.</p>
     </article>
   </section>
 
@@ -423,9 +421,8 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
       <span class="num" aria-hidden="true">03</span>
       <div class="main">
         <h2 class="title"><a href="https://afterworkphotos.com" target="_blank" rel="noopener">afterworkphotos</a> <a href="https://snap.afterworkphotos.com" target="_blank" rel="noopener">Snap Cam</a> <a href="https://afterworkphotos.com/gallery/" target="_blank" rel="noopener">WebXR gallery</a></h2>
-        <p class="tagline">Square photos, taken after work — on the web, on the phone, in WebXR, straight from the camera.</p>
+        <p class="tagline">square photos, unedited. made with custom Snap Cam, published straight away. On desktop, phone, tablet and VR.</p>
       </div>
-      <p class="body">square photos, unedited. made with custom Snap Cam, published straight away. On desktop, phone, tablet and VR.</p>
     </article>
   </section>
 
@@ -436,9 +433,8 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
       <span class="num" aria-hidden="true">04</span>
       <div class="main">
         <h2 class="title"><a href="https://github.com/01msmr/doday/blob/main/README.md" target="_blank" rel="noopener">Do Day</a></h2>
-        <p class="tagline">A task and calendar PWA built on a self-hosted Nextcloud.</p>
+        <p class="tagline">Tasks and appointments with tagging, data hosted on a Nextcloud instance.</p>
       </div>
-      <p class="body">Tasks and appointments with tagging, data hosted on a Nextcloud instance.</p>
     </article>
   </section>
 
@@ -449,9 +445,8 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
       <span class="num" aria-hidden="true">05</span>
       <div class="main">
         <h2 class="title"><a href="https://time.msmr.co" target="_blank" rel="noopener">Chromachron</a></h2>
-        <p class="tagline">A clock without hands: fields of colour instead of numerals.</p>
+        <p class="tagline">a watch with colours instead of hands.</p>
       </div>
-      <p class="body">a watch with colours instead of hands.</p>
     </article>
   </section>
 
@@ -462,9 +457,8 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
       <span class="num" aria-hidden="true">06</span>
       <div class="main">
         <h2 class="title"><a href="https://makerspac.es" target="_blank" rel="noopener">makerspac.es</a></h2>
-        <p class="tagline">A map of makerspaces across the German-speaking world.</p>
+        <p class="tagline">makerspaces in the EU on a map, with workshops and live opening status.</p>
       </div>
-      <p class="body">makerspaces in the EU on a map, with workshops and live opening status.</p>
     </article>
   </section>
 
@@ -475,9 +469,8 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
       <span class="num" aria-hidden="true">07</span>
       <div class="main">
         <h2 class="title"><a href="https://a.msmr.co" target="_blank" rel="noopener">a.msmr</a></h2>
-        <p class="tagline">A personal start page: every link one tap away.</p>
+        <p class="tagline">a simple start page: clean layout, inline editable.</p>
       </div>
-      <p class="body">a simple start page: clean layout, inline editable.</p>
     </article>
   </section>
 
