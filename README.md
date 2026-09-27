@@ -12,6 +12,8 @@ A single static HTML file with no build step and no framework. The wordmark shri
 | `img/<name>.webp` | screenshot of a project: shown on double-click, and drawn as a halftone on click |
 | `fonts/` | Geist and Geist Mono (Latin subset, SIL OFL), served from this site |
 | `.htaccess` | caching and compression rules for the server |
+| `icons/`, `site.webmanifest` | favicons, iOS and Android icons in every project colour; the page picks one at random on each load |
+| `tools/icons.py` | regenerates the icons (needs fontTools and ImageMagick) |
 
 ## Local preview
 
@@ -29,7 +31,7 @@ Push to `main`. The server at netcup pulls from GitHub.
 
 1. Copy a `<section class="slide">` block in `index.html`. Change its `id`, number, details, title, tagline and text. Projects are ordered newest first.
 2. Give it a colour. Add a `--c-…` variable in `:root` with the same lightness and chroma as the others (`oklch(70% .2 <hue>)`).
-3. Add it to the nav, to the link list on the last screen, and to the counter (`/ 07`).
+3. Add it to the nav, to the link list on the last screen, and to the counter (`/ 07`). If you add a colour, add it to `HUES` in `tools/icons.py` too, run it, and raise the `7` in the icon script in `index.html`.
 4. Image (optional): save a screenshot, about 1600 px wide, as WebP:
 
    ```sh
