@@ -165,19 +165,11 @@ function setActive(i, now = false){           // now: Navigation sofort (Auswahl
   root.style.setProperty('--hl-now', i >= 0 ? getComputedStyle(slides[i]).getPropertyValue('--hl') : '');
   clearTimeout(navT);
   navT = setTimeout(() => {
-    // schmal: der neue Eintrag bleibt beim Umschalten genau dort, wo er gerade steht (kein Sprung durch
-    // aufklappenden Namen und verschwindende Nachbarn) — erst danach gleitet er in einem Zug zur Mitte
-    const t = links[current], before = narrow.matches && t ? t.getBoundingClientRect().left : null;
     links.forEach((a, j) => a.toggleAttribute('aria-current', j === current));
     count.textContent = String(current + 1).padStart(2, '0');
     count.classList.remove('tick'); void count.offsetWidth; count.classList.add('tick');
     markNeighbours();
-    if (before !== null) {
-      cancelAnimationFrame(navAnim);
-      nav.style.scrollSnapType = 'none';
-      nav.scrollLeft += t.getBoundingClientRect().left - before;
-    }
-    relayout(); centerNav();
+    relayout(); centerNav(false);                 // schmal: sofort mittig — der aktive Eintrag steht immer in der Mitte
   }, now ? 0 : navDelay());
 }
 function navDelay(){                          // Touch: ab Beginn der Füllung gerechnet; sonst voll
@@ -240,7 +232,7 @@ function settle(){
   if (!a) return relayout();
   if (a === endLink) endPage.scrollIntoView({ behavior:'smooth' });
   else { setActive(links.indexOf(a), true); slides[links.indexOf(a)].scrollIntoView({ behavior:'smooth' }); }
-  requestAnimationFrame(() => { relayout(); centerNav(); });
+  requestAnimationFrame(() => { relayout(); centerNav(false); });
 }
 narrow.addEventListener('change', () => { relayout(); centerNav(false); });
 /* ═══ 4 Blättern: aktives Projekt — erst übernehmen, wenn der Bildlauf steht ═══ */
@@ -265,7 +257,7 @@ new IntersectionObserver(([en]) => {
   root.classList.toggle('at-end', atEnd);
   endLink.toggleAttribute('aria-current', atEnd);
   links.forEach((a, j) => { if (a !== endLink) a.toggleAttribute('aria-current', !atEnd && j === current); });
-  requestAnimationFrame(() => { relayout(); centerNav(); });
+  requestAnimationFrame(() => { relayout(); centerNav(false); });
 }, { threshold:.5 }).observe(endPage);
 
 /* Start ↔ erstes Projekt: eigener, langsamer Bildlauf (≈ doppelte Dauer des
