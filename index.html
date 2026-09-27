@@ -102,13 +102,12 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .mark:hover i{color:var(--hl-now,var(--ink))}
 
 .nav{
-  position:relative;display:flex;gap:clamp(.9rem,2vw,1.6rem);min-width:0;
+  position:relative;display:flex;gap:0;align-self:stretch;min-width:0;   /* volle Höhe der Kopfleiste */
   font-size:.9375rem;letter-spacing:-.03em;
   opacity:clamp(0,(var(--p) - .55) * 2.2,1);
   transform:translateY(calc((1 - var(--p)) * -100%));   /* mit der Leiste aus dem Bild und wieder herein */
   pointer-events:auto;
 }
-.nav{gap:0;align-self:stretch}                         /* volle Höhe der Kopfleiste */
 .nav a{position:relative;display:flex;align-items:center;padding:0 .75rem;color:var(--ink);white-space:nowrap;transition:color .5s var(--soft)}
 .nav a:not(:last-of-type)::after{                         /* feiner Trennstrich rechts */
   content:"";position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--pill);   /* volle Höhe */
@@ -187,7 +186,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   display:grid;scroll-snap-align:start;
 }
 .card{
-  position:relative;isolation:isolate;overflow:hidden;
+  position:relative;isolation:isolate;overflow:hidden;background:var(--bg);   /* Grund, auch für die Invertierung der Linkseite */
   display:grid;grid-template-rows:auto 1fr auto;gap:1.5rem;
   --t:clamp(2.6rem,7.4vw,7rem);                          /* Titelgröße */
   padding:clamp(1.25rem,3.5vw,3rem);
@@ -214,7 +213,6 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .slide .card .meta{color:#fff}
   .slide .card .meta .no{color:#fff}
 }
-.card{background:var(--bg)}                              /* Grund für die Invertierung */
 .inv :is(.meta,.title,.tagline,.body,.end__head,.links){color:#fff;mix-blend-mode:difference}
 .inv :is(.meta,.tagline,.end__head span){color:rgb(255 255 255 / .6)}
 .inv .meta .no{color:#fff}
@@ -260,8 +258,9 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .meta .d::after{content:"";position:absolute;inset:-50% -.625rem}
 .meta .d.gap::after{left:-1.875rem}                        /* dort ist die Lücke breiter */
 .status .dx{gap:.5rem}
-.status .dx::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--hl)}
-.status.prototyp .dx::before{background:none;box-shadow:inset 0 0 0 1.5px var(--hl)}
+/* Statuspunkt: Projektfarbe mit Ring in Schriftfarbe — sichtbar auf Grund und Füllung */
+.status .dx::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--hl);box-shadow:0 0 0 1.5px currentColor}
+.status.prototyp .dx::before{background:none;box-shadow:inset 0 0 0 1.5px currentColor}
 
 .num{
   position:absolute;right:calc(clamp(1rem,3vw,2.5rem) + .3em);top:clamp(.5rem,2vw,1.5rem);z-index:-1;   /* .3em ≈ halbe Ziffernbreite */
@@ -293,10 +292,6 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 
 .body{margin:0;max-width:60ch}
 
-/* Farbfläche aktiv: alles in Tinte, Nummer gefüllt */
-/* Statuspunkt: Projektfarbe mit Ring in Schriftfarbe — sichtbar auf Grund und Füllung */
-.status .dx::before{box-shadow:0 0 0 1.5px currentColor}
-.status.prototyp .dx::before{box-shadow:inset 0 0 0 1.5px currentColor}
 
 
 /* ── Füllung als Flüssigkeit (nur mit Maus): ersetzt die glatte Fläche ── */
@@ -307,20 +302,19 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 /* ── Cursor: Kreis, oberes linkes Viertel eckig = Zeigerspitze ── */
 .has-cursor,.has-cursor *{cursor:none !important}
 /* Cursor liegt über der Spur und deckt sie ab; Farbe schwarz oder weiß, je nach Grund */
-.fx{position:fixed;inset:0;z-index:100;pointer-events:none;transition:opacity .3s;--cur:#000}
-.fx{--cur-inv:#fff;--cur-line-inv:rgb(0 0 0 / .7)}      /* umgekehrte Farben für den Teil über der Navigation */
+.fx{position:fixed;inset:0;z-index:100;pointer-events:none;transition:opacity .3s;--cur:#000;
+  --cur-inv:#fff;--cur-line-inv:rgb(0 0 0 / .7)}         /* umgekehrte Farben für den Teil über der Navigation */
 @media (prefers-color-scheme:dark){.fx{--cur-line:rgb(0 0 0 / .7);--cur-inv:#000;--cur-line-inv:rgb(255 255 255 / .7)}}
 /* Nur der Teil des Cursors, der die Navigation überdeckt, erscheint invertiert:
    eine zweite Cursor-Kopie, zugeschnitten auf die Fläche der Navigation; die Spur bleibt normal */
 .fx-inv{position:absolute;inset:0;clip-path:inset(100%)}
 .fx-inv .cursor svg{fill:var(--cur-inv);stroke:var(--cur-line-inv)}
 .cursor,.trail{position:absolute;left:0;top:0;will-change:transform}
-.cursor svg path{shape-rendering:geometricPrecision;stroke-linejoin:miter}
 .cursor{width:22px;height:22px}
 .cursor svg{display:block;width:100%;height:100%;overflow:visible;fill:var(--cur);
   stroke:var(--cur-line,rgb(255 255 255 / .7));stroke-width:2;paint-order:stroke fill;   /* Kontur 1 px außen, Gegenfarbe zum Cursor */
   transition:width .45s var(--out),height .45s var(--out),fill .25s}
-.cursor svg path{vector-effect:non-scaling-stroke}       /* Kontur bleibt 1 px, egal wie groß der Cursor ist */
+.cursor svg path{vector-effect:non-scaling-stroke;shape-rendering:geometricPrecision;stroke-linejoin:miter}   /* Kontur bleibt 1 px, egal wie groß der Cursor ist */
 .cursor.is-link svg{width:160%;height:160%}             /* Größe über die Maße statt transform: Kontur skaliert nicht mit */
 .trail{width:var(--sz);height:var(--sz);margin:calc(var(--sz) / -2) 0 0 calc(var(--sz) / -2);border-radius:50%;background:var(--cur);transition:background .25s}
 .is-away .fx{opacity:0}
@@ -405,7 +399,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
         <h2 class="title">msmr.dev</h2>
         <p class="tagline">This project overview.</p>
       </div>
-      <p class="body">A single static HTML file with no build step. The wordmark shrinks into the header as you scroll, each project snaps into place as its own screen, and titles and numbers drift with the scroll. Without JavaScript the page stays fully readable.</p>
+      <p class="body">clean portfolio site: one screen per project and a few small UI hacks.</p>
     </article>
   </section>
 
@@ -418,7 +412,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
         <h2 class="title"><a href="https://korrekturen.msmr.co" target="_blank" rel="noopener">korrekturen</a></h2>
         <p class="tagline">Reporting and tracking corrections sent to newsrooms.</p>
       </div>
-      <p class="body">Reports are submitted through an iOS Shortcut and sent as email. A SHA-256 token in the subject line serves as a correlation ID; an IMAP worker matches the outbox against the inbox and links each reply to its report. Results are reviewed in a table view with filtering and sorting.</p>
+      <p class="body">Report typos to newsrooms and collect accepted fixes.</p>
     </article>
   </section>
 
@@ -431,7 +425,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
         <h2 class="title"><a href="https://afterworkphotos.com" target="_blank" rel="noopener">afterworkphotos</a> <a href="https://snap.afterworkphotos.com" target="_blank" rel="noopener">Snap Cam</a> <a href="https://afterworkphotos.com/gallery/" target="_blank" rel="noopener">WebXR gallery</a></h2>
         <p class="tagline">Square photos, taken after work — on the web, on the phone, in WebXR, straight from the camera.</p>
       </div>
-      <p class="body">On the desktop a wall of prints, on phone and iPad a pile of paper sheets to swipe through, and a WebXR gallery for VR headsets where every floor is a year, joined by a lift. Snap Cam, a personal iOS camera, takes the square shot, suggests a name and posts it; a GitHub workflow files it by date, rebuilds the index and the photo is live. No build step, no framework.</p>
+      <p class="body">square photos, unedited. made with custom Snap Cam, published straight away. On desktop, phone, tablet and VR.</p>
     </article>
   </section>
 
@@ -444,7 +438,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
         <h2 class="title"><a href="https://github.com/01msmr/doday/blob/main/README.md" target="_blank" rel="noopener">Do Day</a></h2>
         <p class="tagline">A task and calendar PWA built on a self-hosted Nextcloud.</p>
       </div>
-      <p class="body">A Hono backend wraps CalDAV and WebDAV and exposes them as an HTTP API; the data stays in the existing Nextcloud instance. Tasks are organised with hierarchical tags following the #Area.Subarea pattern, resolved through a UID-based registry stored in WebDAV.</p>
+      <p class="body">Tasks and appointments with tagging, data hosted on a Nextcloud instance.</p>
     </article>
   </section>
 
@@ -457,7 +451,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
         <h2 class="title"><a href="https://time.msmr.co" target="_blank" rel="noopener">Chromachron</a></h2>
         <p class="tagline">A clock without hands: fields of colour instead of numerals.</p>
       </div>
-      <p class="body">The Chromachron principle implemented in p5.js, installable as a PWA on iOS. The spiral was constructed in Rhino and carried over as a Bézier curve. Most of the effort went into iOS-specific PWA details: status bar, icon delivery and viewport behaviour.</p>
+      <p class="body">a watch with colours instead of hands.</p>
     </article>
   </section>
 
@@ -470,7 +464,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
         <h2 class="title"><a href="https://makerspac.es" target="_blank" rel="noopener">makerspac.es</a></h2>
         <p class="tagline">A map of makerspaces across the German-speaking world.</p>
       </div>
-      <p class="body">A directory of open workshops with filtering, clustering and radius search, born out of the Toolbox Bodensee community. Where a space publishes SpaceAPI, its opening status is shown live. An embed mode lets other sites include the map. Built without a framework, served statically from GitHub Pages.</p>
+      <p class="body">makerspaces in the EU on a map, with workshops and live opening status.</p>
     </article>
   </section>
 
@@ -483,7 +477,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
         <h2 class="title"><a href="https://a.msmr.co" target="_blank" rel="noopener">a.msmr</a></h2>
         <p class="tagline">A personal start page: every link one tap away.</p>
       </div>
-      <p class="body">Links in sections of equally sized tiles, with a section bar to jump between them and keyboard navigation. On iPhone and iPad the sections snap to a height grid, so none is ever cut off at the bottom edge. A signed-in edit mode sorts and nests links; a PHP check on the server flags dead ones before saving.</p>
+      <p class="body">a simple start page: clean layout, inline editable.</p>
     </article>
   </section>
 
