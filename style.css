@@ -37,10 +37,13 @@
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-snap-type:y mandatory}   /* auch auf dem Telefon: jede Karte rastet ein */
-/* Touch (iOS): ohne globales »smooth« — Safari rastet damit erst daneben ein und korrigiert nach;
-   jede Wischbewegung hält an der nächsten Karte; kein Gummiband an den Enden */
+/* Touch (iPhone/iPad): die Karten scrollen in einem eigenen Bereich (.pager). Dort baut iOS das
+   Einrasten in den Schwung ein; auf der ganzen Seite rastet es erst nach dem Schwung nach.
+   Ohne globales »smooth«, eine Karte je Wischbewegung, kein Gummiband. */
 @media (hover:none){
-  html{scroll-behavior:auto;overscroll-behavior-y:none}
+  html{scroll-behavior:auto;scroll-snap-type:none}
+  body{height:100svh;overflow:hidden}
+  .pager{height:100svh;overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:none}
   .slide,.hero,.end{scroll-snap-stop:always}
 }
 body{

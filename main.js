@@ -22,6 +22,13 @@ const count   = document.querySelector('.count b');
 const endPage = document.querySelector('.end');
 const screens = [hero, ...slides, endPage];     // Start, Projekte, Linkseite
 let atEnd = false;                              // Linkseite sichtbar
+// Scrollbereich: auf Touch der eigene Bereich .pager (sauberes Einrasten auf iOS), sonst das Fenster
+const pagerOn  = matchMedia('(hover:none)').matches;
+const pager    = document.querySelector('.pager');
+const scroller = pagerOn ? pager : window;
+const snapEl   = pagerOn ? pager : root;        // trägt scroll-snap-type
+const Y        = () => pagerOn ? pager.scrollTop : scrollY;
+const toY      = y => pagerOn ? (pager.scrollTop = y) : scrollTo(0, y);
 
 root.classList.add('js');
 
@@ -51,7 +58,7 @@ function measure(){
 let lastP = -1;
 const onHeader = [];                          // weitere Arbeit nur, solange sich der Kopf bewegt (nicht bei jedem Scrollen)
 function update(force){
-  const p = Math.min(1, Math.max(0, scrollY / travel));
+  const p = Math.min(1, Math.max(0, Y() / travel));
   if (p === lastP && !force) return;          // nach dem Startbildschirm: nichts mehr zu tun, kein Neuberechnen der Seite
   lastP = p;
   // EIN Bogen: die Mitte der Marke läuft auf einer quadratischen Bézierkurve
@@ -73,13 +80,13 @@ function update(force){
 
   // Unterzeile: schrumpft und verblasst beim Hochscrollen; ganz weg, wenn sie noch
   // eine eigene Höhe unter der Kopfleiste steht
-  const q = Math.min(1, Math.max(0, scrollY / Math.max(1, ledeTop - ledeEnd)));
+  const q = Math.min(1, Math.max(0, Y() / Math.max(1, ledeTop - ledeEnd)));
   lede.style.opacity = (1 - q).toFixed(3);
   lede.style.transform = `scale(${(1 - .35 * q).toFixed(3)})`;
   onHeader.forEach(f => f());
 }
 let queued = false;
-addEventListener('scroll', () => {
+scroller.addEventListener('scroll', () => {
   if (queued) return; queued = true;
   requestAnimationFrame(() => { queued = false; update(); });
 }, { passive:true });
@@ -248,7 +255,7 @@ const io = new IntersectionObserver(entries => entries.forEach(en => {
   pending = slides.indexOf(en.target);        // merken, aber erst übernehmen, wenn der Bildlauf steht
   waitIdle();
 }), { threshold:.5 });
-addEventListener('scroll', () => { if (pending !== null) waitIdle(); }, { passive:true });
+scroller.addEventListener('scroll', () => { if (pending !== null) waitIdle(); }, { passive:true });
 [hero, ...slides].forEach(el => io.observe(el));
 addEventListener('resize', relayout);
 document.fonts.ready.then(relayout);
@@ -271,21 +278,21 @@ let gliding = false, glideEnd = 0;
 function glide(to){
   if (gliding) return;
   gliding = true;
-  const from = scrollY, t0 = performance.now();
-  root.style.scrollSnapType = 'none'; root.style.scrollBehavior = 'auto';
+  const from = Y(), t0 = performance.now();
+  snapEl.style.scrollSnapType = 'none'; snapEl.style.scrollBehavior = 'auto';
   const tick = now => {
     const k = Math.min(1, (now - t0) / SLOW);
     const e = k < .5 ? 4 * k ** 3 : 1 - (-2 * k + 2) ** 3 / 2;   // ease-in-out cubic
-    scrollTo(0, from + (to - from) * e);
+    toY(from + (to - from) * e);
     if (k < 1) return requestAnimationFrame(tick);
-    root.style.scrollSnapType = ''; root.style.scrollBehavior = '';
+    snapEl.style.scrollSnapType = ''; snapEl.style.scrollBehavior = '';
     gliding = false; glideEnd = performance.now();
   };
   requestAnimationFrame(tick);
 }
 const first = () => slides[0].offsetTop;
-const onHero = () => scrollY < first() * .5;
-const atFirst = () => Math.abs(scrollY - first()) < 8;
+const onHero = () => Y() < first() * .5;
+const atFirst = () => Math.abs(Y() - first()) < 8;
 
 function go(dir){
   const here = atEnd ? screens.length - 1 : current + 1;                     // current: -1 = Start
