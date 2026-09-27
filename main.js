@@ -172,14 +172,18 @@ function setActive(i, now = false){           // now: Navigation sofort (Auswahl
   navT = setTimeout(() => {
     // schmal: der aktive Eintrag steht sofort und immer mittig; ringsum bewegt sich alles im selben Takt
     // (NAV_MS, ease-out): Fenster wächst/schrumpft mittig, Farbe blendet über, Nachbarn folgen den Fensterkanten
-    const wOld = narrow.matches ? windowWidth() : 0;
+    // gab es vorher keinen aktiven Eintrag (Start → 01), steht das Fenster sofort in seiner Breite — nichts, wovon es wachsen könnte
+    const hadActive = links.some(a => a.hasAttribute('aria-current'));
+    const wOld = narrow.matches && hadActive ? windowWidth() : 0;
     const on = atEnd ? endLink : links[current];    // Linkseite sichtbar: »project urls« bleibt aktiv
     links.forEach(a => a.toggleAttribute('aria-current', a === on));
     count.textContent = String(current + 1).padStart(2, '0');
     count.classList.remove('tick'); void count.offsetWidth; count.classList.add('tick');
     markNeighbours();
+    if (narrow.matches && !hadActive) hl.style.transition = 'none';
     relayout(); centerNav();
     if (wOld) followCentre(wOld);
+    else if (narrow.matches) { void hl.offsetWidth; hl.style.transition = ''; }
   }, now ? 0 : navDelay());
 }
 const EASE_OUT = 'cubic-bezier(.33,1,.68,1)';   // wie .nav__hl im CSS
