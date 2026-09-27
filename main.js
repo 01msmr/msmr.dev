@@ -1,7 +1,11 @@
 /* msmr.dev — Verhalten der Seite. Blöcke:
-   0 Grundlagen · 1 Wortmarke · 2 Navigation · 3 Schmale Navigation (Auswahlrad)
-   4 Blättern (aktives Projekt, Tasten, Wischen) · 5 Projektbild · 6 Link-Pille
-   7 Flüssigkeit · 8 Cursor */
+   0 Grundlagen (Elemente, Scrollbereich: Fenster bzw. .pager auf Touch)
+   1 Wortmarke (Bogen, Schrift-Transition; Leiste gleitet mit dem letzten Stück herein)
+   2 Navigation (aktives Projekt, Farbband/-fenster; schmal: mittig, Nachbarn an den Fensterkanten)
+   3 Schmale Navigation (Auswahlrad)
+   4 Blättern (aktives Projekt; Rad/Tasten auf dem Rechner, Wischen auf Touch — je Geste eine Karte,
+     im Tempo der Geste; seitliche Gesten)
+   5 Projektbild · 6 Link-Pille · 7 Flüssigkeit · 8 Cursor */
 
 /* ═══ 0 Grundlagen: Elemente, Medienabfragen, gemeinsamer Zustand ═══ */
 const root    = document.documentElement;
@@ -294,50 +298,57 @@ new IntersectionObserver(([en]) => {
   if (wOld) followCentre(wOld);
 }, { threshold:.5 }).observe(endPage);
 
-/* Start ↔ erstes Projekt: eigener, langsamer Bildlauf (≈ doppelte Dauer des
-   Browser-Bildlaufs), damit die Wortmarke Zeit für ihren Bogen hat. */
-const SLOW = 1050;                          // halb zwischen Browser (≈ 700 ms) und 1400 ms
-let gliding = false, glideEnd = 0;
-function glide(to){
-  if (gliding) return;
-  gliding = true;
+/* ── Blättern mit Rad, Trackpad, Tasten (Rechner) ──
+   Eine Geste = eine Karte. Der Bildlauf übernimmt das Tempo der Geste (wie das Wischen auf dem
+   Telefon): ease-out cubic mit T = 3·Weg / Tempo, weich auf die Kartenkante — 0,3 bis 0,65 s,
+   Start ↔ 01 bis 1,05 s (die Wortmarke braucht Zeit für ihren Bogen). Nachschwung wird geschluckt. */
+let gliding = false, lastWheel = 0;
+const easeOutC = k => 1 - (1 - k) ** 3;
+function glide(to, dur){
   const from = Y(), t0 = performance.now();
+  gliding = true;
   snapEl.style.scrollSnapType = 'none'; snapEl.style.scrollBehavior = 'auto';
   const tick = now => {
-    const k = Math.min(1, (now - t0) / SLOW);
-    const e = k < .5 ? 4 * k ** 3 : 1 - (-2 * k + 2) ** 3 / 2;   // ease-in-out cubic
-    toY(from + (to - from) * e);
+    const k = Math.min(1, (now - t0) / dur);
+    toY(from + (to - from) * easeOutC(k));
     if (k < 1) return requestAnimationFrame(tick);
     snapEl.style.scrollSnapType = ''; snapEl.style.scrollBehavior = '';
-    gliding = false; glideEnd = performance.now();
+    gliding = false;
   };
   requestAnimationFrame(tick);
 }
 const first = () => slides[0].offsetTop;
-const onHero = () => Y() < first() * .5;
-const atFirst = () => Math.abs(Y() - first()) < 8;
-
-function go(dir){
-  const here = atEnd ? screens.length - 1 : current + 1;                     // current: -1 = Start
-  const i = Math.max(0, Math.min(screens.length - 1, here + dir));
-  if (i <= 1 && (onHero() || atFirst())) return glide(i === 0 ? 0 : first());
-  screens[i].scrollIntoView({ behavior:'smooth' });
+const here = () => {                             // Bildschirm, dessen Anfang der Scrollposition am nächsten ist
+  const y = Y(); let b = 0;
+  screens.forEach((el, i) => { if (Math.abs(el.offsetTop - y) < Math.abs(screens[b].offsetTop - y)) b = i; });
+  return b;
+};
+function go(dir, speed = 0){                     // speed: Tempo der Geste in px/ms (0 = unbekannt)
+  if (gliding) return;
+  const from = here(), i = Math.max(0, Math.min(screens.length - 1, from + dir));
+  const to = Math.min(screens[i].offsetTop, document.documentElement.scrollHeight - innerHeight);
+  const d = Math.abs(to - Y());
+  if (d < 1) return;
+  const most = (from <= 1 && i <= 1) ? 1050 : 650;
+  glide(to, speed > 0 ? Math.min(most, Math.max(300, 3 * d / speed)) : most);
 }
 addEventListener('keydown', ev => {
   if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.target.closest('input, textarea')) return;
-  if (ev.key === 'ArrowRight') { ev.preventDefault(); go(1); }
-  if (ev.key === 'ArrowLeft')  { ev.preventDefault(); go(-1); }
-  const down = ['ArrowDown', 'PageDown', ' '].includes(ev.key), up = ['ArrowUp', 'PageUp'].includes(ev.key);
-  if (down && onHero())  { ev.preventDefault(); glide(first()); }
-  if (up && atFirst())   { ev.preventDefault(); glide(0); }
+  const k = ev.key;
+  if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(k)) { ev.preventDefault(); go(1); }
+  if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(k))          { ev.preventDefault(); go(-1); }
 });
-addEventListener('wheel', ev => {             // senkrecht: nur der Übergang Start ↔ erstes Projekt
+if (!pagerOn) addEventListener('wheel', ev => { // senkrecht: jede Geste eine Karte, im Tempo der Geste
+  if (ev.target.closest && ev.target.closest('.nav')) return;
   if (Math.abs(ev.deltaY) <= Math.abs(ev.deltaX)) return;
-  if (gliding || performance.now() - glideEnd < 600) { ev.preventDefault(); return; }   // Nachschwung des Trackpads schlucken
-  if (ev.deltaY > 0 && onHero())  { ev.preventDefault(); glide(first()); }
-  if (ev.deltaY < 0 && atFirst()) { ev.preventDefault(); glide(0); }
+  ev.preventDefault();
+  const now = performance.now(), quiet = now - lastWheel > 180;
+  lastWheel = now;
+  if (gliding || !quiet) return;                // Nachschwung / laufende Geste
+  const px = Math.abs(ev.deltaY) * (ev.deltaMode === 1 ? 16 : ev.deltaMode === 2 ? innerHeight : 1);
+  go(Math.sign(ev.deltaY), px / 16);            // ≈ ein Rad-Ereignis pro Bild (16 ms)
 }, { passive:false });
-document.querySelector('.cue a').addEventListener('click', ev => { ev.preventDefault(); glide(first()); });
+document.querySelector('.cue a').addEventListener('click', ev => { ev.preventDefault(); go(1); });
 let wheelLock = 0;
 addEventListener('wheel', ev => {
   if (ev.target.closest && ev.target.closest('.nav')) return;   // der Streifen scrollt selbst
