@@ -116,11 +116,11 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
     position:absolute;top:0;bottom:0;right:0;left:calc(var(--pad) + var(--mark-w) - 16px);margin:0;z-index:1;   /* nur rechts der Wortmarke; aktiver Eintrag in dessen Mitte */
     overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
     scroll-snap-type:x mandatory;
-    padding:0;scroll-padding-inline-end:1.4rem;           /* rechtsbündig: aktiver Eintrag rechts, Platz für › dahinter */
+    padding:0;                                          /* Leerraum links/rechts über ::before/::after */
   }
   .bar .nav::-webkit-scrollbar{display:none}
-  .bar .nav::before{content:"";flex:0 0 100%}          /* Leerraum so breit wie der Streifen: auch 01 kann nach rechts */
-  .nav a{padding:0 .45rem;scroll-snap-align:end}         /* enger; rastet am rechten Rand ein */
+  .bar .nav::before,.bar .nav::after{content:"";flex:0 0 50%}   /* je halbe Streifenbreite: erster und letzter Eintrag können in die Mitte */
+  .nav a{padding:0 .45rem;scroll-snap-align:center}      /* enger; rastet in der Mitte des Streifens ein */
   .nav.is-scrubbing a b{display:inline}                   /* beim Wischen nur Nummern — nichts verschiebt sich unter dem Finger */
   .nav.is-scrubbing a span{max-width:0}
   /* nur der aktive Eintrag; links und rechts davon ‹ bzw. › für den vorigen / nächsten */
