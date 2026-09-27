@@ -134,7 +134,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 @media (max-width:1099px){
   .nav a b{display:inline}
   .nav a[aria-current] b{display:none}
-  .nav a span{max-width:0;overflow:hidden;transition:max-width .5s var(--out)}
+  .nav a span{max-width:0;overflow:hidden}                /* sofort: sonst verschiebt sich der Streifen zweimal */
   .nav a[aria-current] span{max-width:10em}
   .count{display:none}
 
@@ -145,16 +145,22 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
     overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
     scroll-snap-type:x mandatory;
     padding-inline:calc(50% - 1.1rem);                   /* erster und letzter Eintrag können in die Mitte */
-    mask-image:linear-gradient(to right,transparent calc(50% - 9.5rem),#000 calc(50% - 7.5rem),#000 calc(50% + 7.5rem),transparent calc(50% + 9.5rem));   /* um die Mitte: aktiver Name + 1–2 Nachbarn je Seite */
   }
   .bar .nav::-webkit-scrollbar{display:none}
   .nav a{padding:0 .45rem;scroll-snap-align:center}      /* enger */
   .nav.is-scrubbing a b{display:inline}                   /* beim Wischen nur Nummern — nichts verschiebt sich unter dem Finger */
   .nav.is-scrubbing a span{max-width:0}
+  /* nur je ein Nachbar links und rechts; gibt es dahinter noch mehr, steht dort ‹ bzw. › */
+  .nav a.far{opacity:0;pointer-events:none}
+  .nav a:is(.edge-l,.edge-r) :is(b,span){display:none}
+  .nav a.edge-l::before,.nav a.edge-r::before{font:400 .8125rem var(--mono);color:var(--mute)}
+  .nav a.edge-l::before{content:"<"}
+  .nav a.edge-r::before{content:">"}
   .mark{z-index:2;background:var(--bg);padding-right:.5rem}   /* über dem Streifen */
   .mark::after{content:"";position:absolute;left:100%;top:0;bottom:0;width:1.25rem;background:linear-gradient(to right,var(--bg),transparent)}
   .mark__m{display:inline-block;transition:opacity .2s}
   .bar::before{border-bottom-color:transparent}          /* Leiste nahtlos: Grund und Kante gleich */
+  .nav__hl{transition:clip-path .45s cubic-bezier(.33,1,.68,1)}   /* synchron mit dem Zentrieren des Streifens */
 }
 
 /* ── Start ── */
@@ -590,7 +596,16 @@ function placeHl(){
   hl.style.setProperty('--l', L + 'px');
   hl.style.setProperty('--r', (b.w - R) + 'px');
 }
-function relayout(){ paintBand(); placeHl(); }
+function relayout(){ markNeighbours(); paintBand(); placeHl(); }
+function markNeighbours(c){                   // schmal: aktiv (oder Mitte beim Wischen) ± 1, dahinter ‹ ›
+  const i = links.indexOf(c || peek || (atEndSafe() ? endLink : links[current]));
+  links.forEach((a, j) => {
+    const d = j - i;
+    a.classList.toggle('far', i >= 0 && Math.abs(d) > 2);
+    a.classList.toggle('edge-l', i >= 0 && d === -2);
+    a.classList.toggle('edge-r', i >= 0 && d === 2);
+  });
+}
 links.forEach(a => a.addEventListener('pointerenter', () => { hovered = a; placeHl(); }));
 nav.addEventListener('pointerleave', () => { hovered = null; placeHl(); });
 
@@ -602,9 +617,8 @@ function setActive(i){
   root.style.setProperty('--hl-now', i >= 0 ? getComputedStyle(slides[i]).getPropertyValue('--hl') : '');
   count.textContent = String(i + 1).padStart(2, '0');
   count.classList.remove('tick'); void count.offsetWidth; count.classList.add('tick');
-  relayout();
-  centerNav();
-  setTimeout(() => { relayout(); centerNav(); }, 520);   // schmale Ansicht: Name klappt erst aus
+  markNeighbours();
+  requestAnimationFrame(() => { relayout(); centerNav(); });   // neue Breiten stehen: einmal messen, einmal zentrieren
 }
 
 /* ═══ Schmale Ansicht: Navigation als Auswahlrad ═══
@@ -615,11 +629,27 @@ const narrow = matchMedia('(max-width:1099px)');
 const markM = document.querySelector('.mark__m');
 let scrubbing = false, settleT = 0;
 
+/* Streifen und Farbfenster bewegen sich gemeinsam: gleiche Dauer, gleiche Kurve
+   (--nav-ms / ease-out cubic), Einrasten des Streifens währenddessen aus. */
+const NAV_MS = 450;
+let navAnim = 0;
 function centerNav(smooth = true){
   if (!narrow.matches || scrubbing) return;
   const a = atEndSafe() ? endLink : links[current];
   if (!a) return;
-  nav.scrollTo({ left:a.offsetLeft + a.offsetWidth / 2 - nav.clientWidth / 2, behavior:smooth ? 'smooth' : 'auto' });
+  const to = Math.max(0, Math.min(nav.scrollWidth - nav.clientWidth, a.offsetLeft + a.offsetWidth / 2 - nav.clientWidth / 2));
+  cancelAnimationFrame(navAnim);
+  const from = nav.scrollLeft;
+  if (!smooth || Math.abs(to - from) < 1) { nav.scrollLeft = to; return; }
+  nav.style.scrollSnapType = 'none';
+  const t0 = performance.now();
+  const tick = now => {
+    const k = Math.min(1, (now - t0) / NAV_MS), e = 1 - (1 - k) ** 3;
+    nav.scrollLeft = from + (to - from) * e;
+    if (k < 1) navAnim = requestAnimationFrame(tick);
+    else nav.style.scrollSnapType = '';
+  };
+  navAnim = requestAnimationFrame(tick);
 }
 const atEndSafe = () => typeof atEnd !== 'undefined' && atEnd;   // atEnd wird weiter unten angelegt
 function centred(){                           // Eintrag, dessen Mitte der Streifenmitte am nächsten ist
@@ -630,11 +660,13 @@ function centred(){                           // Eintrag, dessen Mitte der Strei
 }
 function slideMark(){                         // »msmr« weicht, sobald der Streifen gescrollt wird
   if (!narrow.matches) { mark.style.translate = ''; markM.style.opacity = ''; return; }
-  const w = markM.offsetWidth, shift = Math.min(nav.scrollLeft, w);
+  // Ausgangspunkt: erster Eintrag (01) in der Mitte — dort steht »msmr.dev« vollständig
+  const f = links[0], base = Math.max(0, f.offsetLeft + f.offsetWidth / 2 - nav.clientWidth / 2);
+  const w = markM.offsetWidth, shift = Math.min(Math.max(0, nav.scrollLeft - base), w);
   mark.style.translate = `${-shift}px 0`;
   markM.style.opacity = (1 - shift / w).toFixed(3);
 }
-const startScrub = () => { if (!narrow.matches) return; scrubbing = true; nav.classList.add('is-scrubbing'); };
+const startScrub = () => { if (!narrow.matches) return; cancelAnimationFrame(navAnim); nav.style.scrollSnapType = ''; scrubbing = true; nav.classList.add('is-scrubbing'); };
 nav.addEventListener('touchstart', startScrub, { passive:true });
 nav.addEventListener('wheel', startScrub, { passive:true });
 nav.addEventListener('touchend', () => { if (!scrubbing) return; clearTimeout(settleT); settleT = setTimeout(settle, 160); }, { passive:true });   // nur getippt: Zustand zurücksetzen
@@ -642,7 +674,7 @@ nav.addEventListener('scroll', () => {
   slideMark();
   if (!scrubbing) return;
   const c = centred();
-  if (c !== peek) { peek = c; placeHl(); }
+  if (c !== peek) { peek = c; markNeighbours(c); placeHl(); }
   clearTimeout(settleT);
   settleT = setTimeout(settle, 160);          // kurz nach dem letzten Scrollschritt gilt es als losgelassen
 }, { passive:true });
@@ -655,10 +687,15 @@ function settle(){
   relayout(); centerNav();
 }
 narrow.addEventListener('change', () => { slideMark(); relayout(); centerNav(false); });
+let pending = null, idleT = 0;
+const commit = () => { if (pending !== null) setActive(pending); pending = null; };
+const waitIdle = () => { clearTimeout(idleT); idleT = setTimeout(commit, 140); };
 const io = new IntersectionObserver(entries => entries.forEach(en => {
   if (!en.isIntersecting) return;
-  setActive(slides.indexOf(en.target));
+  pending = slides.indexOf(en.target);        // merken, aber erst übernehmen, wenn der Bildlauf steht
+  waitIdle();
 }), { threshold:.5 });
+addEventListener('scroll', () => { if (pending !== null) waitIdle(); }, { passive:true });
 [hero, ...slides].forEach(el => io.observe(el));
 addEventListener('resize', relayout);
 document.fonts.ready.then(relayout);
@@ -674,8 +711,7 @@ new IntersectionObserver(([en]) => {
   root.classList.toggle('at-end', atEnd);
   endLink.toggleAttribute('aria-current', atEnd);
   links.forEach((a, j) => { if (a !== endLink) a.toggleAttribute('aria-current', !atEnd && j === current); });
-  relayout();
-  setTimeout(() => { relayout(); centerNav(); }, 520);
+  requestAnimationFrame(() => { relayout(); centerNav(); });
 }, { threshold:.5 }).observe(endPage);
 
 /* Start ↔ erstes Projekt: eigener, langsamer Bildlauf (≈ doppelte Dauer des
