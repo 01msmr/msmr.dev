@@ -553,11 +553,11 @@ if (!calm.matches) {
     new ResizeObserver(size).observe(card);
     const wake = () => { live.add(s); if (!raf) { t0 = 0; raf = requestAnimationFrame(loop); } };
     if (touch) {
-      // Touch: Füllung, sobald die Karte fast eingerastet ist (99,6 % im Bild). Beim Verlassen bleibt sie voll;
+      // Touch: Füllung, sobald die Karte fast eingerastet ist (99,4 % im Bild). Beim Verlassen bleibt sie voll;
       // erst ganz außer Sicht wird sie unsichtbar zurückgesetzt, damit sie beim nächsten Mal wieder steigt.
       // Karten höher als der Bildschirm: bezogen auf den Anteil, der überhaupt ins Bild passt.
       const screen = card.closest('.slide, .end');
-      const IN = .996 * Math.min(1, innerHeight / screen.offsetHeight);   // Start bei 99,6 % im Bild
+      const IN = .994 * Math.min(1, innerHeight / screen.offsetHeight);   // Start bei 99,4 % im Bild
       const GONE = .002;                                  // außer Sicht: unter 0,2 % (< 2 px)
       new IntersectionObserver(([en]) => {
         if (en.intersectionRatio >= IN && s.target !== FULL) {
