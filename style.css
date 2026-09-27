@@ -127,12 +127,11 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .bar .nav{
     position:absolute;top:0;bottom:0;right:0;left:calc(var(--pad) + var(--mark-w) - 16px);margin:0;z-index:1;   /* nur rechts der Wortmarke; aktiver Eintrag in dessen Mitte */
     overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
-    scroll-snap-type:x mandatory;
     padding:0;                                          /* Leerraum links/rechts über ::before/::after */
   }
   .bar .nav::-webkit-scrollbar{display:none}
   .bar .nav::before,.bar .nav::after{content:"";flex:0 0 50%}   /* je halbe Streifenbreite: erster und letzter Eintrag können in die Mitte */
-  .nav a{padding:0 .45rem;scroll-snap-align:center}      /* enger; rastet in der Mitte des Streifens ein */
+  .nav a{padding:0 .45rem}                               /* enger; kein CSS-Einrasten — das Skript zentriert (sonst springt es an den Enden) */
   .nav a::after{display:none}                            /* keine Trennstriche: nur ein Eintrag mit ‹ › sichtbar */
   .nav.is-scrubbing a b{display:inline}                   /* beim Wischen nur Nummern — nichts verschiebt sich unter dem Finger */
   .nav.is-scrubbing a span{max-width:0}

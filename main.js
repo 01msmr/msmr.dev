@@ -225,14 +225,12 @@ function centerNav(smooth = true){
   const to = Math.max(0, Math.min(nav.scrollWidth - nav.clientWidth, a.offsetLeft + a.offsetWidth / 2 - nav.clientWidth / 2));   // in die Mitte des Streifens
   cancelAnimationFrame(navAnim);
   const from = nav.scrollLeft;
-  if (!smooth || Math.abs(to - from) < 1) { nav.scrollLeft = to; nav.style.scrollSnapType = ''; return; }
-  nav.style.scrollSnapType = 'none';
+  if (!smooth || Math.abs(to - from) < 1) { nav.scrollLeft = to; return; }
   const t0 = performance.now();
   const tick = now => {
     const k = Math.min(1, (now - t0) / NAV_MS), e = 1 - (1 - k) ** 3;
     nav.scrollLeft = from + (to - from) * e;
     if (k < 1) navAnim = requestAnimationFrame(tick);
-    else nav.style.scrollSnapType = '';
   };
   navAnim = requestAnimationFrame(tick);
 }
@@ -244,7 +242,7 @@ function centred(){                           // Eintrag, dessen Mitte der Strei
 }
 const startScrub = () => {
   if (!narrow.matches || scrubbing) return;
-  cancelAnimationFrame(navAnim); nav.style.scrollSnapType = '';
+  cancelAnimationFrame(navAnim);
   scrubbing = true; nav.classList.add('is-scrubbing');
   requestAnimationFrame(() => { peek = centred(); markNeighbours(peek); paintBand(); placeHl(); });   // nur Nummern: Band neu malen
 };
