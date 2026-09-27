@@ -552,20 +552,20 @@ if (!calm.matches) {
     const size = () => { s.w = card.clientWidth; s.h = card.clientHeight; svg.setAttribute('viewBox', `0 0 ${s.w} ${s.h}`); draw(s); };
     new ResizeObserver(size).observe(card);
     const wake = () => { live.add(s); if (!raf) { t0 = 0; raf = requestAnimationFrame(loop); } };
-    if (touch) {                              // Touch: steigt, sobald die Karte zu 98 % im Bild steht
+    if (touch) {                              // Touch: steigt, sobald die Karte fast eingerastet ist (99,5 %)
       const screen = card.closest('.slide, .end');
       let on = false;
       new IntersectionObserver(([en]) => {
         // sichtbarer Anteil — bei Karten höher als der Bildschirm bezogen auf die Bildschirmhöhe
         const frac = en.intersectionRect.height / Math.min(en.boundingClientRect.height, en.rootBounds.height);
-        const now = on ? frac > .5 : frac >= .98;   // an ab 98 %, aus erst unter 50 % (kein Flackern)
+        const now = on ? frac > .5 : frac >= .995;  // an ab 99,5 %, aus erst unter 50 % (kein Flackern)
         if (now === on) return;
         on = now;
         s.target = on ? FULL : 0;
         if (on) fillStart = performance.now();
         s.mx = on ? (s.mx ?? .5) : null;
         wake();
-      }, { threshold:Array.from({ length:101 }, (_, i) => i / 100) }).observe(screen);   // Prüfpunkte in 1-%-Schritten
+      }, { threshold:[...Array.from({ length:101 }, (_, i) => i / 100), .995] }).observe(screen);   // Prüfpunkte in 1-%-Schritten + 99,5 %
       card.addEventListener('pointermove', e => { if (e.pointerType === 'touch') { stir(s, e); wake(); } });
       card.addEventListener('pointerup', () => { s.px = null; });
       size();
