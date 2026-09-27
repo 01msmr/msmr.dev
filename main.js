@@ -6,7 +6,7 @@
 /* ═══ 0 Grundlagen: Elemente, Medienabfragen, gemeinsamer Zustand ═══ */
 const root    = document.documentElement;
 const calm    = matchMedia('(prefers-reduced-motion: reduce)');
-const narrow  = matchMedia('(max-width:1099px)');
+const narrow  = matchMedia('(max-width:1023px)');
 const bar     = document.querySelector('.bar');
 const mark    = document.querySelector('.mark');
 const slot    = document.querySelector('.mark-slot');
@@ -137,14 +137,15 @@ function placeHl(){
   if (narrow.matches) hl.style.backgroundColor = a ? navColors[links.indexOf(a)] : 'transparent';
 }
 function relayout(){ markNeighbours(); paintBand(); placeHl(); }
-function markNeighbours(c){                   // schmal: nur der aktive Eintrag (oder die Mitte beim Wischen), daneben ‹ ›
+function markNeighbours(c){                   // schmal: aktiver Eintrag (oder die Mitte beim Wischen) mit Nachbarn, dahinter ‹ ›
   let i = links.indexOf(c || peek || (atEnd ? endLink : links[current]));
   if (i < 0) i = 0;                             // Startbildschirm: als stünde 01 an — nie alle Einträge zeigen
+  const K = innerWidth >= 700 ? 2 : 1;          // Nachbarn je Seite: Tablet hochkant 2 (= 5 Einträge), Telefon 1 (= 3)
   links.forEach((a, j) => {
     const d = j - i;
-    a.classList.toggle('far', Math.abs(d) > 1);
-    a.classList.toggle('edge-l', d === -1);
-    a.classList.toggle('edge-r', d === 1);
+    a.classList.toggle('far', Math.abs(d) > K + 1);
+    a.classList.toggle('edge-l', d === -(K + 1));
+    a.classList.toggle('edge-r', d === K + 1);
   });
 }
 markNeighbours();                               // gleich beim Laden: der Streifen startet reduziert

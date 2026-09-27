@@ -103,10 +103,15 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 /* Platzhalter-Pfeile an den Enden des Streifens: nur schmal, unsichtbar und ohne Funktion —
    so hat jeder Eintrag links und rechts einen Nachbarn, das Layout bleibt beim Wechsel gleich */
 .nav-pad{display:none}
+/* 1024–1099 px (iPad Pro 12,9″ hochkant): Desktop-Navigation, etwas enger, ohne Zähler */
+@media (min-width:1024px) and (max-width:1099px){
+  .nav a{padding:0 .5rem}
+  .count{display:none}
+}
 /* Nummern nur in der schmalen Ansicht */
 .nav a b{display:none;font:400 .75rem var(--mono);letter-spacing:0}
 /* schmal: nur Nummern, das aktive Projekt klappt seinen Namen aus */
-@media (max-width:1099px){
+@media (max-width:1023px){
   .nav a b{display:inline}
   .nav a[aria-current] b{display:none}
   .nav a span{max-width:0;overflow:hidden}                /* sofort: sonst verschiebt sich der Streifen zweimal */
