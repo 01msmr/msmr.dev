@@ -77,12 +77,12 @@ def png(svg_text, px, path):
 
 for n, (C, h) in enumerate(HUES):
     col = oklch_hex(.7, C, h)
-    fav = svg(col, pad=2, word='m', fill=.95)                  # klein: nur »m«, sonst unlesbar
+    fav = svg(col, pad=0, word='m', fill=.95)                  # klein: nur »m«, sonst unlesbar
     (OUT / f'fav-{n}.svg').write_text(fav)
     png(fav, 32, OUT / f'fav-{n}-32.png')
-    png(svg(col, pad=18, paper=PAPER), 180, OUT / f'touch-{n}.png')   # iOS rundet selbst ab: Form mit Rand auf Papier
-    png(svg(col, pad=18, paper=PAPER), 192, OUT / f'icon-192-{n}.png')   # Android / Manifest
-    png(svg(col, pad=18, paper=PAPER), 512, OUT / f'icon-512-{n}.png')
+    png(svg(col, pad=0, paper=PAPER), 180, OUT / f'touch-{n}.png')   # ohne Rand: Form füllt die ganze Fläche, iOS/Android maskieren selbst
+    png(svg(col, pad=0, paper=PAPER), 192, OUT / f'icon-192-{n}.png')   # Android / Manifest
+    png(svg(col, pad=0, paper=PAPER), 512, OUT / f'icon-512-{n}.png')
     print(n, col)
 
 
