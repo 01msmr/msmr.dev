@@ -134,15 +134,17 @@ function placeHl(){
   hl.style.setProperty('--r', (b.w - R) + 'px');
 }
 function relayout(){ markNeighbours(); paintBand(); placeHl(); }
-function markNeighbours(c){                   // schmal: aktiv (oder Mitte beim Wischen) ± 1, dahinter ‹ ›
-  const i = links.indexOf(c || peek || (atEnd ? endLink : links[current]));
+function markNeighbours(c){                   // schmal: nur der aktive Eintrag (oder die Mitte beim Wischen), daneben ‹ ›
+  let i = links.indexOf(c || peek || (atEnd ? endLink : links[current]));
+  if (i < 0) i = 0;                             // Startbildschirm: als stünde 01 an — nie alle Einträge zeigen
   links.forEach((a, j) => {
     const d = j - i;
-    a.classList.toggle('far', i >= 0 && Math.abs(d) > 2);
-    a.classList.toggle('edge-l', i >= 0 && d === -2);
-    a.classList.toggle('edge-r', i >= 0 && d === 2);
+    a.classList.toggle('far', Math.abs(d) > 1);
+    a.classList.toggle('edge-l', d === -1);
+    a.classList.toggle('edge-r', d === 1);
   });
 }
+markNeighbours();                               // gleich beim Laden: der Streifen startet reduziert
 links.forEach(a => a.addEventListener('pointerenter', () => { hovered = a; placeHl(); }));
 /* Klick: der Eintrag wird sofort aktiv — die Seite folgt. Sonst springt die Markierung beim
    Wegbewegen der Maus kurz zurück, bis die Seite angekommen ist. */
@@ -549,13 +551,13 @@ if (!calm.matches) {
     const size = () => { s.w = card.clientWidth; s.h = card.clientHeight; svg.setAttribute('viewBox', `0 0 ${s.w} ${s.h}`); draw(s); };
     new ResizeObserver(size).observe(card);
     const wake = () => { live.add(s); if (!raf) { t0 = 0; raf = requestAnimationFrame(loop); } };
-    if (touch) {                              // Touch: steigt, sobald die Karte zu 96 % im Bild steht
+    if (touch) {                              // Touch: steigt, sobald die Karte zu 98 % im Bild steht
       const screen = card.closest('.slide, .end');
       let on = false;
       new IntersectionObserver(([en]) => {
         // sichtbarer Anteil — bei Karten höher als der Bildschirm bezogen auf die Bildschirmhöhe
         const frac = en.intersectionRect.height / Math.min(en.boundingClientRect.height, en.rootBounds.height);
-        const now = on ? frac > .5 : frac >= .96;   // an ab 96 %, aus erst unter 50 % (kein Flackern)
+        const now = on ? frac > .5 : frac >= .98;   // an ab 98 %, aus erst unter 50 % (kein Flackern)
         if (now === on) return;
         on = now;
         s.target = on ? FULL : 0;

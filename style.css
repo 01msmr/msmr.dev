@@ -122,7 +122,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .nav a{padding:0 .45rem;scroll-snap-align:center}      /* enger */
   .nav.is-scrubbing a b{display:inline}                   /* beim Wischen nur Nummern — nichts verschiebt sich unter dem Finger */
   .nav.is-scrubbing a span{max-width:0}
-  /* nur je ein Nachbar links und rechts; gibt es dahinter noch mehr, steht dort ‹ bzw. › */
+  /* nur der aktive Eintrag; links und rechts davon ‹ bzw. › für den vorigen / nächsten */
   .nav a.far{opacity:0;pointer-events:none}
   .nav a:is(.edge-l,.edge-r) :is(b,span){display:none}
   .nav a.edge-l::before,.nav a.edge-r::before{font:400 .8125rem var(--mono);color:var(--mute)}
