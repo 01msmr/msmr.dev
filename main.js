@@ -154,7 +154,7 @@ function placeHl(){
   hl.style.setProperty('--r', (b.w - R) + 'px');
   // Linie: derselbe Ausschnitt, aber immer auf dem aktiven Eintrag (folgt nicht der Maus) — gleiches Band, gleicher
   // Takt: wo Fenster und Linie übereinander stehen, haben sie genau dieselben Farben
-  const act = atEnd ? endLink : links[current], u = act ? box(act) : null;
+  const act = choice || (atEnd ? endLink : links[current]), u = act ? box(act) : null;   // Klick: sofort, auch auf »project urls«
   under.style.setProperty('--l', (u ? u.l : 0) + 'px');
   under.style.setProperty('--r', b.w - (u ? u.r : box(links[0]).l - 2) + 'px');
   // schmal: Fenster in der Farbe des Eintrags — der Wechsel blendet schnell über (CSS)

@@ -21,7 +21,8 @@
   --soft:cubic-bezier(.76,0,.24,1);    /* ease-in-out quart: zögert an, gleitet aus */
   --nav-t:.45s;                         /* Takt der schmalen Navigation (Fenster, Nummern, Zielen) … */
   --nav-ease:cubic-bezier(.33,1,.68,1); /* … und ihre Kurve (ease-out cubic) — main.js liest beides */
-  --stroke:2px;                         /* alle Linien in Projektfarbe: Kartenkontur, Ziffernkontur, Linie unter dem Fenster */
+  --stroke:2px;                         /* Linien in Projektfarbe: Kartenkontur, Ziffernkontur */
+  --nav-line:3px;                       /* Linie unter dem aktiven Eintrag (Rechner) */
   --p:1;                                /* Kopf groß → klein, von JS gesetzt */
 
   /* Projektfarben kommen aus projects.json (oklch 70 % …), direkt an den Elementen */
@@ -290,7 +291,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .nav__under{display:none}
 @media (hover:hover) and (pointer:fine) and (min-width:1024px){
   .nav__under{
-    display:block;position:absolute;top:100%;left:0;width:100%;height:var(--stroke);pointer-events:none;
+    display:block;position:absolute;top:100%;left:0;width:100%;height:var(--nav-line);pointer-events:none;
     clip-path:inset(0 var(--r,50%) 0 var(--l,50%));transition:clip-path .9s var(--out);   /* wie .nav__hl */
   }
 }
