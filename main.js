@@ -109,9 +109,10 @@ measure();
 let current = -2, hovered = null, peek = null, choice = null;   // choice: angeklickter Eintrag, solange die Seite noch unterwegs ist
 let aiming = false, aimFrom = null, aimEnd = 0, navLater = false;  // Zielen auf Touch (3): läuft / Plätze davor / Ende
 
-const box = a => {                           // genaue Lage eines Eintrags im Band (Bruchteile von Pixeln)
-  const n = hl.getBoundingClientRect(), r = a.getBoundingClientRect();
-  return { l:r.left - n.left, r:r.right - n.left, w:n.width };
+const box = a => {                           // genaue Lage eines Eintrags im Band (Bruchteile von Pixeln) — sein Ruheplatz:
+  const n = hl.getBoundingClientRect(), r = a.getBoundingClientRect();   // ein laufendes Gleiten (transform) zählt nicht,
+  const t = getComputedStyle(a).transform, dx = t === 'none' ? 0 : new DOMMatrix(t).m41;   // sonst landet das Fenster neben dem Eintrag
+  return { l:r.left - dx - n.left, r:r.right - dx - n.left, w:n.width };
 };
 /* Vor dem ersten Eintrag liegt ein unsichtbarer »Eintrag 0« (Startbildschirm): auf dem Rechner
    die Fläche der Wortmarke, schmal so breit wie der erste Eintrag. Von dort gleitet das Fenster
@@ -210,6 +211,7 @@ function windowWidth(){                          // aktuelle Breite des Farbfens
   return hl.getBoundingClientRect().width
     - parseFloat(hl.style.getPropertyValue('--l') || 0) - parseFloat(hl.style.getPropertyValue('--r') || 0);
 }
+let settleHl = 0;
 const navSpots = () => links.map(a => {        // Mitte und Sichtbarkeit jedes Eintrags (vor dem Umschalten)
   const r = a.getBoundingClientRect();
   return { x:r.left + r.width / 2, shown:!a.classList.contains('far') };
@@ -230,6 +232,7 @@ function followCentre(wOld, before){
   if (!before) return;
   const now = navSpots();
   const slot = Math.min(...now.slice(1).map((n, j) => n.x - now[j].x));   // kleinster Abstand zweier Nummern
+  clearTimeout(settleHl); settleHl = setTimeout(placeHl, NAV_MS + 30);   // zur Sicherheit: nach dem Gleiten noch einmal genau auf den Eintrag
   links.forEach((a, j) => {
     if (a === act) return;                       // der aktive steht sofort in der Mitte
     const o = before[j], n = now[j], dx = o.x - n.x;
