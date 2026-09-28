@@ -15,7 +15,8 @@
   --sans:"Hanken Grotesk",system-ui,sans-serif;
   --mono:"Hanken Grotesk",system-ui,sans-serif;   /* auch die Details: eine Schrift für alles */
   --pad:clamp(1rem,4vw,3rem);
-  --bar:58px;                           /* 30px Wortmarke + 2×14px */
+  --bar-pad:14px;                       /* Abstand über und unter der Wortmarke (Rechner: 10.5px) */
+  --bar:calc(30px + 2 * var(--bar-pad)); /* 30px Wortmarke + 2 × --bar-pad: 58px, Rechner 51px */
   --out:cubic-bezier(.16,1,.3,1);       /* expo-out: schnell rein, weich aus */
   --nav-t:.45s;                         /* Takt der schmalen Navigation (Fenster, Nummern, Zielen) … */
   --nav-ease:cubic-bezier(.33,1,.68,1); /* … und ihre Kurve (ease-out cubic) — main.js liest beides */
@@ -27,6 +28,7 @@
   /* Projektfarben kommen aus projects.json (oklch 70 % …), direkt an den Elementen */
 }
 @media (hover:hover) and (pointer:fine) and (min-width:1024px){:root{--fs-s:1.8}}   /* nur mit voller Navigation */
+@media (hover:hover) and (pointer:fine){:root{--bar-pad:10.5px}}   /* Rechner: Leiste 51 statt 58 px (−12 %) */
 @media (prefers-color-scheme:dark){
   :root{
     --bg:#0e0f10;
@@ -70,7 +72,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   background:var(--bg);                                 /* voll deckend, genau wie die Seite */
 }
 .mark{
-  position:absolute;left:var(--pad);top:14px;pointer-events:auto;white-space:nowrap;
+  position:absolute;left:var(--pad);top:var(--bar-pad);pointer-events:auto;white-space:nowrap;
   font-size:30px;line-height:1;font-weight:600;letter-spacing:-.065em;
   transform-origin:0 0;
 }

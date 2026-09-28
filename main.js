@@ -43,7 +43,7 @@ const EASE_OUT = cssRoot.getPropertyValue('--nav-ease').trim();
 
 /* ═══ 1 Wortmarke: bildschirmbreit auf dem Start, schrumpft links oben
    in die Kopfleiste (30 px). Ohne JS steht sie gleich klein dort. ═══ */
-const TOP  = 14;
+let TOP = 14;                                   // Abstand der kleinen Wortmarke von oben (CSS --bar-pad)
 let big = 1, slotTop = 0, travel = 1, padX = 0, markW = 0, ledeTop = 0, ledeH = 0, ledeEnd = 0, barH = 58;
 
 /* Echte Schrift-Transition: die Schriftgröße selbst läuft mit (nicht transform:scale).
@@ -60,7 +60,8 @@ function measure(){
   travel = Math.max(1, hero.offsetHeight * .72);    // Weg bis zur Kopfleiste: endet später, wo das Gleiten schon langsamer ist
   lede.style.transform = ''; lede.style.opacity = '';
   ledeTop = lede.offsetTop; ledeH = lede.offsetHeight;
-  barH = parseFloat(getComputedStyle(root).getPropertyValue('--bar'));
+  barH = bar.offsetHeight;                          // Höhe der Leiste (CSS --bar)
+  TOP = parseFloat(getComputedStyle(root).getPropertyValue('--bar-pad')) || 14;
   ledeEnd = barH + ledeH;   // ganz weg: eine eigene Höhe unter der Kopfleiste
   update(true);
 }
