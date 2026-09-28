@@ -161,7 +161,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .bar .nav.is-aiming .nav__hl{transition:clip-path .45s cubic-bezier(.33,1,.68,1)}   /* Farbe wechselt sofort mit dem Eintrag */
 .bar .nav.is-aiming a{transition:none}                  /* Schriftfarbe ebenso: kein Überblenden im Fenster */
 @media (hover:none) and (max-width:1023px){
-  .nav a[aria-current]{touch-action:none}                /* Finger auf dem aktiven Eintrag: zielt, statt den Streifen zu schieben */
+  .bar .nav{touch-action:none}                           /* Finger auf dem Streifen: zielt (main.js 3), statt ihn zu schieben */
 }
 
 /* ── Start ── */

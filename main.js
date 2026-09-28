@@ -273,7 +273,7 @@ const startScrub = () => {
   scrubbing = true; nav.classList.add('is-scrubbing');
   requestAnimationFrame(() => { peek = centred(); markNeighbours(peek); paintBand(); placeHl(); });   // nur Nummern: Band neu malen
 };
-nav.addEventListener('touchstart', ev => { if (!(pagerOn && ev.target.closest('a[aria-current]'))) startScrub(); }, { passive:true });   // aktiver Eintrag: Zielen (unten)
+if (!pagerOn) nav.addEventListener('touchstart', startScrub, { passive:true });   // Touch-Geräte ohne Maus: Zielen (unten) statt Wischen
 nav.addEventListener('wheel', startScrub, { passive:true });
 nav.addEventListener('touchend', () => { if (!scrubbing) return; clearTimeout(settleT); settleT = setTimeout(settle, 160); }, { passive:true });   // nur getippt: Zustand zurücksetzen
 nav.addEventListener('scroll', () => {
@@ -298,7 +298,7 @@ narrow.addEventListener('change', () => { relayout(); centerNav(); });
    unter dem feststehenden Fenster durch, das Fenster zeigt Name und Farbe des Projekts darin.
    Loslassen: das Fenster schrumpft auf den gewählten Namen, die Seite gleitet dorthin (nur getippt: bleibt). */
 if (pagerOn) {
-  let f = 0, f0 = 0, x0 = 0, from = 0, pid = null, gap = 26, W = 0, widths = [], aimed = -1;
+  let f = 0, f0 = 0, x0 = 0, from = 0, pid = null, touched = null, dragged = false, gap = 26, W = 0, widths = [], aimed = -1;
   const place = () => {                          // Lage aller Einträge für die Zielstellung f (Bruchteil)
     const c = nav.clientWidth / 2;
     const k = Math.max(0, Math.min(links.length - 1, Math.round(f)));
@@ -316,9 +316,9 @@ if (pagerOn) {
       a.style.transform = `translateX(${x - widths[j] / 2}px)`;
     });
   };
-  const start = (a, ev) => {
+  const start = (a, ev) => {                     // a: der aktive Eintrag — Ausgangspunkt, egal wo der Finger liegt
     const spots = navSpots();
-    aiming = true; aimed = -1;
+    aiming = true; aimed = -1; dragged = false;
     from = f = f0 = links.indexOf(a); x0 = ev.clientX;
     nav.scrollLeft = 0;
     nav.classList.add('is-aiming');
@@ -340,7 +340,9 @@ if (pagerOn) {
     });
   };
   const finish = () => {
-    const j = aimed, before = navSpots(), wOld = W;
+    // nur getippt (nicht gezogen) auf einen Nachbarn: der wird gewählt
+    const j = !dragged && touched && links.includes(touched) ? links.indexOf(touched) : aimed;
+    const before = navSpots(), wOld = W;
     links.forEach(a => a.getAnimations().forEach(x => x.cancel()));   // Einblenden des Zielens, falls noch unterwegs
     aiming = false; aimEnd = performance.now();
     nav.classList.remove('is-aiming');
@@ -358,13 +360,14 @@ if (pagerOn) {
     glideTouch(Math.min(el.offsetTop, pager.scrollHeight - pager.clientHeight), 650, screens.indexOf(el));
   };
   nav.addEventListener('pointerdown', ev => {
-    const a = ev.target.closest('a');
-    if (!narrow.matches || aiming || !a || !a.hasAttribute('aria-current')) return;
-    pid = ev.pointerId;
-    start(a, ev);
+    // Finger irgendwo auf dem Streifen: Zielen vom aktiven Eintrag aus — das Fenster verhält sich immer gleich
+    if (!narrow.matches || aiming) return;
+    pid = ev.pointerId; touched = ev.target.closest('a');
+    start(atEnd ? endLink : (links[current] || links[0]), ev);
   });
   nav.addEventListener('pointermove', ev => {    // der Finger bleibt am Eintrag gefangen
     if (!aiming || ev.pointerId !== pid) return;   // nur der Finger, der begonnen hat
+    if (Math.abs(ev.clientX - x0) > 8) dragged = true;
     f = Math.max(0, Math.min(links.length - 1, f0 - (ev.clientX - x0) / gap));
     place();
   });
