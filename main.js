@@ -131,7 +131,7 @@ function paintBand(){
   navColors = navColors || links.map(a => getComputedStyle(a).getPropertyValue('--hl'));
   const V = zeroWidth();
   hl.style.left = -V + 'px';
-  hl.style.width = nav.scrollWidth + V + 'px';    // im scrollbaren Streifen: Band über die ganze Länge (+ Eintrag 0)
+  hl.style.width = nav.scrollWidth + V + 'px';    // im scrollbaren Streifen: Band über die ganze Länge (+ Vorlauf vor 01)
   const f = box(links[0]);
   const stops = [`transparent 0px`, `transparent ${f.l}px`];
   links.forEach((a, j) => {
@@ -139,7 +139,7 @@ function paintBand(){
     stops.push(`${c} ${b.l}px`, `${c} ${b.r}px`);                          // harte Kanten, in px wie das Fenster
   });
   under.style.left = hl.style.left; under.style.width = hl.style.width;   // Linie: dasselbe Band an derselben Stelle
-  if (narrow.matches) { hl.style.backgroundImage = under.style.backgroundImage = 'none'; return; }   // schmal: eine Farbe, die überblendet (placeHl)
+  if (narrow.matches) { hl.style.backgroundImage = under.style.backgroundImage = 'none'; return; }   // schmal: eine Farbe (placeHl) — wechselt sofort, beim Zielen blendet sie über (CSS)
   hl.style.backgroundColor = '';
   hl.style.backgroundImage = under.style.backgroundImage = `linear-gradient(to right, ${stops.join(',')})`;
   links.forEach(a => a.style.setProperty('--x', box(a).l + hl.offsetLeft + 'px'));   // Lage im Streifen, für die Schriftfarbe (paintText)
