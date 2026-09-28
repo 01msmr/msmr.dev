@@ -8,8 +8,8 @@ echo json_encode([
   'short_name'       => 'msmr',
   'start_url'        => '/',
   'display'          => 'standalone',
-  'background_color' => '#fafaf8',
-  'theme_color'      => '#fafaf8',
+  'background_color' => '#ffffff',
+  'theme_color'      => '#ffffff',
   'icons'            => [
     ['src' => "app-icons/icon-192-$n.png", 'sizes' => '192x192', 'type' => 'image/png'],
     ['src' => "app-icons/icon-512-$n.png", 'sizes' => '512x512', 'type' => 'image/png'],

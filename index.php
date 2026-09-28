@@ -29,7 +29,7 @@ $icon = random_int(0, $n - 1);               // Icon in einer der Projektfarben 
 <meta property="og:title" content="msmr.dev — Projects">
 <meta property="og:description" content="web projects. <?= $count ?> projects, one screen each.">
 <meta property="og:url" content="https://msmr.dev/">
-<meta name="theme-color" content="#fafaf8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e0f10" media="(prefers-color-scheme: dark)">
 
 <link rel="preload" href="fonts/hanken-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>

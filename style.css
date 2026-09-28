@@ -2,7 +2,7 @@
 /* Schrift liegt auf dem eigenen Server (Latin-Teilmenge, SIL OFL — siehe fonts/OFL-HankenGrotesk.txt) */
 @font-face{font-family:"Hanken Grotesk";src:url(fonts/hanken-grotesk-latin.woff2) format("woff2");font-weight:100 900;font-display:swap}
 :root{
-  --bg:#fafaf8;
+  --bg:#fff;
   --ink:#191b1d;
   --mute:rgb(25 27 29 / .5);
   --line:rgb(25 27 29 / .12);
@@ -67,7 +67,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .bar::before{
   content:"";position:absolute;inset:0;z-index:-1;opacity:var(--p);
   transform:translateY(var(--nav-y,0px));               /* Startbildschirm: Leiste oben aus dem Bild; fährt herein, während die Wortmarke das letzte Stück steigt */
-  background:var(--pill);                               /* voll deckend weiß (dunkel: schwarz) */
+  background:var(--bg);                                 /* voll deckend, genau wie die Seite */
 }
 .mark{
   position:absolute;left:var(--pad);top:14px;pointer-events:auto;white-space:nowrap;
