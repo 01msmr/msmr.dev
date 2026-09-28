@@ -72,7 +72,7 @@ Push to `main`. A GitHub webhook tells the netcup server to pull.
 
 | Width | Nav |
 |---|---|
-| ≥ 1100 px | all names, dividers, counter; a colour window slides between items, its colour switching at the item edges |
+| ≥ 1100 px | all names, dividers, counter; a colour window slides between items (following the mouse), its colour switching at the item edges; a line in the active item's colour runs just below the bar, exactly as wide as the item and not following the mouse, so the window's bottom edge meets it once the window rests on the active item (also in the narrow nav, e.g. on iPad) |
 | 1024–1099 px | the same, tighter, without counter |
 | 700–1023 px | active item centred beside the wordmark, 2 numbered neighbours per side, `‹ ›` beyond |
 | < 700 px | active item, 1 neighbour per side, `‹ ›` beyond; invisible placeholders keep the layout constant at both ends |

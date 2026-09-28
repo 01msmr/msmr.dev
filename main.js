@@ -21,6 +21,7 @@ const slides  = [...document.querySelectorAll('.slide')];
 const nav     = document.querySelector('.nav');
 const links   = [...nav.querySelectorAll('a')];
 const hl      = nav.querySelector('.nav__hl');
+const onBox   = nav.querySelector('.nav__on');   // Linie unter dem aktiven Eintrag, unterhalb der Leiste
 const endLink = nav.querySelector('.nav-end');
 const count   = document.querySelector('.count b');
 const endPage = document.querySelector('.end');
@@ -148,6 +149,15 @@ function placeHl(){
   hl.style.setProperty('--r', (b.w - R) + 'px');
   // schmal: Fenster in der Farbe des Eintrags — der Wechsel blendet schnell über (CSS)
   if (narrow.matches) hl.style.backgroundColor = a ? navColors[links.indexOf(a)] : 'transparent';
+  // Linie unter dem aktiven Eintrag (unterhalb der Leiste) in seiner Farbe — folgt nicht der Maus; gleitet im selben Takt wie das
+  // Fenster, so decken sich beide genau, sobald das Fenster auf dem aktiven Eintrag steht
+  const act = atEnd ? endLink : links[current];
+  onBox.classList.toggle('is-on', !!act);
+  if (!act) return;
+  const o = box(act);
+  onBox.style.left = hl.getBoundingClientRect().left - nav.getBoundingClientRect().left + nav.scrollLeft + o.l + 'px';   // Bruchteile wie das Fenster
+  onBox.style.width = o.r - o.l + 'px';
+  onBox.style.setProperty('--c', (navColors || [])[links.indexOf(act)] || 'transparent');
 }
 function relayout(){ markNeighbours(); paintBand(); placeHl(); }
 function markNeighbours(c){                   // schmal: aktiver Eintrag (oder die Mitte beim Wischen) mit Nachbarn, dahinter ‹ ›
