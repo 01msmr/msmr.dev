@@ -61,8 +61,8 @@ function measure(){
   lede.style.transform = ''; lede.style.opacity = '';
   ledeTop = lede.offsetTop; ledeH = lede.offsetHeight;
   barH = bar.offsetHeight;                          // Höhe der Leiste (CSS --bar)
-  TOP = parseFloat(getComputedStyle(root).getPropertyValue('--bar-pad')) || 14;
-  ledeEnd = barH + ledeH;   // ganz weg: eine eigene Höhe unter der Kopfleiste
+  TOP = bar.offsetTop + (parseFloat(getComputedStyle(root).getPropertyValue('--bar-pad')) || 14);   // Leiste kann eingerückt sein (Rechner: --pad)
+  ledeEnd = bar.offsetTop + barH + ledeH;   // ganz weg: eine eigene Höhe unter der Kopfleiste
   update(true);
 }
 let lastP = -1;
@@ -89,7 +89,7 @@ function update(force){
   root.style.setProperty('--p', t.toFixed(3));
   // Leiste/Navigation: kommen im selben Tempo herunter, in dem die Wortmarke das letzte Stück (eine
   // Leistenhöhe) hinaufsteigt — sie beginnen kurz vor dem Ende und sind mit ihr zugleich am Ziel
-  root.style.setProperty('--nav-y', -Math.min(Math.max(0, my - ey), barH) + 'px');
+  root.style.setProperty('--nav-y', -Math.min(Math.max(0, my - ey), bar.offsetTop + barH) + 'px');   // ganz aus dem Bild, samt Rand darüber
 
   // Unterzeile: schrumpft und verblasst beim Hochscrollen; ganz weg, wenn sie noch
   // eine eigene Höhe unter der Kopfleiste steht

@@ -373,8 +373,14 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   padding:var(--bar) var(--pad) 1rem;
   display:grid;
 }
-/* Rechner: Karte beginnt direkt unter der Linie des aktiven Eintrags — kein Abstand dazwischen */
-@media (hover:hover) and (pointer:fine) and (min-width:1024px){.slide,.end{padding-top:calc(var(--bar) + var(--nav-line))}}
+/* Rechner: überall derselbe Rand (--pad) — über der Leiste, zwischen Linie und Karte, links, rechts und unter der Karte.
+   Die Leiste rückt um --pad nach unten, ihr Grund reicht bis zum oberen Bildschirmrand. */
+@media (hover:hover) and (pointer:fine){
+  .bar{top:var(--pad)}
+  .bar::before{inset:calc(-1 * var(--pad)) 0 0}
+  .slide,.end{padding:calc(2 * var(--pad) + var(--bar)) var(--pad) var(--pad)}
+}
+@media (hover:hover) and (pointer:fine) and (min-width:1024px){.slide,.end{padding-top:calc(2 * var(--pad) + var(--bar) + var(--nav-line))}}   /* + Linie unter dem aktiven Eintrag */
 .card--end{--hl:var(--end-fill);grid-template-rows:auto 1fr}   /* hell: dunkelgrau füllen, dunkel: hellgrau */
 /* Unterzeile wird beim letzten Scrollen zur großen Überschrift */
 .end__head{
