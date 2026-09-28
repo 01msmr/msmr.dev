@@ -605,23 +605,6 @@ document.addEventListener('click', ev => {
   history.replaceState(null, '', a.getAttribute('href'));
 });
 
-/* Touch: Kopf der großen Zahl über der Leiste — Kopie, genau auf die Zahl in der Karte gelegt (CSS .num--over) */
-const numOver = [...document.querySelectorAll('.slide .num')].map(n => {
-  const c = n.cloneNode(true); c.classList.add('num--over');
-  n.closest('.slide').append(c);
-  return [n, c];
-});
-function placeNumOver(){
-  if (!pagerOn) return;
-  numOver.forEach(([n, c]) => {
-    const r = n.getBoundingClientRect(), s = c.parentNode.getBoundingClientRect();
-    c.style.transform = `translate(${r.left - s.left}px,${r.top - s.top}px)`;
-  });
-}
-addEventListener('resize', placeNumOver);
-document.fonts.ready.then(placeNumOver);
-placeNumOver();
-
 /* ═══ 5 Projektbild und Details
    Klick: Raster ein/aus. Doppelklick (nur bei Raster): volles Farbbild ↔ Raster; Touch: Doppeltipp, auch ohne Raster.
    Alle Bilder werden nach dem Laden der Seite vorab geladen und gerastert.
