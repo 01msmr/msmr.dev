@@ -101,25 +101,6 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .count b.tick{animation:tick .5s var(--out)}
 @keyframes tick{from{transform:translateY(-.6em);opacity:0}}
 
-/* Liste aller Projekte (schmal, Touch): fällt unter der Leiste herab; wie die Navigation —
-   gleiche Schrift, der aktive Eintrag im Farbfenster seiner Projektfarbe */
-.pick{
-  position:fixed;inset:var(--bar) 0 auto;width:auto;height:auto;margin:0;padding:0;border:0;
-  background:var(--bg);color:var(--ink);border-bottom:1px solid var(--line);
-  font-size:.9375rem;letter-spacing:-.03em;
-  transform:translateY(-.5rem);opacity:0;
-  transition:transform .45s cubic-bezier(.33,1,.68,1),opacity .45s cubic-bezier(.33,1,.68,1),display .45s allow-discrete,overlay .45s allow-discrete;
-}
-.pick:popover-open{display:grid;transform:none;opacity:1}
-@starting-style{.pick:popover-open{transform:translateY(-.5rem);opacity:0}}
-.pick::backdrop{background:transparent}
-.pick a{display:flex;align-items:center;gap:.9rem;min-height:44px;padding:0 var(--pad);color:var(--ink)}
-.pick a + a{border-top:1px solid var(--line)}
-.pick b{font:400 .75rem var(--mono);letter-spacing:0;color:var(--mute);min-width:1.4em}
-.pick a[aria-current]{background:var(--hl);color:var(--on)}
-.pick a[aria-current] b{color:inherit}
-.pick a.pick-end[aria-current]{color:var(--end-on)}
-
 /* Platzhalter an den Enden des Streifens: nur auf dem Telefon, unsichtbar und ohne Funktion —
    so hat jeder Eintrag links und rechts Nachbar und Pfeil, das Layout bleibt beim Wechsel gleich */
 .nav-pad{display:none}
@@ -164,6 +145,22 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .mark{z-index:2}                                     /* über dem Streifen — ohne eigenen Hintergrund */
   .bar::before{border-bottom-color:transparent}          /* Leiste nahtlos: Grund und Kante gleich */
   .nav__hl{transition:clip-path .45s cubic-bezier(.33,1,.68,1),background-color .45s cubic-bezier(.33,1,.68,1)}   /* schmal: Fenster und Farbe im selben Takt wie der Streifen (NAV_MS, ease-out) */
+}
+
+/* Zielen (Touch, schmal; main.js 3): Einträge frei gesetzt, alle als Nummer, der im Fenster mit Namen.
+   Nach den Regeln der schmalen Ansicht und mit .bar davor: gewinnt gegen .far, ‹ › und den aktiven Eintrag */
+.bar .nav:is(.is-aiming,.aim-measure){overflow:hidden}
+.bar .nav.is-aiming a{position:absolute;left:0;top:0;bottom:0;opacity:1;pointer-events:auto}
+.bar .nav.is-aiming a::before{content:none}
+.bar .nav.is-aiming a b{display:inline}
+.bar .nav.is-aiming a span{display:inline;max-width:0}
+.bar .nav.is-aiming a.aim b{display:none}
+.bar .nav.is-aiming a.aim span{max-width:none}
+.bar .nav.aim-measure a b{display:none}
+.bar .nav.aim-measure a span{display:inline;max-width:none}
+.bar .nav.is-aiming .nav__hl{transition:clip-path .45s cubic-bezier(.33,1,.68,1),background-color .12s linear}
+@media (hover:none) and (max-width:1023px){
+  .nav a[aria-current]{touch-action:none}                /* Finger auf dem aktiven Eintrag: zielt, statt den Streifen zu schieben */
 }
 
 /* ── Start ── */

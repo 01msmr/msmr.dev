@@ -107,6 +107,7 @@ measure();
    über die Lücke verlaufend). Das Rechteck ist ein Ausschnitt davon und
    gleitet zum Eintrag unter der Maus, sonst zum aktiven Projekt. */
 let current = -2, hovered = null, peek = null, choice = null;   // choice: angeklickter Eintrag, solange die Seite noch unterwegs ist
+let aiming = false, aimFrom = null, aimEnd = 0, navLater = false;  // Zielen auf Touch (3): läuft / Plätze davor / Ende
 
 const box = a => {                           // genaue Lage eines Eintrags im Band (Bruchteile von Pixeln)
   const n = hl.getBoundingClientRect(), r = a.getBoundingClientRect();
@@ -135,6 +136,7 @@ function paintBand(){
   hl.style.backgroundImage = `linear-gradient(to right, ${stops.join(',')})`;
 }
 function placeHl(){
+  if (aiming) return;                            // Zielen (3): das Fenster steht fest in der Mitte
   // schmal: auf dem Startbildschirm steht das Fenster schon auf 01 — es ist da, bevor die Leiste ins Bild kommt
   const a = hovered || peek || choice || (atEnd ? endLink : links[current]) || (narrow.matches ? links[0] : null);
   links.forEach(l => l.classList.toggle('in-win', l === a));
@@ -147,6 +149,7 @@ function placeHl(){
 }
 function relayout(){ markNeighbours(); paintBand(); placeHl(); }
 function markNeighbours(c){                   // schmal: aktiver Eintrag (oder die Mitte beim Wischen) mit Nachbarn, dahinter ‹ ›
+  if (aiming) return;
   let i = links.indexOf(c || peek || (atEnd ? endLink : links[current]));
   if (i < 0) i = 0;                             // Startbildschirm: als stünde 01 an — nie alle Einträge zeigen
   const K = innerWidth >= 700 ? 2 : 1;          // Nachbarn je Seite: Tablet hochkant 2 (= 5 Einträge), Telefon 1 (= 3)
@@ -180,13 +183,16 @@ function setActive(i, now = false){           // now: Navigation sofort (Auswahl
   slides.forEach((s, j) => s.classList.toggle('is-active', j === i));
   root.style.setProperty('--hl-now', i >= 0 ? getComputedStyle(slides[i]).getPropertyValue('--hl') : '');
   clearTimeout(navT);
-  navT = setTimeout(() => {
+  navT = setTimeout(showNav, now ? 0 : navDelay());
+}
+function showNav(){                              // Navigation auf das aktive Projekt umstellen
+  if (aiming) { navLater = true; return; }       // beim Zielen: erst nach dem Loslassen
     // schmal: der aktive Eintrag steht sofort und immer mittig; ringsum bewegt sich alles im selben Takt
     // (NAV_MS, ease-out): Fenster wächst/schrumpft mittig, Farbe blendet über, Nummern gleiten an ihren neuen Platz (followCentre)
     // gab es vorher keinen aktiven Eintrag (Start → 01), steht das Fenster sofort in seiner Breite — nichts, wovon es wachsen könnte
     const hadActive = links.some(a => a.hasAttribute('aria-current'));
     const wOld = narrow.matches && hadActive ? windowWidth() : 0;
-    const before = wOld ? navSpots() : null;
+    const before = aimFrom || (wOld ? navSpots() : null); aimFrom = null;   // nach dem Zielen: von den Zielplätzen aus
     // Linkseite sichtbar: »project urls« bleibt aktiv; schmal auf dem Startbildschirm bleibt 01 stehen (Name + Fenster)
     const on = atEnd ? endLink : (links[current] || (narrow.matches ? links[0] : null));
     links.forEach(a => a.toggleAttribute('aria-current', a === on));
@@ -197,7 +203,6 @@ function setActive(i, now = false){           // now: Navigation sofort (Auswahl
     relayout(); centerNav();
     if (wOld) followCentre(wOld, before);
     else if (narrow.matches) { void hl.offsetWidth; hl.style.transition = ''; }
-  }, now ? 0 : navDelay());
 }
 const EASE_OUT = 'cubic-bezier(.33,1,.68,1)';   // wie .nav__hl im CSS
 function windowWidth(){                          // aktuelle Breite des Farbfensters
@@ -248,7 +253,7 @@ let scrubbing = false, settleT = 0;
 
 const NAV_MS = 450;                             // Takt der Umschalt-Animation (wie .nav__hl im CSS)
 function centerNav(){                           // aktiven Eintrag sofort in die Mitte des Streifens
-  if (!narrow.matches || scrubbing) return;
+  if (!narrow.matches || scrubbing || aiming) return;
   const a = atEnd ? endLink : (links[current] || links[0]);   // Startbildschirm: 01
   if (!a) return;
   nav.scrollLeft = Math.max(0, Math.min(nav.scrollWidth - nav.clientWidth, a.offsetLeft + a.offsetWidth / 2 - nav.clientWidth / 2));
@@ -264,7 +269,7 @@ const startScrub = () => {
   scrubbing = true; nav.classList.add('is-scrubbing');
   requestAnimationFrame(() => { peek = centred(); markNeighbours(peek); paintBand(); placeHl(); });   // nur Nummern: Band neu malen
 };
-nav.addEventListener('touchstart', startScrub, { passive:true });
+nav.addEventListener('touchstart', ev => { if (!(pagerOn && ev.target.closest('a[aria-current]'))) startScrub(); }, { passive:true });   // aktiver Eintrag: Zielen (unten)
 nav.addEventListener('wheel', startScrub, { passive:true });
 nav.addEventListener('touchend', () => { if (!scrubbing) return; clearTimeout(settleT); settleT = setTimeout(settle, 160); }, { passive:true });   // nur getippt: Zustand zurücksetzen
 nav.addEventListener('scroll', () => {
@@ -284,32 +289,87 @@ function settle(){
 }
 narrow.addEventListener('change', () => { relayout(); centerNav(); });
 
-/* Touch, schmal: Tipp auf den aktiven Eintrag öffnet die Liste aller Projekte (#pick), der aktive ist
-   markiert. Auswahl gleitet dorthin; ein Tipp daneben schließt nur die Liste. */
-const pick = document.getElementById('pick');
-const pickLinks = [...pick.querySelectorAll('a')];
-let pickClosed = 0;
-pick.addEventListener('toggle', ev => { if (ev.newState === 'closed') pickClosed = performance.now(); });
-nav.addEventListener('click', ev => {
-  const a = ev.target.closest('a');
-  if (!pagerOn || !narrow.matches || !a || !a.hasAttribute('aria-current')) return;
-  ev.preventDefault(); ev.stopPropagation();
-  const on = atEnd ? pickLinks.length - 1 : Math.max(0, current);
-  pickLinks.forEach((l, j) => l.toggleAttribute('aria-current', j === on));
-  pick.showPopover();
-}, true);
-pick.addEventListener('click', ev => {
-  const a = ev.target.closest('a'); if (!a) return;
-  ev.preventDefault(); ev.stopPropagation();
-  pick.hidePopover();
-  const j = pickLinks.indexOf(a), el = j < slides.length ? slides[j] : endPage;
-  if (j < slides.length) setActive(j, true);
-  const to = Math.min(el.offsetTop, pager.scrollHeight - pager.clientHeight);
-  glideTouch(to, 650, screens.indexOf(el));
-});
-document.addEventListener('click', ev => {         // Tipp neben die Liste: schließt nur (kein Raster, kein Link)
-  if (performance.now() - pickClosed < 400 && !pick.contains(ev.target)) { ev.preventDefault(); ev.stopPropagation(); }
-}, true);
+/* Touch, schmal: Zielen. Finger auf den aktiven Eintrag: das Farbfenster in der Mitte wächst auf die Breite
+   des längsten Namens, alle Nummern erscheinen links und rechts davon. Seitlich ziehen: die Nummern gleiten
+   unter dem feststehenden Fenster durch, das Fenster zeigt Name und Farbe des Projekts darin.
+   Loslassen: das Fenster schrumpft auf den gewählten Namen, die Seite gleitet dorthin (nur getippt: bleibt). */
+if (pagerOn) {
+  let f = 0, f0 = 0, x0 = 0, from = 0, pid = null, gap = 26, W = 0, widths = [], aimed = -1;
+  const place = () => {                          // Lage aller Einträge für die Zielstellung f (Bruchteil)
+    const c = nav.clientWidth / 2;
+    const k = Math.max(0, Math.min(links.length - 1, Math.round(f)));
+    if (k !== aimed) {
+      aimed = k;
+      links.forEach((a, j) => { a.classList.toggle('aim', j === k); a.classList.toggle('in-win', j === k); });
+      hl.style.backgroundColor = navColors[k];
+      widths = links.map(a => a.offsetWidth);
+    }
+    links.forEach((a, j) => {
+      const d = j - f;
+      // neben dem Fenster je eine Nummer pro gap; beim Wechsel taucht die Nummer am Fensterrand ein bzw. auf
+      const x = j === k ? c : c + Math.sign(d) * (W / 2 + gap / 2) + (d - Math.sign(d)) * gap;
+      a.style.transform = `translateX(${x - widths[j] / 2}px)`;
+    });
+  };
+  const start = (a, ev) => {
+    const spots = navSpots();
+    aiming = true; aimed = -1;
+    from = f = f0 = links.indexOf(a); x0 = ev.clientX;
+    nav.scrollLeft = 0;
+    nav.classList.add('is-aiming');
+    const probe = links.find(l => l !== a) || a;
+    gap = probe.offsetWidth;                     // Abstand zweier Nummern (Nummer + Innenabstand)
+    nav.classList.add('aim-measure');           // alle Namen kurz ausgeklappt messen
+    W = Math.max(...links.map(l => l.offsetWidth));
+    nav.classList.remove('aim-measure');
+    place();
+    // Fenster: mittig, so breit wie der längste Name — gleitet aus seiner bisherigen Breite dorthin
+    const cx = nav.scrollLeft + nav.clientWidth / 2 - hl.offsetLeft;   // Streifenmitte im Band (Layoutwerte, nicht vom Bildlauf abhängig)
+    hl.style.setProperty('--l', cx - W / 2 + 'px');
+    hl.style.setProperty('--r', hl.offsetWidth - (cx + W / 2) + 'px');
+    // Nummern gleiten von ihren alten Plätzen an die neuen (zusätzlich zur Zielstellung, die dem Finger folgt)
+    const now = navSpots();
+    links.forEach((l, j) => {
+      const dx = spots[j].x - now[j].x;
+      if (Math.abs(dx) > .5) l.animate([{ transform:`translateX(${dx}px)` }, { transform:'translateX(0)' }], { duration:NAV_MS, easing:EASE_OUT, composite:'add' });
+    });
+  };
+  const finish = () => {
+    const j = aimed, before = navSpots(), wOld = W;
+    links.forEach(a => a.getAnimations().forEach(x => x.cancel()));   // Einblenden des Zielens, falls noch unterwegs
+    aiming = false; aimEnd = performance.now();
+    nav.classList.remove('is-aiming');
+    links.forEach(a => { a.style.transform = ''; a.classList.remove('aim'); });
+    const later = navLater; navLater = false;
+    aimFrom = before;
+    if (j === from) {                            // nichts gewählt: Fenster schrumpft zurück, Nummern an ihre Plätze
+      if (later) return showNav();               // die Seite hat inzwischen gewechselt
+      aimFrom = null; relayout(); centerNav(); followCentre(wOld, before);
+      return;
+    }
+    const el = links[j] === endLink ? endPage : slides[j];
+    if (el === endPage) { aimFrom = null; relayout(); centerNav(); }
+    else if (current === j) showNav(); else setActive(j, true);
+    glideTouch(Math.min(el.offsetTop, pager.scrollHeight - pager.clientHeight), 650, screens.indexOf(el));
+  };
+  nav.addEventListener('pointerdown', ev => {
+    const a = ev.target.closest('a');
+    if (!narrow.matches || aiming || !a || !a.hasAttribute('aria-current')) return;
+    pid = ev.pointerId;
+    start(a, ev);
+  });
+  nav.addEventListener('pointermove', ev => {    // der Finger bleibt am Eintrag gefangen
+    if (!aiming || ev.pointerId !== pid) return;   // nur der Finger, der begonnen hat
+    f = Math.max(0, Math.min(links.length - 1, f0 - (ev.clientX - x0) / gap));
+    place();
+  });
+  nav.addEventListener('pointerup', ev => { if (aiming && ev.pointerId === pid) finish(); });
+  nav.addEventListener('pointercancel', ev => { if (aiming && ev.pointerId === pid) { f = f0; place(); finish(); } });
+  nav.addEventListener('click', ev => {         // Klick nach dem Zielen: nichts weiter (kein Sprung zurück)
+    if (performance.now() - aimEnd < 400) { ev.preventDefault(); ev.stopPropagation(); }
+  }, true);
+}
+
 /* ═══ 4 Blättern: aktives Projekt — erst übernehmen, wenn der Bildlauf steht ═══ */
 let pending = null, idleT = 0;
 const commit = () => { if (pending !== null) setActive(pending); pending = null; choice = null; };   // Seite steht: Klick-Wahl erledigt
@@ -329,6 +389,7 @@ new ResizeObserver(relayout).observe(nav);   // Breite ändert sich (Schrift, sc
    Pfeiltasten, seitliches Wischen am Trackpad, Wischen am Touchscreen ═══ */
 new IntersectionObserver(([en]) => {
   if (en.isIntersecting === atEnd) return;
+  if (aiming) { atEnd = en.isIntersecting; root.classList.toggle('at-end', atEnd); navLater = true; return; }   // beim Zielen: nach dem Loslassen
   const wOld = narrow.matches ? windowWidth() : 0, before = wOld ? navSpots() : null;
   atEnd = en.isIntersecting;
   root.classList.toggle('at-end', atEnd);
