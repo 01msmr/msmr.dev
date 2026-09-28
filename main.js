@@ -119,9 +119,8 @@ const box = a => {                           // genaue Lage eines Eintrags im Ba
   const t = getComputedStyle(a).transform, dx = t === 'none' ? 0 : new DOMMatrix(t).m41;   // sonst landet das Fenster neben dem Eintrag
   return { l:r.left - dx - n.left, r:r.right - dx - n.left, w:n.width };
 };
-/* Vor dem ersten Eintrag liegt ein unsichtbarer »Eintrag 0« (Startbildschirm): auf dem Rechner
-   die Fläche der Wortmarke, schmal so breit wie der erste Eintrag. Von dort gleitet das Fenster
-   in Eintrag 01 — die Farbe wechselt an der Kante von transparent zur Projektfarbe. */
+/* Das Band beginnt vor dem ersten Eintrag (Rechner: Fläche der Wortmarke, schmal: so breit wie der erste
+   Eintrag), transparent — so hat das Fenster auch am linken Ende immer Band unter sich. */
 const zeroWidth = () => narrow.matches
   ? links[0].offsetWidth
   : parseFloat(getComputedStyle(root).getPropertyValue('--mark-w')) || 160;
@@ -164,20 +163,20 @@ hl.addEventListener('transitionend', textStop);
 hl.addEventListener('transitioncancel', textStop);
 function placeHl(){
   if (aiming) return;                            // Zielen (3): das Fenster steht fest in der Mitte
-  // schmal: auf dem Startbildschirm steht das Fenster schon auf 01 — es ist da, bevor die Leiste ins Bild kommt
-  const a = hovered || peek || choice || (atEnd ? endLink : links[current]) || (narrow.matches ? links[0] : null);
+  // auf dem Startbildschirm steht das Fenster schon auf 01 — es ist da, bevor die Leiste ins Bild kommt, und
+  // beim Wechsel Start → 01 bewegt sich nichts
+  const a = hovered || peek || choice || (atEnd ? endLink : links[current]) || links[0];
   links.forEach(l => l.classList.toggle('in-win', l === a));
-  const b = box(a || links[0]);
-  const L = a ? b.l : 0, R = a ? b.r : box(links[0]).l - 2;   // nichts aktiv: Fenster auf dem unsichtbaren Eintrag 0 (2 px Abstand: kein Farbsaum an 01)
-  hl.style.setProperty('--l', L + 'px');
-  hl.style.setProperty('--r', (b.w - R) + 'px');
+  const b = box(a);
+  hl.style.setProperty('--l', b.l + 'px');
+  hl.style.setProperty('--r', b.w - b.r + 'px');
   // Linie: derselbe Ausschnitt, aber immer auf dem aktiven Eintrag (folgt nicht der Maus) — gleiches Band, gleicher
   // Takt: wo Fenster und Linie übereinander stehen, haben sie genau dieselben Farben
-  const act = choice || (atEnd ? endLink : links[current]), u = act ? box(act) : null;   // Klick: sofort, auch auf »project urls«
-  under.style.setProperty('--l', (u ? u.l : 0) + 'px');
-  under.style.setProperty('--r', b.w - (u ? u.r : box(links[0]).l - 2) + 'px');
-  // schmal: Fenster in der Farbe des Eintrags — der Wechsel blendet schnell über (CSS)
-  if (narrow.matches) hl.style.backgroundColor = a ? navColors[links.indexOf(a)] : 'transparent';
+  const act = choice || (atEnd ? endLink : links[current]) || links[0], u = box(act);   // Klick: sofort, auch auf »project urls«
+  under.style.setProperty('--l', u.l + 'px');
+  under.style.setProperty('--r', b.w - u.r + 'px');
+  // schmal: Fenster in der Farbe des Eintrags, gleichzeitig mit der Schrift (CSS: kein Überblenden)
+  if (narrow.matches) hl.style.backgroundColor = navColors[links.indexOf(a)];
 }
 function relayout(){ markNeighbours(); paintBand(); placeHl(); }
 function markNeighbours(c){                   // schmal: aktiver Eintrag (oder die Mitte beim Wischen) mit Nachbarn, dahinter ‹ ›
@@ -192,8 +191,8 @@ function markNeighbours(c){                   // schmal: aktiver Eintrag (oder d
     a.classList.toggle('edge-r', d === K + 1);
   });
 }
-// schmal: 01 ist von Anfang an aktiv (Name + Fenster) — beim Wechsel Start → 01 ändert sich nichts
-if (narrow.matches) links[0].setAttribute('aria-current', '');
+// 01 ist von Anfang an aktiv (Name + Fenster + Linie) — beim Wechsel Start → 01 ändert sich nichts
+links[0].setAttribute('aria-current', '');
 markNeighbours();                               // gleich beim Laden: der Streifen startet reduziert
 links.forEach(a => a.addEventListener('pointerenter', () => { hovered = a; placeHl(); }));
 /* Klick: der Eintrag wird sofort aktiv — die Seite folgt. Sonst springt die Markierung beim
@@ -225,8 +224,8 @@ function showNav(){                              // Navigation auf das aktive Pr
     const hadActive = links.some(a => a.hasAttribute('aria-current'));
     const wOld = narrow.matches && hadActive ? windowWidth() : 0;
     const before = aimFrom || (wOld ? navSpots() : null); aimFrom = null;   // nach dem Zielen: von den Zielplätzen aus
-    // Linkseite sichtbar: »project urls« bleibt aktiv; schmal auf dem Startbildschirm bleibt 01 stehen (Name + Fenster)
-    const on = atEnd ? endLink : (links[current] || (narrow.matches ? links[0] : null));
+    // Linkseite sichtbar: »project urls« bleibt aktiv; auf dem Startbildschirm bleibt 01 stehen (Name + Fenster)
+    const on = atEnd ? endLink : (links[current] || links[0]);
     links.forEach(a => a.toggleAttribute('aria-current', a === on));
     markNeighbours();
     if (narrow.matches && !hadActive) hl.style.transition = 'none';
