@@ -77,7 +77,7 @@ Push to `main`. A GitHub webhook tells the netcup server to pull.
 | 700–1023 px | active item centred beside the wordmark, 2 numbered neighbours per side, `‹ ›` beyond |
 | < 700 px | active item, 1 neighbour per side, `‹ ›` beyond; invisible placeholders keep the layout constant at both ends |
 
-In the narrow nav the active item always sits in the centre. On a switch the colour window resizes around it and crossfades, and the numbers slide to their new places: the incoming number pushes the others sideways out of the centre, on both sides; new numbers slide in from outside and old ones slide out and fade, all in 0.45 s. Swiping the strip works like a picker: numbers only while swiping, the centred item becomes active on release.
+In the narrow nav the active item always sits in the centre. On a switch the colour window resizes around it and crossfades, and the numbers slide to their new places: the incoming number pushes the others sideways out of the centre, on both sides; new numbers slide in from outside and old ones slide out and fade, all in 0.45 s. Swiping the strip works like a picker: numbers only while swiping, the centred item becomes active on release. On touch devices, tapping the active item opens a list of all projects below the bar (a `popover`, styled like the nav), with the current one in its colour; choosing one glides there, and a tap beside the list only closes it.
 
 **Cards.** Hover (desktop) fills a card like a thick liquid that bulges toward the cursor. On touch devices the card fills once it has settled and stays full while it leaves the screen; the nav switches at the same moment. Keyboard focus fills a card as well.
 

@@ -54,6 +54,13 @@ $icon = random_int(0, $n - 1);               // Icon in einer der Projektfarben 
   </nav>
   <span class="count" aria-hidden="true"><b>00</b> / <?= two($n) ?></span>
 </header>
+<!-- Telefon/Tablet hochkant: Tipp auf den aktiven Eintrag öffnet die Liste aller Projekte (main.js 3) -->
+<div class="pick" id="pick" popover aria-label="All projects">
+<?php foreach ($projects as $i => $p): ?>
+  <a href="#<?= e($p['id']) ?>" style="--hl:<?= color($p) ?>"><b><?= two($i + 1) ?></b><span><?= e($p['name']) ?></span></a>
+<?php endforeach; ?>
+  <a href="#links" class="pick-end" style="--hl:var(--end-fill)"><b>↗</b><span>project urls</span></a>
+</div>
 
 <div class="pager">   <!-- Touch: eigener Scrollbereich — iOS rastet dort sauber ein (auf der ganzen Seite erst nachträglich) -->
 <main>

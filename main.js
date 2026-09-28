@@ -283,6 +283,33 @@ function settle(){
   requestAnimationFrame(() => { relayout(); centerNav(); });
 }
 narrow.addEventListener('change', () => { relayout(); centerNav(); });
+
+/* Touch, schmal: Tipp auf den aktiven Eintrag öffnet die Liste aller Projekte (#pick), der aktive ist
+   markiert. Auswahl gleitet dorthin; ein Tipp daneben schließt nur die Liste. */
+const pick = document.getElementById('pick');
+const pickLinks = [...pick.querySelectorAll('a')];
+let pickClosed = 0;
+pick.addEventListener('toggle', ev => { if (ev.newState === 'closed') pickClosed = performance.now(); });
+nav.addEventListener('click', ev => {
+  const a = ev.target.closest('a');
+  if (!pagerOn || !narrow.matches || !a || !a.hasAttribute('aria-current')) return;
+  ev.preventDefault(); ev.stopPropagation();
+  const on = atEnd ? pickLinks.length - 1 : Math.max(0, current);
+  pickLinks.forEach((l, j) => l.toggleAttribute('aria-current', j === on));
+  pick.showPopover();
+}, true);
+pick.addEventListener('click', ev => {
+  const a = ev.target.closest('a'); if (!a) return;
+  ev.preventDefault(); ev.stopPropagation();
+  pick.hidePopover();
+  const j = pickLinks.indexOf(a), el = j < slides.length ? slides[j] : endPage;
+  if (j < slides.length) setActive(j, true);
+  const to = Math.min(el.offsetTop, pager.scrollHeight - pager.clientHeight);
+  glideTouch(to, 650, screens.indexOf(el));
+});
+document.addEventListener('click', ev => {         // Tipp neben die Liste: schließt nur (kein Raster, kein Link)
+  if (performance.now() - pickClosed < 400 && !pick.contains(ev.target)) { ev.preventDefault(); ev.stopPropagation(); }
+}, true);
 /* ═══ 4 Blättern: aktives Projekt — erst übernehmen, wenn der Bildlauf steht ═══ */
 let pending = null, idleT = 0;
 const commit = () => { if (pending !== null) setActive(pending); pending = null; choice = null; };   // Seite steht: Klick-Wahl erledigt

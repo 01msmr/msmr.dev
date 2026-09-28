@@ -101,6 +101,25 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .count b.tick{animation:tick .5s var(--out)}
 @keyframes tick{from{transform:translateY(-.6em);opacity:0}}
 
+/* Liste aller Projekte (schmal, Touch): fällt unter der Leiste herab; wie die Navigation —
+   gleiche Schrift, der aktive Eintrag im Farbfenster seiner Projektfarbe */
+.pick{
+  position:fixed;inset:var(--bar) 0 auto;width:auto;height:auto;margin:0;padding:0;border:0;
+  background:var(--bg);color:var(--ink);border-bottom:1px solid var(--line);
+  font-size:.9375rem;letter-spacing:-.03em;
+  transform:translateY(-.5rem);opacity:0;
+  transition:transform .45s cubic-bezier(.33,1,.68,1),opacity .45s cubic-bezier(.33,1,.68,1),display .45s allow-discrete,overlay .45s allow-discrete;
+}
+.pick:popover-open{display:grid;transform:none;opacity:1}
+@starting-style{.pick:popover-open{transform:translateY(-.5rem);opacity:0}}
+.pick::backdrop{background:transparent}
+.pick a{display:flex;align-items:center;gap:.9rem;min-height:44px;padding:0 var(--pad);color:var(--ink)}
+.pick a + a{border-top:1px solid var(--line)}
+.pick b{font:400 .75rem var(--mono);letter-spacing:0;color:var(--mute);min-width:1.4em}
+.pick a[aria-current]{background:var(--hl);color:var(--on)}
+.pick a[aria-current] b{color:inherit}
+.pick a.pick-end[aria-current]{color:var(--end-on)}
+
 /* Platzhalter an den Enden des Streifens: nur auf dem Telefon, unsichtbar und ohne Funktion —
    so hat jeder Eintrag links und rechts Nachbar und Pfeil, das Layout bleibt beim Wechsel gleich */
 .nav-pad{display:none}
