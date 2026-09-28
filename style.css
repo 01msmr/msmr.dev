@@ -101,6 +101,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   transition:left .9s var(--out),width .9s var(--out),background-color .9s var(--out),opacity .3s;   /* wie das Fenster */
 }
 .nav__on.is-on{opacity:1}
+@media (hover:hover) and (pointer:fine){.nav__on{height:4.5px}}   /* Rechner: dreimal so dick */
 .count{margin-left:auto;font:400 .8125rem var(--mono);color:var(--mute);letter-spacing:0;opacity:var(--p);transform:translateY(var(--nav-y,0px));font-variant-numeric:tabular-nums;white-space:nowrap}
 .count b{font-weight:400;color:var(--ink);display:inline-block}
 .at-end .count{opacity:0;transition:opacity .4s}          /* letzte Seite: keine Seitenzahl */
