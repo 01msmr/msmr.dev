@@ -28,7 +28,7 @@
 
   /* Projektfarben kommen aus projects.json (oklch 70 % …), direkt an den Elementen */
 }
-@media (hover:hover) and (pointer:fine){:root{--fs-s:1.8}}
+@media (hover:hover) and (pointer:fine) and (min-width:1024px){:root{--fs-s:1.8}}   /* nur mit voller Navigation */
 @media (prefers-color-scheme:dark){
   :root{
     --bg:#0e0f10;
@@ -113,13 +113,6 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 @media (min-width:1024px) and (max-width:1099px){
   .nav a{padding:0 .5rem}
 }
-/* Rechner: 40 % mehr Innenabstand links und rechts in den Einträgen (.75 → 1.05rem, eng .5 → .7rem) */
-@media (hover:hover) and (pointer:fine) and (min-width:1024px){
-  .nav a{padding:0 1.05rem}
-}
-@media (hover:hover) and (pointer:fine) and (min-width:1024px) and (max-width:1099px){
-  .nav a{padding:0 .7rem}
-}
 /* Telefon (< 700 px): Platzhalter an den Enden zeigen — gleiche Anordnung ‹ · Nachbar · aktiv · Nachbar · › überall */
 @media (max-width:699px){
   .nav-pad{display:flex;align-items:center;padding:0 .45rem;font:400 calc(.75rem * var(--fs-s)) var(--mono);letter-spacing:0;visibility:hidden;pointer-events:none}
@@ -156,6 +149,14 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .nav__hl{transition:clip-path var(--nav-t) var(--nav-ease)}   /* schmal: Fenster im Takt des Streifens; Farbe wechselt sofort … */
   .nav a{transition:none}                                /* … zusammen mit der Schriftfarbe */
 }
+
+/* Rechner (Maus): 40 % mehr Innenabstand links und rechts in jedem Eintrag — Touch bleibt wie gehabt */
+@media (hover:hover) and (pointer:fine){
+  .nav a{padding:0 1.05rem}
+  .nav-pad{padding:0 .63rem}
+}
+@media (hover:hover) and (pointer:fine) and (min-width:1024px) and (max-width:1099px){.nav a{padding:0 .7rem}}
+@media (hover:hover) and (pointer:fine) and (max-width:1023px){.nav a{padding:0 .63rem}}
 
 /* Zielen (Touch, schmal; main.js 3): Einträge frei gesetzt, alle als Nummer, der im Fenster mit Namen.
    Nach den Regeln der schmalen Ansicht und mit .bar davor: gewinnt gegen .far, ‹ › und den aktiven Eintrag */
