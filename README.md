@@ -72,10 +72,12 @@ Push to `main`. A GitHub webhook tells the netcup server to pull.
 
 | Width | Nav |
 |---|---|
-| ≥ 1100 px | all names, dividers; a colour window slides between items (following the mouse), its colour switching at the item edges, and the text colour changing exactly at the window's edges while it glides (no fade); on desktop a 3 px line (`--nav-line`) just below the bar, with the card starting right beneath it (on touch devices the card starts right at the bar), marks the active item and stays there while the window follows the mouse; it is cut from the same colour band as the window, so wherever both are at the same position their colours match, also while moving |
+| ≥ 1100 px | all names with dividers; the colour window follows the mouse |
 | 1024–1099 px | the same, tighter |
 | 700–1023 px | active item centred beside the wordmark, 2 numbered neighbours per side, `‹ ›` beyond |
 | < 700 px | active item, 1 neighbour per side, `‹ ›` beyond; invisible placeholders keep the layout constant at both ends |
+
+In the full nav (from 1024 px) the colour window slides between items. Its colour switches at the item edges, and the text colour changes exactly at the window's edges, also while it glides, never fading. On desktop a 3 px line (`--nav-line`) just below the bar marks the active item and stays there while the window follows the mouse. It is cut from the same colour band as the window, so wherever both stand their colours match. The cards start right beneath that line (on touch devices right at the bar). With a mouse the nav items have 40 % more padding at the sides, and the nav type grows with the window from 1× at 1024 px to 1.8× where all names fit (≈ 1560 px).
 
 In the narrow nav the active item always sits in the centre. On a switch the colour window resizes around it, and window and text colour change at once, together. No number ever slides through the window: the new project stands in it as its name straight away, the previous one starts right at the window's edge and slides out, pushing the others sideways, on both sides. Numbers that disappear fade first; new ones, and numbers turning into `‹ ›`, fade in afterwards, so two never overlap. All in 0.45 s (`--nav-t` in `style.css`, also read by `main.js`). With a mouse wheel or trackpad the strip works like a picker: numbers only while scrolling, the centred item becomes active on release. On touch devices, pressing anywhere on the strip aims (a plain tap on a neighbour switches to it): the colour window in the centre grows to fit the longest name and all numbers appear beside it. Dragging sideways slides the numbers through the fixed window, which shows the name and colour of the project inside it. On release the window shrinks to the chosen name and the page glides there.
 
@@ -86,8 +88,8 @@ In the narrow nav the active item always sits in the centre. On a switch the col
 ## Notes
 
 - External project links open in a new tab; links to msmr.dev itself don't. Do Day links to its README, because the app itself is private.
-- Colours follow the system's light or dark mode.
-- On desktop the small type (nav, tech details at rest) is 1.8× larger (`--fs-s` in `style.css`); an enlarged detail keeps its size. The full nav grows with the window from 1× at 1024 px to 1.8× where all names fit (≈ 1560 px).
+- Colours follow the system's light or dark mode; in light mode page and bar are pure white.
+- On desktop the small type (nav, tech details at rest) is 1.8× larger (`--fs-s` in `style.css`); an enlarged detail keeps its size.
 - Right after the page has loaded, all screenshots are fetched and their halftones drawn one after another, so fast scrolling never meets an unloaded card. Fonts come from this site, not from Google.
 - On touch devices there is no text selection, loupe or grey tap flash, so holding and tapping stay with the page's own gestures. Pinch zoom stays, and project links keep their long-press menu.
 - Motion respects `prefers-reduced-motion`: pages jump instead of gliding, cards fill plainly instead of as a liquid, and the cursor has no trail.

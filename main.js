@@ -1,7 +1,8 @@
 /* msmr.dev — Verhalten der Seite. Blöcke:
    0 Grundlagen (Elemente, Scrollbereich: Fenster bzw. .pager auf Touch)
    1 Wortmarke (Bogen, Schrift-Transition; Leiste gleitet mit dem letzten Stück herein)
-   2 Navigation (aktives Projekt, Farbband/-fenster; schmal: mittig, Nummern gleiten an ihren neuen Platz)
+   2 Navigation (aktives Projekt, Farbband/-fenster, Linie unter dem aktiven Eintrag; voll: Schriftfarbe genau an den
+     Fensterkanten; schmal: mittig, keine Nummer gleitet durchs Fenster)
    3 Schmale Navigation (Auswahlrad mit Rad/Trackpad; Touch: Zielen — Fenster fest in der Mitte, Nummern ziehen durch)
    4 Blättern (aktives Projekt; Rad/Tasten auf dem Rechner, Wischen auf Touch — je Geste eine Karte,
      im Tempo der Geste; seitliche Gesten)
