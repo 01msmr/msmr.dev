@@ -282,7 +282,12 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   color:var(--bg);-webkit-text-stroke:calc(2 * var(--stroke)) var(--hl);
   paint-order:stroke fill;                                /* Füllung über der Kontur: innere Überlappungen der Glyphen verschwinden, außen bleibt --stroke */
 }
-@media (min-width:1200px){.num{top:.074em}}              /* Rechner: Ziffer ragt leicht über die Oberkante, wie auf dem Telefon */
+/* Oberkante der Ziffern (Versalhöhe) 1 px über der Karte: flache Köpfe (1 4 5 7) decken die Kontur ganz ab und
+   öffnen sie, runde (0 3 8 …) ragen etwas weiter — für jede Zahl 01–99, auf jedem Gerät gleich
+   (die Zahl driftet nicht mit dem Scrollen — sonst läge sie je nach Gerät anders). Ohne text-box: die bisherige Lage. */
+@supports (text-box:trim-both cap alphabetic){
+  .num{text-box:trim-both cap alphabetic;top:-1px}
+}
 /* Rechner: Linie unter dem aktiven Eintrag, direkt unterhalb der Leiste — ein zweiter Ausschnitt desselben Farbbands
    wie das Fenster (Band und Lage setzt main.js 2), gleicher Takt: stehen beide an derselben Stelle, stimmen die Farben */
 .nav__under{display:none}
@@ -378,9 +383,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
     .title,.tagline{animation:drift linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
     .tagline{animation-name:drift-s}
     @keyframes drift-s{from{transform:translateY(2rem)}to{transform:translateY(-2rem)}}
-    .num{animation:drift-l linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
     @keyframes drift  {from{transform:translateY(3.5rem)}to{transform:translateY(-3.5rem)}}
-    @keyframes drift-l{from{translate:0 22%}to{translate:0 -22%}}
   }
 }
 @media (prefers-reduced-motion:reduce){
