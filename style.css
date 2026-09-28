@@ -97,7 +97,19 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   content:"";position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--pill);   /* volle Höhe */
 }
 .nav a.in-win{color:var(--on)}
-.nav a.nav-end.in-win{color:var(--end-on)}                    /* dunkelgraues Fenster: helle Schrift */                          /* im Farbfenster: dunkle Schrift, auch im Dunkelmodus */
+.nav a.nav-end.in-win{color:var(--end-on)}               /* dunkelgraues Fenster: helle Schrift; sonst im Farbfenster dunkle Schrift */
+/* Volle Navigation (≥ 1024 px): das Fenster gleitet über die Einträge — die Schrift wechselt die Farbe genau an
+   seinen Kanten, in jedem Bild (main.js 2 setzt --wl/--wr = Fensterkanten, --x = Lage des Eintrags), kein Überblenden */
+@media (min-width:1024px){
+  .nav{--wl:0px;--wr:0px}
+  .bar .nav a,.bar .nav a.in-win,.bar .nav a.nav-end.in-win{
+    --x:0px;color:transparent;-webkit-background-clip:text;background-clip:text;transition:none;
+    background-image:linear-gradient(to right,var(--ink) calc(var(--wl) - var(--x)),var(--on-c) calc(var(--wl) - var(--x)),
+      var(--on-c) calc(var(--wr) - var(--x)),var(--ink) calc(var(--wr) - var(--x)));
+  }
+  .bar .nav a{--on-c:var(--on)}                         /* Schrift im Fenster: dunkel … */
+  .bar .nav a.nav-end{--on-c:var(--end-on)}              /* … auf dem dunkelgrauen Fenster von »project urls« hell */
+}
 /* Band aus Projektfarben, je Eintrag eine Fläche mit harter Kante; das Rechteck ist ein Fenster darauf.
    Gleitet es über eine Kante, wandert der Farbwechsel mit durch das Rechteck. */
 .nav__hl{

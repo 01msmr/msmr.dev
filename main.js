@@ -141,7 +141,26 @@ function paintBand(){
   if (narrow.matches) { hl.style.backgroundImage = under.style.backgroundImage = 'none'; return; }   // schmal: eine Farbe, die überblendet (placeHl)
   hl.style.backgroundColor = '';
   hl.style.backgroundImage = under.style.backgroundImage = `linear-gradient(to right, ${stops.join(',')})`;
+  links.forEach(a => a.style.setProperty('--x', box(a).l + hl.offsetLeft + 'px'));   // Lage im Streifen, für die Schriftfarbe (paintText)
+  paintText();
 }
+/* Volle Navigation: Schriftfarbe genau an den Kanten des Fensters — auch während es gleitet. Die Kanten kommen aus
+   dem tatsächlich gezeichneten Ausschnitt (clip-path mitten im Übergang), daher Bild für Bild, solange er läuft. */
+const fullNav = matchMedia('(min-width:1024px)');
+function paintText(){
+  if (!fullNav.matches) return;
+  const m = getComputedStyle(hl).clipPath.match(/-?[\d.]+px/g);
+  if (!m || m.length < 4) return;
+  const [, R, , L] = m.map(parseFloat), x0 = hl.offsetLeft;
+  nav.style.setProperty('--wl', x0 + L + 'px');
+  nav.style.setProperty('--wr', x0 + hl.offsetWidth - R + 'px');
+}
+let textRaf = 0;
+const textLoop = () => { paintText(); textRaf = requestAnimationFrame(textLoop); };
+const textStop = () => { cancelAnimationFrame(textRaf); textRaf = 0; paintText(); };
+hl.addEventListener('transitionrun', () => { if (!textRaf) textRaf = requestAnimationFrame(textLoop); });
+hl.addEventListener('transitionend', textStop);
+hl.addEventListener('transitioncancel', textStop);
 function placeHl(){
   if (aiming) return;                            // Zielen (3): das Fenster steht fest in der Mitte
   // schmal: auf dem Startbildschirm steht das Fenster schon auf 01 — es ist da, bevor die Leiste ins Bild kommt

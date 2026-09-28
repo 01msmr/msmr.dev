@@ -72,7 +72,7 @@ Push to `main`. A GitHub webhook tells the netcup server to pull.
 
 | Width | Nav |
 |---|---|
-| ≥ 1100 px | all names, dividers; a colour window slides between items (following the mouse), its colour switching at the item edges; on desktop a 3 px line (`--nav-line`) just below the bar, with the card starting right beneath it (on touch devices the card starts right at the bar), marks the active item and stays there while the window follows the mouse; it is cut from the same colour band as the window, so wherever both are at the same position their colours match, also while moving |
+| ≥ 1100 px | all names, dividers; a colour window slides between items (following the mouse), its colour switching at the item edges, and the text colour changing exactly at the window's edges while it glides (no fade); on desktop a 3 px line (`--nav-line`) just below the bar, with the card starting right beneath it (on touch devices the card starts right at the bar), marks the active item and stays there while the window follows the mouse; it is cut from the same colour band as the window, so wherever both are at the same position their colours match, also while moving |
 | 1024–1099 px | the same, tighter |
 | 700–1023 px | active item centred beside the wordmark, 2 numbered neighbours per side, `‹ ›` beyond |
 | < 700 px | active item, 1 neighbour per side, `‹ ›` beyond; invisible placeholders keep the layout constant at both ends |
