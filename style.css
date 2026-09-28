@@ -94,7 +94,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 /* Band aus Projektfarben, je Eintrag eine Fläche mit harter Kante; das Rechteck ist ein Fenster darauf.
    Gleitet es über eine Kante, wandert der Farbwechsel mit durch das Rechteck. */
 .nav__hl{
-  position:absolute;inset:0 auto calc(-1 * var(--under,0px)) 0;width:100%;z-index:-1;   /* Rechner: reicht --under unter die Leiste */
+  position:absolute;inset:0 auto 0 0;width:100%;z-index:-1;
   clip-path:inset(0 var(--r,50%) 0 var(--l,50%));
   transition:clip-path .9s var(--out);                   /* startet sofort, läuft weich aus */
 }
@@ -285,8 +285,15 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   paint-order:stroke fill;                                /* Füllung über der Kontur: innere Überlappungen der Glyphen verschwinden, außen bleibt --stroke */
 }
 @media (min-width:1200px){.num{top:.074em}}              /* Rechner: Ziffer ragt leicht über die Oberkante, wie auf dem Telefon */
-/* Rechner: das Fenster ragt --stroke unter die Leiste — eine Linie mit denselben Kanten und Farbwechseln */
-@media (hover:hover) and (pointer:fine){.nav__hl{--under:var(--stroke)}}
+/* Rechner: Linie unter dem aktiven Eintrag, direkt unterhalb der Leiste — ein zweiter Ausschnitt desselben Farbbands
+   wie das Fenster (Band und Lage setzt main.js 2), gleicher Takt: stehen beide an derselben Stelle, stimmen die Farben */
+.nav__under{display:none}
+@media (hover:hover) and (pointer:fine) and (min-width:1024px){
+  .nav__under{
+    display:block;position:absolute;top:100%;left:0;width:100%;height:var(--stroke);pointer-events:none;
+    clip-path:inset(0 var(--r,50%) 0 var(--l,50%));transition:clip-path .9s var(--out);   /* wie .nav__hl */
+  }
+}
 
 .main{align-self:end;display:grid;gap:1.1rem;max-width:62rem}
 .title{margin:0;font-size:var(--t);font-weight:500;line-height:.95;letter-spacing:-.065em}

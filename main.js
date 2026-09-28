@@ -21,6 +21,7 @@ const slides  = [...document.querySelectorAll('.slide')];
 const nav     = document.querySelector('.nav');
 const links   = [...nav.querySelectorAll('a')];
 const hl      = nav.querySelector('.nav__hl');
+const under   = nav.querySelector('.nav__under');   // Rechner: Linie unter dem aktiven Eintrag — zweiter Ausschnitt des Bands
 const endLink = nav.querySelector('.nav-end');
 const count   = document.querySelector('.count b');
 const endPage = document.querySelector('.end');
@@ -137,9 +138,10 @@ function paintBand(){
     const c = navColors[j], b = box(a);                                   // volle Projektfarbe
     stops.push(`${c} ${b.l}px`, `${c} ${b.r}px`);                          // harte Kanten, in px wie das Fenster
   });
-  if (narrow.matches) { hl.style.backgroundImage = 'none'; return; }   // schmal: eine Farbe, die überblendet (placeHl)
+  under.style.left = hl.style.left; under.style.width = hl.style.width;   // Linie: dasselbe Band an derselben Stelle
+  if (narrow.matches) { hl.style.backgroundImage = under.style.backgroundImage = 'none'; return; }   // schmal: eine Farbe, die überblendet (placeHl)
   hl.style.backgroundColor = '';
-  hl.style.backgroundImage = `linear-gradient(to right, ${stops.join(',')})`;
+  hl.style.backgroundImage = under.style.backgroundImage = `linear-gradient(to right, ${stops.join(',')})`;
 }
 function placeHl(){
   if (aiming) return;                            // Zielen (3): das Fenster steht fest in der Mitte
@@ -150,6 +152,11 @@ function placeHl(){
   const L = a ? b.l : 0, R = a ? b.r : box(links[0]).l - 2;   // nichts aktiv: Fenster auf dem unsichtbaren Eintrag 0 (2 px Abstand: kein Farbsaum an 01)
   hl.style.setProperty('--l', L + 'px');
   hl.style.setProperty('--r', (b.w - R) + 'px');
+  // Linie: derselbe Ausschnitt, aber immer auf dem aktiven Eintrag (folgt nicht der Maus) — gleiches Band, gleicher
+  // Takt: wo Fenster und Linie übereinander stehen, haben sie genau dieselben Farben
+  const act = atEnd ? endLink : links[current], u = act ? box(act) : null;
+  under.style.setProperty('--l', (u ? u.l : 0) + 'px');
+  under.style.setProperty('--r', b.w - (u ? u.r : box(links[0]).l - 2) + 'px');
   // schmal: Fenster in der Farbe des Eintrags — der Wechsel blendet schnell über (CSS)
   if (narrow.matches) hl.style.backgroundColor = a ? navColors[links.indexOf(a)] : 'transparent';
 }
