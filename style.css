@@ -68,7 +68,6 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   content:"";position:absolute;inset:0;z-index:-1;opacity:var(--p);
   transform:translateY(var(--nav-y,0px));               /* Startbildschirm: Leiste oben aus dem Bild; fährt herein, während die Wortmarke das letzte Stück steigt */
   background:color-mix(in srgb,var(--bg) 94%,transparent);   /* ohne Blur: günstiger für schwache Grafik */
-  border-bottom:1px solid var(--line);
 }
 .mark{
   position:absolute;left:var(--pad);top:14px;pointer-events:auto;white-space:nowrap;
@@ -147,7 +146,6 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .nav a.edge-l::before{content:"<"}
   .nav a.edge-r::before{content:">"}
   .mark{z-index:2}                                     /* über dem Streifen — ohne eigenen Hintergrund */
-  .bar::before{border-bottom-color:transparent}          /* Leiste nahtlos: Grund und Kante gleich */
   .nav__hl{transition:clip-path var(--nav-t) var(--nav-ease)}   /* schmal: Fenster im Takt des Streifens; Farbe wechselt sofort … */
   .nav a{transition:none}                                /* … zusammen mit der Schriftfarbe */
 }
