@@ -8,7 +8,7 @@ No build step and no framework. The server renders one PHP page from a JSON list
 
 | | |
 |---|---|
-| `projects.json` | **the one source for all projects**: name, colour, links, text, tech, image. Cards, nav, link list, counter and icons are all built from it |
+| `projects.json` | **the one source for all projects**: name, colour, links, text, tech, image. Cards, nav, link list and icons are all built from it |
 | `index.php` | the page template, rendered on every request |
 | `style.css`, `main.js` | styling and behaviour. Shared values (colours, line widths `--stroke`/`--nav-line`, nav timing `--nav-t`/`--nav-ease`) live in `:root` of `style.css`; `main.js` reads the nav timing from there and is organised in numbered blocks (see its header) |
 | `img/<name>.webp` | screenshot of a project: shown on double-click, and drawn as a halftone on click |
@@ -72,8 +72,8 @@ Push to `main`. A GitHub webhook tells the netcup server to pull.
 
 | Width | Nav |
 |---|---|
-| ≥ 1100 px | all names, dividers, counter; a colour window slides between items (following the mouse), its colour switching at the item edges; on desktop a 3 px line (`--nav-line`) just below the bar, with the card starting right beneath it (on touch devices the card starts right at the bar), marks the active item and stays there while the window follows the mouse; it is cut from the same colour band as the window, so wherever both are at the same position their colours match, also while moving |
-| 1024–1099 px | the same, tighter, without counter |
+| ≥ 1100 px | all names, dividers; a colour window slides between items (following the mouse), its colour switching at the item edges; on desktop a 3 px line (`--nav-line`) just below the bar, with the card starting right beneath it (on touch devices the card starts right at the bar), marks the active item and stays there while the window follows the mouse; it is cut from the same colour band as the window, so wherever both are at the same position their colours match, also while moving |
+| 1024–1099 px | the same, tighter |
 | 700–1023 px | active item centred beside the wordmark, 2 numbered neighbours per side, `‹ ›` beyond |
 | < 700 px | active item, 1 neighbour per side, `‹ ›` beyond; invisible placeholders keep the layout constant at both ends |
 
@@ -87,6 +87,7 @@ In the narrow nav the active item always sits in the centre. On a switch the col
 
 - External project links open in a new tab; links to msmr.dev itself don't. Do Day links to its README, because the app itself is private.
 - Colours follow the system's light or dark mode.
+- On desktop the small type (nav, tech details at rest) is 1.8× larger (`--fs-s` in `style.css`); an enlarged detail keeps its size. The full nav grows with the window from 1× at 1024 px to 1.8× where all names fit (≈ 1480 px).
 - Right after the page has loaded, all screenshots are fetched and their halftones drawn one after another, so fast scrolling never meets an unloaded card. Fonts come from this site, not from Google.
 - On touch devices there is no text selection, loupe or grey tap flash, so holding and tapping stay with the page's own gestures. Pinch zoom stays, and project links keep their long-press menu.
 - Motion respects `prefers-reduced-motion`: pages jump instead of gliding, cards fill plainly instead of as a liquid, and the cursor has no trail.

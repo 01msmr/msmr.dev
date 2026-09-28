@@ -52,7 +52,6 @@ $icon = random_int(0, $n - 1);               // Icon in einer der Projektfarben 
     <a href="#links" class="nav-end" style="--hl:var(--end-fill)"><b>↗</b><span>project urls</span></a>
     <span class="nav-pad" aria-hidden="true">00</span><span class="nav-pad" aria-hidden="true">&gt;</span>   <!-- … und rechts vom letzten -->
   </nav>
-  <span class="count" aria-hidden="true"><b>00</b> / <?= two($n) ?></span>
 </header>
 
 <div class="pager">   <!-- Touch: eigener Scrollbereich — iOS rastet dort sauber ein (auf der ganzen Seite erst nachträglich) -->

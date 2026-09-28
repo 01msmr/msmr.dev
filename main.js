@@ -23,7 +23,6 @@ const links   = [...nav.querySelectorAll('a')];
 const hl      = nav.querySelector('.nav__hl');
 const under   = nav.querySelector('.nav__under');   // Rechner: Linie unter dem aktiven Eintrag — zweiter Ausschnitt des Bands
 const endLink = nav.querySelector('.nav-end');
-const count   = document.querySelector('.count b');
 const endPage = document.querySelector('.end');
 const screens = [hero, ...slides, endPage];     // Start, Projekte, Linkseite
 let atEnd = false;                              // Linkseite sichtbar
@@ -209,8 +208,6 @@ function showNav(){                              // Navigation auf das aktive Pr
     // Linkseite sichtbar: »project urls« bleibt aktiv; schmal auf dem Startbildschirm bleibt 01 stehen (Name + Fenster)
     const on = atEnd ? endLink : (links[current] || (narrow.matches ? links[0] : null));
     links.forEach(a => a.toggleAttribute('aria-current', a === on));
-    count.textContent = String(current + 1).padStart(2, '0');
-    count.classList.remove('tick'); void count.offsetWidth; count.classList.add('tick');
     markNeighbours();
     if (narrow.matches && !hadActive) hl.style.transition = 'none';
     relayout(); centerNav();
