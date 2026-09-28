@@ -91,17 +91,10 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 /* Band aus Projektfarben, je Eintrag eine Fläche mit harter Kante; das Rechteck ist ein Fenster darauf.
    Gleitet es über eine Kante, wandert der Farbwechsel mit durch das Rechteck. */
 .nav__hl{
-  position:absolute;inset:0 auto 0 0;width:100%;z-index:-1;
+  position:absolute;inset:0 auto calc(-1 * var(--under,0px)) 0;width:100%;z-index:-1;   /* Rechner: reicht --under unter die Leiste */
   clip-path:inset(0 var(--r,50%) 0 var(--l,50%));
   transition:clip-path .9s var(--out);                   /* startet sofort, läuft weich aus */
 }
-.nav__on{                                                /* Linie unter dem aktiven Eintrag, direkt unterhalb der Leiste; Lage setzt main.js (2) */
-  position:absolute;top:100%;height:1.5px;left:0;width:0;opacity:0;pointer-events:none;   /* so dick wie die Kartenkontur */
-  background:var(--c,transparent);
-  transition:left .9s var(--out),width .9s var(--out),background-color .9s var(--out),opacity .3s;   /* wie das Fenster */
-}
-.nav__on.is-on{opacity:1}
-@media (hover:hover) and (pointer:fine){.nav__on{height:4.5px}}   /* Rechner: dreimal so dick */
 .count{margin-left:auto;font:400 .8125rem var(--mono);color:var(--mute);letter-spacing:0;opacity:var(--p);transform:translateY(var(--nav-y,0px));font-variant-numeric:tabular-nums;white-space:nowrap}
 .count b{font-weight:400;color:var(--ink);display:inline-block}
 .at-end .count{opacity:0;transition:opacity .4s}          /* letzte Seite: keine Seitenzahl */
@@ -152,7 +145,6 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .mark{z-index:2}                                     /* über dem Streifen — ohne eigenen Hintergrund */
   .bar::before{border-bottom-color:transparent}          /* Leiste nahtlos: Grund und Kante gleich */
   .nav__hl{transition:clip-path .45s cubic-bezier(.33,1,.68,1),background-color .45s cubic-bezier(.33,1,.68,1)}   /* schmal: Fenster und Farbe im selben Takt wie der Streifen (NAV_MS, ease-out) */
-  .nav__on{transition:left .45s cubic-bezier(.33,1,.68,1),width .45s cubic-bezier(.33,1,.68,1),background-color .45s cubic-bezier(.33,1,.68,1),opacity .3s}   /* Linie im selben Takt */
 }
 
 /* Zielen (Touch, schmal; main.js 3): Einträge frei gesetzt, alle als Nummer, der im Fenster mit Namen.
@@ -290,6 +282,12 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   paint-order:stroke fill;                                /* Füllung über der Kontur: innere Überlappungen der Glyphen verschwinden, außen bleiben 1,5 px */
 }
 @media (min-width:1200px){.num{top:.074em}}              /* Rechner: Ziffer ragt leicht über die Oberkante, wie auf dem Telefon */
+/* Rechner: Linie unter dem Fenster, Kartenkontur und Konturen der großen Nummer einheitlich 3 px (Touch: keine Linie, 1,5 px) */
+@media (hover:hover) and (pointer:fine){
+  .nav__hl{--under:3px}                                   /* Fenster ragt 3 px unter die Leiste: Linie mit denselben Kanten und Farbwechseln */
+  .card{box-shadow:inset 0 0 0 3px var(--hl)}
+  .num{-webkit-text-stroke-width:6px}                    /* Füllung liegt darüber: außen bleiben 3 px sichtbar */
+}
 
 .main{align-self:end;display:grid;gap:1.1rem;max-width:62rem}
 .title{margin:0;font-size:var(--t);font-weight:500;line-height:.95;letter-spacing:-.065em}
