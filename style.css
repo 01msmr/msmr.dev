@@ -390,7 +390,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 /* Projektlinks: große Schrift, beim Hover die Link-Pille wie bei den Projekttiteln */
 .links{
   align-self:end;display:flex;flex-wrap:wrap;gap:.1em .9em;
-  font-size:clamp(1.8rem,4.4vw,4.4rem);font-weight:500;line-height:1.05;letter-spacing:-.06em;
+  font-size:var(--t);font-weight:500;line-height:.95;letter-spacing:-.065em;   /* wie die Projekttitel (.title) */
 }
 .links a{position:relative;display:inline-block;padding:0 .3em .06em;margin-left:-.3em}
 .links a::before,.links .pill-ghost{background:var(--hl)}     /* Pille in der Projektfarbe */
