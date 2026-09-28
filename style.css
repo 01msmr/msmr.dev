@@ -19,6 +19,9 @@
   --out:cubic-bezier(.16,1,.3,1);       /* expo-out: schnell rein, weich aus */
   --inout:cubic-bezier(.65,0,.35,1);
   --soft:cubic-bezier(.76,0,.24,1);    /* ease-in-out quart: zögert an, gleitet aus */
+  --nav-t:.45s;                         /* Takt der schmalen Navigation (Fenster, Nummern, Zielen) … */
+  --nav-ease:cubic-bezier(.33,1,.68,1); /* … und ihre Kurve (ease-out cubic) — main.js liest beides */
+  --stroke:2px;                         /* alle Linien in Projektfarbe: Kartenkontur, Ziffernkontur, Linie unter dem Fenster */
   --p:1;                                /* Kopf groß → klein, von JS gesetzt */
 
   /* Projektfarben kommen aus projects.json (oklch 70 % …), direkt an den Elementen */
@@ -144,7 +147,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .nav a.edge-r::before{content:">"}
   .mark{z-index:2}                                     /* über dem Streifen — ohne eigenen Hintergrund */
   .bar::before{border-bottom-color:transparent}          /* Leiste nahtlos: Grund und Kante gleich */
-  .nav__hl{transition:clip-path .45s cubic-bezier(.33,1,.68,1),background-color .45s cubic-bezier(.33,1,.68,1)}   /* schmal: Fenster und Farbe im selben Takt wie der Streifen (NAV_MS, ease-out) */
+  .nav__hl{transition:clip-path var(--nav-t) var(--nav-ease),background-color var(--nav-t) var(--nav-ease)}   /* schmal: Fenster und Farbe im Takt des Streifens */
 }
 
 /* Zielen (Touch, schmal; main.js 3): Einträge frei gesetzt, alle als Nummer, der im Fenster mit Namen.
@@ -158,7 +161,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .bar .nav.is-aiming a.aim span{max-width:none}
 .bar .nav.aim-measure a b{display:none}
 .bar .nav.aim-measure a span{display:inline;max-width:none}
-.bar .nav.is-aiming .nav__hl{transition:clip-path .45s cubic-bezier(.33,1,.68,1)}   /* Farbe wechselt sofort mit dem Eintrag */
+.bar .nav.is-aiming .nav__hl{transition:clip-path var(--nav-t) var(--nav-ease)}   /* Farbe wechselt sofort mit dem Eintrag */
 .bar .nav.is-aiming a{transition:none}                  /* Schriftfarbe ebenso: kein Überblenden im Fenster */
 @media (hover:none) and (max-width:1023px){
   .bar .nav{touch-action:none}                           /* Finger auf dem Streifen: zielt (main.js 3), statt ihn zu schieben */
@@ -192,7 +195,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   display:grid;grid-template-rows:auto 1fr auto;gap:1.5rem;
   --t:clamp(2.6rem,7.4vw,7rem);                          /* Titelgröße */
   padding:clamp(1.25rem,3.5vw,3rem);
-  box-shadow:inset 0 0 0 1.5px var(--hl);   /* Kontur liegt unter der Füllung und verschwindet darin */
+  box-shadow:inset 0 0 0 var(--stroke) var(--hl);        /* Kontur liegt unter der Füllung und verschwindet darin */
   --r:140px;                                             /* Rechner */
   border-radius:0 var(--r) var(--r) var(--r);
   clip-path:inset(0 round 0 var(--r) var(--r) var(--r));   /* schneidet auch die gleitende Füllung rund zu */
@@ -278,16 +281,12 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   font-size:clamp(7rem,22vw,20rem);font-weight:600;line-height:.8;letter-spacing:-.08em;
   /* immer: Kontur in Projektfarbe, Füllung im Seitengrund — keine Animation.
      Füllt sich die Karte, verschwindet die Kontur in der Farbe und die Zahl steht weiß darin. */
-  color:var(--bg);-webkit-text-stroke:3px var(--hl);
-  paint-order:stroke fill;                                /* Füllung über der Kontur: innere Überlappungen der Glyphen verschwinden, außen bleiben 1,5 px */
+  color:var(--bg);-webkit-text-stroke:calc(2 * var(--stroke)) var(--hl);
+  paint-order:stroke fill;                                /* Füllung über der Kontur: innere Überlappungen der Glyphen verschwinden, außen bleibt --stroke */
 }
 @media (min-width:1200px){.num{top:.074em}}              /* Rechner: Ziffer ragt leicht über die Oberkante, wie auf dem Telefon */
-/* Rechner: Linie unter dem Fenster, Kartenkontur und Konturen der großen Nummer einheitlich 3 px (Touch: keine Linie, 1,5 px) */
-@media (hover:hover) and (pointer:fine){
-  .nav__hl{--under:3px}                                   /* Fenster ragt 3 px unter die Leiste: Linie mit denselben Kanten und Farbwechseln */
-  .card{box-shadow:inset 0 0 0 3px var(--hl)}
-  .num{-webkit-text-stroke-width:6px}                    /* Füllung liegt darüber: außen bleiben 3 px sichtbar */
-}
+/* Rechner: das Fenster ragt --stroke unter die Leiste — eine Linie mit denselben Kanten und Farbwechseln */
+@media (hover:hover) and (pointer:fine){.nav__hl{--under:var(--stroke)}}
 
 .main{align-self:end;display:grid;gap:1.1rem;max-width:62rem}
 .title{margin:0;font-size:var(--t);font-weight:500;line-height:.95;letter-spacing:-.065em}

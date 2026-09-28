@@ -35,6 +35,10 @@ const Y        = () => pagerOn ? pager.scrollTop : scrollY;
 const toY      = y => pagerOn ? (pager.scrollTop = y) : scrollTo(0, y);
 
 root.classList.add('js');
+// Takt der schmalen Navigation — steht nur im CSS (:root --nav-t, --nav-ease), hier gelesen
+const cssRoot  = getComputedStyle(root);
+const NAV_MS   = parseFloat(cssRoot.getPropertyValue('--nav-t')) * 1000;
+const EASE_OUT = cssRoot.getPropertyValue('--nav-ease').trim();
 
 /* ═══ 1 Wortmarke: bildschirmbreit auf dem Start, schrumpft links oben
    in die Kopfleiste (30 px). Ohne JS steht sie gleich klein dort. ═══ */
@@ -206,7 +210,6 @@ function showNav(){                              // Navigation auf das aktive Pr
     if (wOld) followCentre(wOld, before);
     else if (narrow.matches) { void hl.offsetWidth; hl.style.transition = ''; }
 }
-const EASE_OUT = 'cubic-bezier(.33,1,.68,1)';   // wie .nav__hl im CSS
 function windowWidth(){                          // aktuelle Breite des Farbfensters
   return hl.getBoundingClientRect().width
     - parseFloat(hl.style.getPropertyValue('--l') || 0) - parseFloat(hl.style.getPropertyValue('--r') || 0);
@@ -256,7 +259,6 @@ function navDelay(){                          // Touch: ab Beginn der Füllung g
    Touch: stattdessen Zielen (unten) — der Streifen selbst lässt sich nicht schieben. */
 let scrubbing = false, settleT = 0;
 
-const NAV_MS = 450;                             // Takt der Umschalt-Animation (wie .nav__hl im CSS)
 function centerNav(){                           // aktiven Eintrag sofort in die Mitte des Streifens
   if (!narrow.matches || scrubbing || aiming) return;
   const a = atEnd ? endLink : (links[current] || links[0]);   // Startbildschirm: 01
