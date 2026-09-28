@@ -175,7 +175,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   display:grid;grid-template-rows:auto 1fr auto;gap:1.5rem;
   --t:clamp(2.6rem,7.4vw,7rem);                          /* Titelgröße */
   padding:clamp(1.25rem,3.5vw,3rem);
-  box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--hl) 40%,transparent);   /* Kontur liegt unter der Füllung und verschwindet darin */
+  box-shadow:inset 0 0 0 1.5px var(--hl);   /* Kontur liegt unter der Füllung und verschwindet darin */
   --r:140px;                                             /* Rechner */
   border-radius:0 var(--r) var(--r) var(--r);
   clip-path:inset(0 round 0 var(--r) var(--r) var(--r));   /* schneidet auch die gleitende Füllung rund zu */
@@ -243,7 +243,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .meta .d::after{content:"";position:absolute;inset:-50% -.625rem}
 
 .num{
-  position:absolute;right:calc(clamp(1rem,3vw,2.5rem) + .3em);top:clamp(.5rem,2vw,1.5rem);z-index:-1;   /* .3em ≈ halbe Ziffernbreite */
+  position:absolute;right:calc(clamp(1rem,3vw,2.5rem) + .3em);top:.0714em;z-index:-1;   /* .3em ≈ halbe Ziffernbreite; top wächst mit der Ziffer (= .5rem bei 7rem): ragt überall leicht über die Oberkante wie auf dem Telefon */
   font-size:clamp(7rem,22vw,20rem);font-weight:600;line-height:.8;letter-spacing:-.08em;
   /* immer: Kontur in Projektfarbe, Füllung im Seitengrund — keine Animation.
      Füllt sich die Karte, verschwindet die Kontur in der Farbe und die Zahl steht weiß darin. */

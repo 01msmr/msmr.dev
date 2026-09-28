@@ -1,7 +1,7 @@
 /* msmr.dev — Verhalten der Seite. Blöcke:
    0 Grundlagen (Elemente, Scrollbereich: Fenster bzw. .pager auf Touch)
    1 Wortmarke (Bogen, Schrift-Transition; Leiste gleitet mit dem letzten Stück herein)
-   2 Navigation (aktives Projekt, Farbband/-fenster; schmal: mittig, Nachbarn an den Fensterkanten)
+   2 Navigation (aktives Projekt, Farbband/-fenster; schmal: mittig, Nummern gleiten an ihren neuen Platz)
    3 Schmale Navigation (Auswahlrad)
    4 Blättern (aktives Projekt; Rad/Tasten auf dem Rechner, Wischen auf Touch — je Geste eine Karte,
      im Tempo der Geste; seitliche Gesten)
@@ -182,10 +182,11 @@ function setActive(i, now = false){           // now: Navigation sofort (Auswahl
   clearTimeout(navT);
   navT = setTimeout(() => {
     // schmal: der aktive Eintrag steht sofort und immer mittig; ringsum bewegt sich alles im selben Takt
-    // (NAV_MS, ease-out): Fenster wächst/schrumpft mittig, Farbe blendet über, Nachbarn folgen den Fensterkanten
+    // (NAV_MS, ease-out): Fenster wächst/schrumpft mittig, Farbe blendet über, Nummern gleiten an ihren neuen Platz (followCentre)
     // gab es vorher keinen aktiven Eintrag (Start → 01), steht das Fenster sofort in seiner Breite — nichts, wovon es wachsen könnte
     const hadActive = links.some(a => a.hasAttribute('aria-current'));
     const wOld = narrow.matches && hadActive ? windowWidth() : 0;
+    const before = wOld ? navSpots() : null;
     // Linkseite sichtbar: »project urls« bleibt aktiv; schmal auf dem Startbildschirm bleibt 01 stehen (Name + Fenster)
     const on = atEnd ? endLink : (links[current] || (narrow.matches ? links[0] : null));
     links.forEach(a => a.toggleAttribute('aria-current', a === on));
@@ -194,7 +195,7 @@ function setActive(i, now = false){           // now: Navigation sofort (Auswahl
     markNeighbours();
     if (narrow.matches && !hadActive) hl.style.transition = 'none';
     relayout(); centerNav();
-    if (wOld) followCentre(wOld);
+    if (wOld) followCentre(wOld, before);
     else if (narrow.matches) { void hl.offsetWidth; hl.style.transition = ''; }
   }, now ? 0 : navDelay());
 }
@@ -203,10 +204,15 @@ function windowWidth(){                          // aktuelle Breite des Farbfens
   return hl.getBoundingClientRect().width
     - parseFloat(hl.style.getPropertyValue('--l') || 0) - parseFloat(hl.style.getPropertyValue('--r') || 0);
 }
+const navSpots = () => links.map(a => {        // Mitte und Sichtbarkeit jedes Eintrags (vor dem Umschalten)
+  const r = a.getBoundingClientRect();
+  return { x:r.left + r.width / 2, shown:!a.classList.contains('far') };
+});
 /* Schmal, nach dem Umschalten: Fenster beginnt mittig in der alten Breite und wächst/schrumpft auf den
-   neuen Eintrag; die Nachbarn hängen an den Fensterkanten (um die halbe Breitenänderung versetzt) und
-   gleiten im selben Takt an ihren Platz. */
-function followCentre(wOld){
+   neuen Eintrag. Die Nummern gleiten von ihrem alten Platz an den neuen — die kommende Nummer schiebt
+   die bisherigen seitlich aus der Mitte, links wie rechts; neue kommen von außen herein, alte gleiten
+   hinaus und verblassen. Alles im selben Takt (NAV_MS, ease-out). */
+function followCentre(wOld, before){
   const act = atEnd ? endLink : links[current]; if (!act) return;
   const b = box(act), c = (b.l + b.r) / 2;
   hl.style.transition = 'none';
@@ -215,12 +221,19 @@ function followCentre(wOld){
   void hl.offsetWidth;
   hl.style.transition = '';
   placeHl();
-  const r = act.getBoundingClientRect(), mid = r.left + r.width / 2, shift = (wOld - r.width) / 2;
-  if (Math.abs(shift) < .5) return;
-  links.forEach(a => {
-    if (a === act || a.classList.contains('far')) return;
-    const q = a.getBoundingClientRect(), side = Math.sign(q.left + q.width / 2 - mid);
-    a.animate([{ transform:`translateX(${side * shift}px)` }, { transform:'none' }], { duration:NAV_MS, easing:EASE_OUT });
+  if (!before) return;
+  const now = navSpots();
+  const slot = Math.min(...now.slice(1).map((n, j) => n.x - now[j].x));   // kleinster Abstand zweier Nummern
+  links.forEach((a, j) => {
+    if (a === act) return;                       // der aktive steht sofort in der Mitte
+    const o = before[j], n = now[j], dx = o.x - n.x;
+    const opt = { duration:NAV_MS, easing:EASE_OUT };
+    if (o.shown && n.shown) {
+      if (Math.abs(dx) > .5) a.animate([{ transform:`translateX(${dx}px)` }, { transform:'none' }], opt);
+    } else if (n.shown)                          // kommt von außen herein
+      a.animate([{ transform:`translateX(${Math.sign(dx) * slot}px)`, opacity:0 }, { transform:'none', opacity:1 }], opt);
+    else if (o.shown)                            // wird hinausgeschoben
+      a.animate([{ transform:`translateX(${dx}px)`, opacity:1 }, { transform:`translateX(${dx - Math.sign(dx) * slot}px)`, opacity:0 }], opt);
   });
 }
 function navDelay(){                          // Touch: ab Beginn der Füllung gerechnet; sonst voll
@@ -289,13 +302,13 @@ new ResizeObserver(relayout).observe(nav);   // Breite ändert sich (Schrift, sc
    Pfeiltasten, seitliches Wischen am Trackpad, Wischen am Touchscreen ═══ */
 new IntersectionObserver(([en]) => {
   if (en.isIntersecting === atEnd) return;
-  const wOld = narrow.matches ? windowWidth() : 0;
+  const wOld = narrow.matches ? windowWidth() : 0, before = wOld ? navSpots() : null;
   atEnd = en.isIntersecting;
   root.classList.toggle('at-end', atEnd);
   endLink.toggleAttribute('aria-current', atEnd);
   links.forEach((a, j) => { if (a !== endLink) a.toggleAttribute('aria-current', !atEnd && j === current); });
   relayout(); centerNav();
-  if (wOld) followCentre(wOld);
+  if (wOld) followCentre(wOld, before);
 }, { threshold:.5 }).observe(endPage);
 
 /* ── Blättern mit Rad, Trackpad, Tasten (Rechner) ──
@@ -304,6 +317,11 @@ new IntersectionObserver(([en]) => {
    Start ↔ 01 bis 1,05 s (die Wortmarke braucht Zeit für ihren Bogen). Nachschwung wird geschluckt. */
 let gliding = false, lastWheel = 0;
 const easeOutC = k => 1 - (1 - k) ** 3;
+/* Touch: die Füllung der Zielkarte beginnt 0,33 s vor dem Ende des Gleitens (Flüssigkeit, 7) */
+const FILL_AHEAD = 330;
+let fillAhead = () => {}, aheadT = 0;
+const fillBefore = (i, dur) => { clearTimeout(aheadT); aheadT = setTimeout(() => fillAhead(screens[i]), Math.max(0, dur - FILL_AHEAD)); };
+let glideTouch = null;                           // Touch: Gleiten im .pager (siehe unten)
 function glide(to, dur){
   if (calm.matches) return toY(to);              // reduzierte Bewegung: sofort an der Kante
   const from = Y(), t0 = performance.now();
@@ -327,10 +345,12 @@ const here = () => {                             // Bildschirm, dessen Anfang de
 function go(dir, speed = 0){                     // speed: Tempo der Geste in px/ms (0 = unbekannt)
   if (gliding) return;
   const from = here(), i = Math.max(0, Math.min(screens.length - 1, from + dir));
-  const to = Math.min(screens[i].offsetTop, root.scrollHeight - innerHeight);
+  const max = pagerOn ? pager.scrollHeight - pager.clientHeight : root.scrollHeight - innerHeight;
+  const to = Math.min(screens[i].offsetTop, max);   // Touch: Höhe des .pager, nicht der Seite (sonst immer ganz nach oben)
   const d = Math.abs(to - Y());
   if (d < 1) return;
-  const most = (from <= 1 && i <= 1) ? 1050 : 650;
+  const most = (from <= 1 && i <= 1) ? (pagerOn ? 900 : 1050) : (pagerOn ? 520 : 650);
+  if (pagerOn) return glideTouch(to, most, i);
   glide(to, speed > 0 ? Math.min(most, Math.max(300, 3 * d / speed)) : most);
 }
 addEventListener('keydown', ev => {
@@ -377,10 +397,11 @@ if (pagerOn) {
   const maxY = () => pager.scrollHeight - pager.clientHeight;
   let startY = 0, samples = [], anim = 0, x0 = 0, y0 = 0;
   const screenAt = y => { const t = tops(); let i = 0; while (i + 1 < t.length && t[i + 1] <= y + 2) i++; return i; };   // Bildschirm, in dem y liegt
-  function glideTo(to, dur){                      // ease-out cubic (easeOutC): Anfangstempo 3·Weg/Dauer, am Ende 0
+  function glideTo(to, dur, i){                   // ease-out cubic (easeOutC): Anfangstempo 3·Weg/Dauer, am Ende 0; i: Zielbildschirm
     cancelAnimationFrame(anim);
     const from = pager.scrollTop, d = to - from;
     if (Math.abs(d) < 1 || calm.matches) { pager.scrollTop = to; pager.style.overflowY = ''; return; }
+    fillBefore(i, dur);
     pager.style.overflowY = 'hidden';                  // stoppt den iOS-Schwung
     const t0 = performance.now();
     const tick = now => {
@@ -390,8 +411,9 @@ if (pagerOn) {
     };
     anim = requestAnimationFrame(tick);
   }
+  glideTouch = glideTo;
   pager.addEventListener('touchstart', ev => {
-    cancelAnimationFrame(anim); pager.style.overflowY = '';
+    cancelAnimationFrame(anim); clearTimeout(aheadT); pager.style.overflowY = '';
     startY = pager.scrollTop;
     x0 = ev.touches[0].clientX; y0 = ev.touches[0].clientY;
     samples = [{ y:y0, t:performance.now() }];
@@ -427,7 +449,7 @@ if (pagerOn) {
     // (Start ↔ 01: bis 0,9 s, die Wortmarke braucht Zeit für ihren Bogen).
     const most = (i === 0 && target === 1) || (i === 1 && target === 0) ? 900 : 520;
     const v0 = Math.sign(v) === Math.sign(d) ? Math.abs(v) : 0;
-    glideTo(y2, v0 > 0 ? Math.min(most, Math.max(250, 3 * Math.abs(d) / v0)) : most);
+    glideTo(y2, v0 > 0 ? Math.min(most, Math.max(250, 3 * Math.abs(d) / v0)) : most, target);
   }, { passive:true });
 }
 
@@ -443,7 +465,8 @@ document.addEventListener('click', ev => {
 });
 
 /* ═══ 5 Projektbild und Details
-   Klick: Raster ein/aus. Doppelklick (nur bei Raster): volles Farbbild ↔ Raster.
+   Klick: Raster ein/aus. Doppelklick (nur bei Raster): volles Farbbild ↔ Raster; Touch: Doppeltipp, auch ohne Raster.
+   Alle Bilder werden nach dem Laden der Seite vorab geladen und gerastert.
    Nach 11 s ohne Aktion in der Karte blendet jedes Bild aus (4 s); danach wieder mit Klick beginnen.
    Ganz aus dem Bild geblättert: Bild aus, offenes Detail zu — die Karte kommt leer zurück. ═══ */
 const SHOW_FOR = 11000;                     // danach blendet das Bild aus
@@ -516,6 +539,9 @@ const away = new IntersectionObserver(es => es.forEach(en => {   // ganz weggebl
 }));
 document.querySelectorAll('.card').forEach(c => away.observe(c));
 
+const preload = [];
+addEventListener('load', () => setTimeout(() => preload.reduce((p, f) => p.then(f), Promise.resolve()), 300));   // nach dem Laden, eins nach dem anderen
+
 document.querySelectorAll('.card[data-shot]').forEach(card => {
   let clickTimer, hideTimer, mode = null;     // null | 'shot' | 'full'
   const canvas = card.querySelector('canvas.shot');
@@ -531,7 +557,7 @@ document.querySelectorAll('.card[data-shot]').forEach(card => {
   const draw = () => load().then(() => {
     if (img.naturalWidth && canvas.dataset.size !== canvas.clientWidth + 'x' + canvas.clientHeight) halftone(canvas, img);
   });
-  card.addEventListener('pointerenter', load, { once:true });
+  preload.push(draw);                          // alle Bilder vorab laden und rastern: kein Warten beim Blättern
   addEventListener('resize', () => { if (canvas.dataset.size) { delete canvas.dataset.size; if (mode) draw(); } });
   const at = ev => {
     const r = card.getBoundingClientRect();
@@ -555,13 +581,22 @@ document.querySelectorAll('.card[data-shot]').forEach(card => {
   card.addEventListener('mousedown', ev => { if (ev.detail > 1 && !ev.target.closest('a')) ev.preventDefault(); });   // kein Markieren beim Doppelklick
   // Touch: ein Tipp auf ein Detail (Technik) vergrößert nur das Detail — kein Tipp auf die Karte
   const ignore = ev => ev.target.closest('a') || (pagerOn && ev.target.closest('.meta .d'));
+  let lastTap = 0;
   card.addEventListener('click', ev => {
-    if (ignore(ev) || ev.detail > 1 || mode === 'full') return;
+    if (ignore(ev)) return;
+    if (pagerOn) {                             // Touch: Doppeltipp selbst erkennen (iOS meldet kein verlässliches dblclick)
+      const now = performance.now();
+      if (now - lastTap < 300) {               // volles Bild ↔ Raster, vom Finger aus — auch direkt aus der leeren Karte
+        lastTap = 0; clearTimeout(clickTimer); at(ev); show(mode === 'full' ? 'shot' : 'full'); return;
+      }
+      lastTap = now;
+    }
+    if (ev.detail > 1 || mode === 'full') return;
     clearTimeout(clickTimer);
     clickTimer = setTimeout(() => show(mode === 'shot' ? null : 'shot'), 240);   // auf möglichen Doppelklick warten
   });
   card.addEventListener('dblclick', ev => {
-    if (ignore(ev)) return;
+    if (pagerOn || ignore(ev)) return;        // Touch: siehe oben
     clearTimeout(clickTimer);
     if (mode === 'shot') { at(ev); show('full'); }          // öffnet sich vom Cursor aus …
     else if (mode === 'full') { at(ev); show('shot'); }     // … und schließt sich zum Cursor hin
@@ -608,6 +643,8 @@ if (!calm.matches) {
   const PACE = .5;                   // Wellen-Tempo: halb so schnell — sehr ruhig
   const FULL = 1.02;          // Ziel knapp über der Kante: hält oben an, ohne einen Spalt zu lassen
   const live = new Set(); let raf = 0, t0 = 0;
+  const fills = new Map();                                   // Touch: Bildschirm → Füllung starten
+  fillAhead = el => fills.get(el)?.();                       // 0,33 s vor Ende des Gleitens (4)
 
   document.querySelectorAll('.card').forEach(card => {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -625,12 +662,16 @@ if (!calm.matches) {
       const screen = card.closest('.slide, .end');
       const IN = .994 * Math.min(1, innerHeight / screen.offsetHeight);   // Start bei 99,4 % im Bild
       const GONE = .002;                                  // außer Sicht: unter 0,2 % (< 2 px)
+      const fill = () => {
+        if (s.target === FULL) return;
+        s.target = FULL; fillStart = performance.now(); s.mx = s.mx ?? .5; wake();
+        const i = slides.indexOf(screen);
+        if (i >= 0) setActive(i, true);                    // Navigation startet zugleich mit dem Steigen
+      };
+      fills.set(screen, fill);
       new IntersectionObserver(([en]) => {
-        if (en.intersectionRatio >= IN && s.target !== FULL) {
-          s.target = FULL; fillStart = performance.now(); s.mx = s.mx ?? .5; wake();
-          const i = slides.indexOf(screen);
-          if (i >= 0) setActive(i, true);                  // Navigation startet zugleich mit dem Steigen
-        } else if (en.intersectionRatio < GONE && s.target === FULL) {   // »isIntersecting« bleibt an der Kante wahr
+        if (en.intersectionRatio >= IN) fill();          // Rückfall, falls kein Gleiten voranging (z. B. Link)
+        else if (en.intersectionRatio < GONE && s.target === FULL) {   // »isIntersecting« bleibt an der Kante wahr
           s.target = 0; s.level = 0; s.lv = 0; s.mx = null; s.y.fill(0); s.v.fill(0); draw(s);   // außer Sicht: leer
         }
       }, { threshold:[GONE, IN] }).observe(screen);

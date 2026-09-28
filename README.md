@@ -64,7 +64,7 @@ Push to `main`. A GitHub webhook tells the netcup server to pull.
 **Scrolling: one project per gesture.** The script moves the page, so every gesture lands exactly on a card edge. On desktop, CSS scroll snapping stays only as a backstop, for example when you drag the scrollbar.
 
 - **Desktop:** a mouse-wheel notch or trackpad swipe moves one card; trackpad momentum is ignored. The glide takes over the speed of the gesture (ease-out, duration = 3 × distance ÷ speed), 0.3–0.65 s, start ↔ 01 up to 1.05 s. Arrow keys (↑ ↓ ← →), Page Up/Down and Space move one card, and so does a sideways trackpad swipe.
-- **Touch (iPhone/iPad):** the page scrolls inside `.pager` (iOS snaps the whole page only after the momentum and then corrects visibly). The finger drives the page 1:1; on release a quick swipe or a quarter-screen drag moves one card, otherwise it springs back. The glide continues at the finger's release speed and settles on the edge, 0.25–0.52 s, start ↔ 01 up to 0.9 s. Sideways swipes switch projects. Cards taller than the screen scroll freely inside.
+- **Touch (iPhone/iPad):** the page scrolls inside `.pager` (iOS snaps the whole page only after the momentum and then corrects visibly). The finger drives the page 1:1; on release a quick swipe or a quarter-screen drag moves one card, otherwise it springs back. The glide continues at the finger's release speed and settles on the edge, 0.25–0.52 s, start ↔ 01 up to 0.9 s. The liquid in the target card starts rising 0.33 s before the glide ends. Sideways swipes move one card, like vertical ones. Cards taller than the screen scroll freely inside.
 
 **Header.** The wordmark shrinks along one Bézier curve (left first, then up) from the full-width start screen into the header, as a real font-size transition. The header bar and nav slide in by one bar height at the same speed as the wordmark's last rise and arrive with it; on touch devices without fading.
 
@@ -77,16 +77,16 @@ Push to `main`. A GitHub webhook tells the netcup server to pull.
 | 700–1023 px | active item centred beside the wordmark, 2 numbered neighbours per side, `‹ ›` beyond |
 | < 700 px | active item, 1 neighbour per side, `‹ ›` beyond; invisible placeholders keep the layout constant at both ends |
 
-In the narrow nav the active item always sits in the centre. On a switch the colour window resizes around it and crossfades, and the neighbours follow the window's edges, all in 0.45 s. Swiping the strip works like a picker: numbers only while swiping, the centred item becomes active on release.
+In the narrow nav the active item always sits in the centre. On a switch the colour window resizes around it and crossfades, and the numbers slide to their new places: the incoming number pushes the others sideways out of the centre, on both sides; new numbers slide in from outside and old ones slide out and fade, all in 0.45 s. Swiping the strip works like a picker: numbers only while swiping, the centred item becomes active on release.
 
 **Cards.** Hover (desktop) fills a card like a thick liquid that bulges toward the cursor. On touch devices the card fills once it has settled and stays full while it leaves the screen; the nav switches at the same moment. Keyboard focus fills a card as well.
 
-**Image and details.** A click (tap) on a card shows a halftone of the screenshot, drawn in the browser; a double-click on the halftone shows the full screenshot. After 11 s without activity the image fades out. Tech details grow on hover; on touch devices a tap enlarges one, and while it is open the next tap anywhere only closes it (no halftone, no link). A card scrolled fully out of view comes back plain: image hidden, detail closed.
+**Image and details.** A click (tap) on a card shows a halftone of the screenshot, drawn in the browser; a double-click on the halftone shows the full screenshot. On touch devices a double-tap shows the full screenshot straight away, and another double-tap goes back to the halftone. After 11 s without activity the image fades out. Tech details grow on hover; on touch devices a tap enlarges one, and while it is open the next tap anywhere only closes it (no halftone, no link). A card scrolled fully out of view comes back plain: image hidden, detail closed.
 
 ## Notes
 
 - External project links open in a new tab; links to msmr.dev itself don't. Do Day links to its README, because the app itself is private.
 - Colours follow the system's light or dark mode.
-- Images load only when a card is first touched or hovered, and fonts come from this site, not from Google.
+- Right after the page has loaded, all screenshots are fetched and their halftones drawn one after another, so fast scrolling never meets an unloaded card. Fonts come from this site, not from Google.
 - Motion respects `prefers-reduced-motion`: pages jump instead of gliding, cards fill plainly instead of as a liquid, and the cursor has no trail.
 - Without JavaScript the page still reads top to bottom, with a small static wordmark.
