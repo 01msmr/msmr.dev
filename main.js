@@ -119,7 +119,8 @@ const box = a => {                           // genaue Lage eines Eintrags im Ba
 const zeroWidth = () => narrow.matches
   ? links[0].offsetWidth
   : parseFloat(getComputedStyle(root).getPropertyValue('--mark-w')) || 160;
-let navColors = null;                        // Projektfarben der Einträge — ändern sich nie, einmal lesen
+let navColors = null;                        // Farben der Einträge — einmal lesen; »project urls« hängt vom Hell-/Dunkelmodus ab
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { navColors = null; relayout(); });   // Moduswechsel: neu lesen
 function paintBand(){
   navColors = navColors || links.map(a => getComputedStyle(a).getPropertyValue('--hl'));
   const V = zeroWidth();
