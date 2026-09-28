@@ -290,6 +290,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
    wie das Fenster (Band und Lage setzt main.js 2), gleicher Takt: stehen beide an derselben Stelle, stimmen die Farben */
 .nav__under{display:none}
 @media (hover:hover) and (pointer:fine) and (min-width:1024px){
+  .nav a:not(:last-of-type)::after{bottom:calc(-1 * var(--nav-line))}   /* Trennstriche schneiden auch die Linie — wie das Fenster */
   .nav__under{
     display:block;position:absolute;top:100%;left:0;width:100%;height:var(--nav-line);pointer-events:none;
     clip-path:inset(0 var(--r,50%) 0 var(--l,50%));transition:clip-path .9s var(--out);   /* wie .nav__hl */
