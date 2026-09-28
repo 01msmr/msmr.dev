@@ -57,7 +57,7 @@ function measure(){
   root.style.setProperty('--mark-w', markW + 32 + 'px');
   slot.style.height = mark.offsetHeight * big * .86 + 'px';
   slotTop = slot.offsetTop;
-  travel = Math.max(1, hero.offsetHeight * .6);
+  travel = Math.max(1, hero.offsetHeight * .72);    // Weg bis zur Kopfleiste: endet später, wo das Gleiten schon langsamer ist
   lede.style.transform = ''; lede.style.opacity = '';
   ledeTop = lede.offsetTop; ledeH = lede.offsetHeight;
   barH = parseFloat(getComputedStyle(root).getPropertyValue('--bar'));
@@ -73,7 +73,7 @@ function update(force){
   // EIN Bogen: die Mitte der Marke läuft auf einer quadratischen Bézierkurve
   // von der Mitte der großen Marke zur Mitte der kleinen. Der Kontrollpunkt liegt
   // auf Höhe des Starts und über dem Ziel — also erst nach links, dann nach oben.
-  const t  = (1 - Math.cos(Math.PI * p)) / 2;            // ease-in-out sine
+  const t  = 1 - (1 - (1 - Math.cos(Math.PI * p)) / 2) ** 1.5;   // ease-in-out sine, das Ende länger ausgerollt
   const s  = big ** (1 - t);                             // Größe: logarithmisch, wirkt gleichmäßig
   const h  = 30;                                         // Zeilenhöhe der kleinen Marke
   const sx = padX + markW * big / 2, sy = slotTop + h * big / 2;   // Start (Mitte)
