@@ -239,6 +239,11 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 @media (hover:none){
   .slide.is-active .card::before,.at-end .card--end::before{transform:none}
   .card{touch-action:manipulation}                       /* Doppeltippen = Doppelklick, kein Zoom */
+  /* Keine Lupe, kein Markieren, kein grauer Tipp-Blitz: Halten und Tippen gehören den Gesten der Seite.
+     Zoomen mit zwei Fingern bleibt. Projektlinks behalten ihr Menü beim Halten (Link kopieren, Vorschau). */
+  html{-webkit-tap-highlight-color:transparent}
+  body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  :is(.title,.links) a{-webkit-touch-callout:default}
 }
 
 .meta{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:1.4em 1.25rem;max-width:calc(100% - 12rem);font:400 .8125rem/1.4 var(--mono);color:var(--ink);letter-spacing:0}   /* voll deckend */

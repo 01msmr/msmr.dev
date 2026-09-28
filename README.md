@@ -88,5 +88,6 @@ In the narrow nav the active item always sits in the centre. On a switch the col
 - External project links open in a new tab; links to msmr.dev itself don't. Do Day links to its README, because the app itself is private.
 - Colours follow the system's light or dark mode.
 - Right after the page has loaded, all screenshots are fetched and their halftones drawn one after another, so fast scrolling never meets an unloaded card. Fonts come from this site, not from Google.
+- On touch devices there is no text selection, loupe or grey tap flash, so holding and tapping stay with the page's own gestures. Pinch zoom stays, and project links keep their long-press menu.
 - Motion respects `prefers-reduced-motion`: pages jump instead of gliding, cards fill plainly instead of as a liquid, and the cursor has no trail.
 - Without JavaScript the page still reads top to bottom, with a small static wordmark.
