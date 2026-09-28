@@ -148,7 +148,8 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .nav a.edge-r::before{content:">"}
   .mark{z-index:2}                                     /* über dem Streifen — ohne eigenen Hintergrund */
   .bar::before{border-bottom-color:transparent}          /* Leiste nahtlos: Grund und Kante gleich */
-  .nav__hl{transition:clip-path var(--nav-t) var(--nav-ease),background-color var(--nav-t) var(--nav-ease)}   /* schmal: Fenster und Farbe im Takt des Streifens */
+  .nav__hl{transition:clip-path var(--nav-t) var(--nav-ease)}   /* schmal: Fenster im Takt des Streifens; Farbe wechselt sofort … */
+  .nav a{transition:none}                                /* … zusammen mit der Schriftfarbe */
 }
 
 /* Zielen (Touch, schmal; main.js 3): Einträge frei gesetzt, alle als Nummer, der im Fenster mit Namen.
@@ -162,8 +163,6 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .bar .nav.is-aiming a.aim span{max-width:none}
 .bar .nav.aim-measure a b{display:none}
 .bar .nav.aim-measure a span{display:inline;max-width:none}
-.bar .nav.is-aiming .nav__hl{transition:clip-path var(--nav-t) var(--nav-ease)}   /* Farbe wechselt sofort mit dem Eintrag */
-.bar .nav.is-aiming a{transition:none}                  /* Schriftfarbe ebenso: kein Überblenden im Fenster */
 @media (hover:none) and (max-width:1023px){
   .bar .nav{touch-action:none}                           /* Finger auf dem Streifen: zielt (main.js 3), statt ihn zu schieben */
 }

@@ -222,16 +222,19 @@ function windowWidth(){                          // aktuelle Breite des Farbfens
     - parseFloat(hl.style.getPropertyValue('--l') || 0) - parseFloat(hl.style.getPropertyValue('--r') || 0);
 }
 let settleHl = 0;
-const navSpots = () => links.map(a => {        // Mitte und Sichtbarkeit jedes Eintrags (vor dem Umschalten)
+const navSpots = () => links.map(a => {        // Lage und Zustand jedes Eintrags (vor dem Umschalten)
   const r = a.getBoundingClientRect();
-  return { x:r.left + r.width / 2, shown:!a.classList.contains('far') };
+  return { x:r.left + r.width / 2, shown:!a.classList.contains('far'), inWin:a.classList.contains('in-win'),
+           edge:a.matches('.edge-l, .edge-r') };
 });
 /* Schmal, nach dem Umschalten: Fenster beginnt mittig in der alten Breite und wächst/schrumpft auf den
-   neuen Eintrag. Die Nummern gleiten von ihrem alten Platz an den neuen — die kommende Nummer schiebt
-   die bisherigen seitlich aus der Mitte, links wie rechts; neue kommen von außen herein, alte gleiten
-   hinaus und verblassen. Alles im selben Takt (NAV_MS, ease-out). */
+   neuen Eintrag; Fenster- und Schriftfarbe wechseln sofort, zusammen. Keine Nummer gleitet durchs Fenster:
+   der neue Eintrag steht gleich als Name darin, der bisherige beginnt direkt am Fensterrand und gleitet
+   hinaus. Die übrigen gleiten von ihrem alten Platz an den neuen; wer verschwindet, verblasst zuerst,
+   wer erscheint oder zu ‹ › wird, blendet danach ein — nie zwei übereinander. Alles im selben Takt. */
 function followCentre(wOld, before){
   const act = atEnd ? endLink : links[current]; if (!act) return;
+  links.forEach(a => a.getAnimations().forEach(x => x.cancel()));   // früheres Gleiten beenden: Ruheplätze messen
   const b = box(act), c = (b.l + b.r) / 2;
   hl.style.transition = 'none';
   hl.style.setProperty('--l', c - wOld / 2 + 'px');
@@ -242,17 +245,23 @@ function followCentre(wOld, before){
   if (!before) return;
   const now = navSpots();
   const slot = Math.min(...now.slice(1).map((n, j) => n.x - now[j].x));   // kleinster Abstand zweier Nummern
+  const r = act.getBoundingClientRect(), mid = r.left + r.width / 2;      // Fenstermitte auf dem Bildschirm
   clearTimeout(settleHl); settleHl = setTimeout(placeHl, NAV_MS + 30);   // zur Sicherheit: nach dem Gleiten noch einmal genau auf den Eintrag
+  const opt = { duration:NAV_MS, easing:EASE_OUT };
+  const move = dx => `translateX(${dx}px)`;
   links.forEach((a, j) => {
-    if (a === act) return;                       // der aktive steht sofort in der Mitte
-    const o = before[j], n = now[j], dx = o.x - n.x;
-    const opt = { duration:NAV_MS, easing:EASE_OUT };
-    if (o.shown && n.shown) {
-      if (Math.abs(dx) > .5) a.animate([{ transform:`translateX(${dx}px)` }, { transform:'none' }], opt);
-    } else if (n.shown)                          // kommt von außen herein
-      a.animate([{ transform:`translateX(${Math.sign(dx) * slot}px)`, opacity:0 }, { transform:'none', opacity:1 }], opt);
-    else if (o.shown)                            // wird hinausgeschoben
-      a.animate([{ transform:`translateX(${dx}px)`, opacity:1 }, { transform:`translateX(${dx - Math.sign(dx) * slot}px)`, opacity:0 }], opt);
+    if (a === act) return;                       // der neue steht sofort als Name im Fenster
+    const o = before[j], n = now[j];
+    let dx = o.x - n.x;
+    if (o.inWin) {                               // der bisherige: beginnt außen am alten Fensterrand
+      const side = Math.sign(n.x - mid) || 1, w = a.getBoundingClientRect().width;
+      dx = mid + side * (wOld / 2 + w / 2) - n.x;
+    }
+    if (!n.shown) {                              // verschwindet: gleitet hinaus, zuerst verblasst
+      if (o.shown) a.animate([{ transform:move(dx), opacity:1 }, { opacity:0, offset:.4 }, { transform:move(dx - Math.sign(dx) * slot), opacity:0 }], opt);
+    } else if (!o.shown || o.edge !== n.edge)    // erscheint oder wird Nummer ↔ ‹ ›: blendet danach ein
+      a.animate([{ transform:move(o.shown ? dx : Math.sign(dx) * slot), opacity:0 }, { opacity:0, offset:.4 }, { transform:'none', opacity:1 }], opt);
+    else if (Math.abs(dx) > .5) a.animate([{ transform:move(dx) }, { transform:'none' }], opt);
   });
 }
 function navDelay(){                          // Touch: ab Beginn der Füllung gerechnet; sonst voll
@@ -330,7 +339,17 @@ if (pagerOn) {
     const spots = navSpots();
     aiming = true; aimed = -1; dragged = false;
     from = f = f0 = links.indexOf(a); x0 = ev.clientX;
+    // Streifen auf den Anfang: das Fenster gleitet mit dem Inhalt mit — ausgleichen, damit es auf dem Bildschirm
+    // stehen bleibt und von dort aus mittig wächst (sonst springt es erst zur Seite und kommt zurück)
+    const sOld = nav.scrollLeft;
     nav.scrollLeft = 0;
+    if (sOld) {
+      hl.style.transition = 'none';
+      hl.style.setProperty('--l', parseFloat(hl.style.getPropertyValue('--l')) - sOld + 'px');
+      hl.style.setProperty('--r', parseFloat(hl.style.getPropertyValue('--r')) + sOld + 'px');
+      void hl.offsetWidth;
+      hl.style.transition = '';
+    }
     nav.classList.add('is-aiming');
     const probe = links.find(l => l !== a) || a;
     gap = probe.offsetWidth;                     // Abstand zweier Nummern (Nummer + Innenabstand)
