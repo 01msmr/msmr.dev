@@ -243,13 +243,14 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .meta .d::after{content:"";position:absolute;inset:-50% -.625rem}
 
 .num{
-  position:absolute;right:calc(clamp(1rem,3vw,2.5rem) + .3em);top:.0714em;z-index:-1;   /* .3em ≈ halbe Ziffernbreite; top wächst mit der Ziffer (= .5rem bei 7rem): ragt überall leicht über die Oberkante wie auf dem Telefon */
+  position:absolute;right:calc(clamp(1rem,3vw,2.5rem) + .3em);top:clamp(.5rem,2vw,1.5rem);z-index:-1;   /* .3em ≈ halbe Ziffernbreite */
   font-size:clamp(7rem,22vw,20rem);font-weight:600;line-height:.8;letter-spacing:-.08em;
   /* immer: Kontur in Projektfarbe, Füllung im Seitengrund — keine Animation.
      Füllt sich die Karte, verschwindet die Kontur in der Farbe und die Zahl steht weiß darin. */
   color:var(--bg);-webkit-text-stroke:3px var(--hl);
   paint-order:stroke fill;                                /* Füllung über der Kontur: innere Überlappungen der Glyphen verschwinden, außen bleiben 1,5 px */
 }
+@media (min-width:1200px){.num{top:.074em}}              /* Rechner: Ziffer ragt leicht über die Oberkante, wie auf dem Telefon */
 
 .main{align-self:end;display:grid;gap:1.1rem;max-width:62rem}
 .title{margin:0;font-size:var(--t);font-weight:500;line-height:.95;letter-spacing:-.065em}
