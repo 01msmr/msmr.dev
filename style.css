@@ -188,7 +188,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 
 /* ── Projekt: ein Bildschirm pro Projekt ── */
 .slide{
-  min-height:100svh;padding:calc(var(--bar) + 1rem) var(--pad) 1rem;
+  min-height:100svh;padding:var(--bar) var(--pad) 1rem;   /* Karte beginnt direkt an der Leiste (Unterkante des Fensters) */
   display:grid;scroll-snap-align:start;
 }
 .card{
@@ -348,9 +348,11 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 /* ── Fuß ── */
 .end{
   min-height:100svh;scroll-snap-align:start;
-  padding:calc(var(--bar) + 1rem) var(--pad) 1rem;
+  padding:var(--bar) var(--pad) 1rem;
   display:grid;
 }
+/* Rechner: Karte beginnt direkt unter der Linie des aktiven Eintrags — kein Abstand dazwischen */
+@media (hover:hover) and (pointer:fine) and (min-width:1024px){.slide,.end{padding-top:calc(var(--bar) + var(--nav-line))}}
 .card--end{--hl:var(--end-fill);grid-template-rows:auto 1fr}   /* hell: dunkelgrau füllen, dunkel: hellgrau */
 /* Unterzeile wird beim letzten Scrollen zur großen Überschrift */
 .end__head{
