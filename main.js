@@ -306,8 +306,9 @@ if (pagerOn) {
     }
     links.forEach((a, j) => {
       const d = j - f;
-      // neben dem Fenster je eine Nummer pro gap; beim Wechsel taucht die Nummer am Fensterrand ein bzw. auf
-      const x = j === k ? c : c + Math.sign(d) * (W / 2 + gap / 2) + (d - Math.sign(d)) * gap;
+      // neben dem Fenster je eine Nummer pro gap; keine Nummer ragt ins Fenster: die kommende hält am Rand
+      // und springt beim Wechsel direkt als Name hinein — gleich in Fenster- und Schriftfarbe
+      const x = j === k ? c : c + Math.sign(d) * (W / 2 + gap / 2) + (d - Math.sign(d) / 2) * gap;
       a.style.transform = `translateX(${x - widths[j] / 2}px)`;
     });
   };
