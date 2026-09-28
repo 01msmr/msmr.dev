@@ -87,7 +87,7 @@ In the narrow nav the active item always sits in the centre. On a switch the col
 
 - External project links open in a new tab; links to msmr.dev itself don't. Do Day links to its README, because the app itself is private.
 - Colours follow the system's light or dark mode.
-- On desktop the small type (nav, tech details at rest) is 1.8× larger (`--fs-s` in `style.css`); an enlarged detail keeps its size. The full nav grows with the window from 1× at 1024 px to 1.8× where all names fit (≈ 1480 px).
+- On desktop the small type (nav, tech details at rest) is 1.8× larger (`--fs-s` in `style.css`); an enlarged detail keeps its size. The full nav grows with the window from 1× at 1024 px to 1.8× where all names fit (≈ 1560 px).
 - Right after the page has loaded, all screenshots are fetched and their halftones drawn one after another, so fast scrolling never meets an unloaded card. Fonts come from this site, not from Google.
 - On touch devices there is no text selection, loupe or grey tap flash, so holding and tapping stay with the page's own gestures. Pinch zoom stays, and project links keep their long-press menu.
 - Motion respects `prefers-reduced-motion`: pages jump instead of gliding, cards fill plainly instead of as a liquid, and the cursor has no trail.
