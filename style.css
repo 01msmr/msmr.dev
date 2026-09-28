@@ -243,7 +243,13 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 
 .meta{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:1.4em 1.25rem;max-width:calc(100% - 12rem);font:400 .8125rem/1.4 var(--mono);color:var(--ink);letter-spacing:0}   /* voll deckend */
 .meta .d{position:relative;display:inline-flex}          /* Trefferfläche bleibt in Normalgröße … */
-.meta .d.on{z-index:3;color:var(--pill)}   /* .on: angetipptes Detail (Touch, main.js 5) */
+.meta .d.on{z-index:3;color:var(--hl)}   /* .on: angetipptes Detail (Touch, main.js 5); leere Karte: in Projektfarbe … */
+/* … gefüllte Karte: weiß. Ohne Flüssigkeit: nach den Zuständen der glatten Füllung */
+.card.filled .meta .d.on,html:not(.liquid) .slide.is-active .card .meta .d.on{color:var(--pill)}
+/* Flüssigkeit: der Wechsel geschieht unsichtbar genau an der Oberfläche — darunter weiß, darüber Projektfarbe
+   (--cut setzt main.js 7 je Bild); ganz voll (.filled) schlicht weiß */
+.liquid .card:not(.filled) .meta .d.on .dx{color:transparent;-webkit-background-clip:text;background-clip:text;
+  background-image:linear-gradient(var(--hl) var(--cut,100%),var(--pill) var(--cut,100%))}
 .meta .dx{                                                 /* … nur die innere Schrift wächst und fängt keine Maus */
   display:inline-flex;align-items:center;pointer-events:none;
   transform-origin:0 50%;transition:transform .33s var(--out);   /* 1,8× so schnell wie zuvor (0,6 s) */
@@ -251,7 +257,10 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .meta .d.on .dx{transform:scale(4)}
 @media (hover:hover){                                       /* Maus: beim Überfahren; Touch nicht (:hover bleibt dort hängen) */
   .inv .meta .d:hover{color:#fff}
-  .meta .d:hover{z-index:3;color:var(--pill)}
+  .meta .d:hover{z-index:3;color:var(--hl)}
+  .card.filled .meta .d:hover,html:not(.liquid) .card:is(:hover,:focus-within) .meta .d:hover{color:var(--pill)}
+  .liquid .card:not(.filled) .meta .d:hover .dx{color:transparent;-webkit-background-clip:text;background-clip:text;
+    background-image:linear-gradient(var(--hl) var(--cut,100%),var(--pill) var(--cut,100%))}
   .meta .d:hover .dx{transform:scale(4)}
 }
 /* Trefferfläche: waagerecht bis zur Mitte der Lücke zum Nachbarn (Lücke 1,25 rem),

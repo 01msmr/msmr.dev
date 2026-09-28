@@ -741,7 +741,7 @@ if (!calm.matches) {
     svg.setAttribute('class', 'liq'); svg.setAttribute('aria-hidden', 'true'); svg.setAttribute('preserveAspectRatio', 'none');
     const path = document.createElementNS(svg.namespaceURI, 'path'); svg.append(path);
     card.prepend(svg);        // zuerst = unter Halbton, Nummer und Schrift
-    const s = { card, path, w:1, h:1, level:0, lv:0, target:0, y:new Float32Array(N), v:new Float32Array(N), px:null, py:null, mx:null, ms:null, t:Math.random() * 100, ph:Math.random() * 6.3 };
+    const s = { card, path, dx:[...card.querySelectorAll('.meta .dx')], w:1, h:1, level:0, lv:0, target:0, y:new Float32Array(N), v:new Float32Array(N), px:null, py:null, mx:null, ms:null, t:Math.random() * 100, ph:Math.random() * 6.3 };
     const size = () => { s.w = card.clientWidth; s.h = card.clientHeight; svg.setAttribute('viewBox', `0 0 ${s.w} ${s.h}`); draw(s); };
     new ResizeObserver(size).observe(card);
     const wake = () => { live.add(s); if (!raf) { t0 = 0; raf = requestAnimationFrame(loop); } };
@@ -820,6 +820,8 @@ if (!calm.matches) {
   }
   function draw(s){
     const { w, h, y } = s, base = (1 - s.level) * h;
+    const filled = s.level > .97;                // ganz voll: vergrößerte Details schlicht weiß (CSS)
+    if (filled !== s.filled) { s.filled = filled; s.card.classList.toggle('filled', filled); }
     if (s.level < .001 && s.target === 0) { s.path.setAttribute('d', ''); return; }
     // unten beginnt die Oberfläche als gerade Linie; die Wellen wachsen auf den ersten 18 % schnell,
     // aber weich herein — und reichen nie unter die Unterkante
@@ -834,6 +836,15 @@ if (!calm.matches) {
       d += `C${(x1 + (x2 - x0) / 6).toFixed(1)} ${(y1 + (y2 - y0) / 6).toFixed(1)} ${(x2 - (x3 - x1) / 6).toFixed(1)} ${(y2 - (y3 - y1) / 6).toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`;
     }
     s.path.setAttribute('d', d + `L${w} ${h}Z`);
+    // vergrößertes Detail: Schriftfarbe wechselt genau an der Oberfläche — darunter weiß, darüber Projektfarbe
+    const open = s.dx.filter(x => x.parentNode.matches('.on, :hover'));
+    if (!open.length) return;
+    const c = s.card.getBoundingClientRect();
+    open.forEach(x => {
+      const r = x.getBoundingClientRect(), i = Math.round((r.left + r.width / 2 - c.left) / w * (N - 1));
+      const cut = (c.top + Y(Math.max(0, Math.min(N - 1, i))) - r.top) / r.height * 100;
+      x.style.setProperty('--cut', Math.max(0, Math.min(100, cut)).toFixed(1) + '%');
+    });
   }
   function loop(now){
     const dt = Math.min(.05, t0 ? (now - t0) / 1000 : 1 / 60); t0 = now;
