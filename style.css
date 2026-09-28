@@ -373,14 +373,13 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   padding:var(--bar) var(--pad) 1rem;
   display:grid;
 }
-/* Rechner: überall derselbe Rand (--pad) — über der Leiste, zwischen Linie und Karte, links, rechts und unter der Karte.
-   Die Leiste rückt um --pad nach unten, ihr Grund reicht bis zum oberen Bildschirmrand. */
+/* Rechner: ein Rand ringsum, so hoch wie die Leiste samt Linie — die Navigation füllt den Rand über der Karte,
+   links, rechts und unten ist er gleich breit (auch die Wortmarke steht auf diesem Rand) */
 @media (hover:hover) and (pointer:fine){
-  .bar{top:var(--pad)}
-  .bar::before{inset:calc(-1 * var(--pad)) 0 0}
-  .slide,.end{padding:calc(2 * var(--pad) + var(--bar)) var(--pad) var(--pad)}
+  :root{--pad:var(--bar)}
+  .slide,.end{padding:var(--pad)}
 }
-@media (hover:hover) and (pointer:fine) and (min-width:1024px){.slide,.end{padding-top:calc(2 * var(--pad) + var(--bar) + var(--nav-line))}}   /* + Linie unter dem aktiven Eintrag */
+@media (hover:hover) and (pointer:fine) and (min-width:1024px){:root{--pad:calc(var(--bar) + var(--nav-line))}}   /* + Linie unter dem aktiven Eintrag */
 .card--end{--hl:var(--end-fill);grid-template-rows:auto 1fr}   /* hell: dunkelgrau füllen, dunkel: hellgrau */
 /* Unterzeile wird beim letzten Scrollen zur großen Überschrift */
 .end__head{
