@@ -21,7 +21,7 @@ OUT.mkdir(exist_ok=True)
 # Projektfarben (oklch 70 % …), Reihenfolge = Zeitleiste
 import json
 HUES = [tuple(p['hue']) for p in json.load(open(ROOT / 'projects.json'))]   # eine Quelle: projects.json
-INK, PAPER = '#191b1d', '#fafaf8'
+INK, PAPER = '#191b1d', '#fff'
 
 
 def oklch_hex(L, C, h):
