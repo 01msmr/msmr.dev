@@ -205,6 +205,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 
 /* ── Projekt: ein Bildschirm pro Projekt ── */
 .slide{
+  position:relative;                                     /* Bezug für den Kopf der großen Zahl (.num--over) */
   min-height:100svh;padding:var(--bar) var(--pad) 1rem;   /* Karte beginnt direkt an der Leiste (Unterkante des Fensters) */
   display:grid;scroll-snap-align:start;
 }
@@ -307,6 +308,15 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
    (die Zahl driftet nicht mit dem Scrollen — sonst läge sie je nach Gerät anders). Ohne text-box: die bisherige Lage. */
 @supports (text-box:trim-both cap alphabetic){
   .num{text-box:trim-both cap alphabetic;top:-1px}
+}
+/* Touch: die Karte beginnt direkt an der Leiste — was von den Ziffern über die Kartenkante ragt, zeigt eine genaue
+   Kopie über Leiste und Fenster (nur dieser Streifen; die Zahl selbst bleibt in der Karte). Lage setzt main.js (5). */
+.num--over{display:none}
+@media (hover:none){
+  .num--over{
+    display:block;left:0;right:auto;top:0;z-index:21;pointer-events:none;   /* über der Leiste (z 20) */
+    clip-path:inset(-2rem -2rem calc(100% - 1px) -2rem);   /* nur oberhalb der Kartenkante (1 px unter der Oberkante der Zahl) */
+  }
 }
 /* Rechner: Linie unter dem aktiven Eintrag, direkt unterhalb der Leiste — ein zweiter Ausschnitt desselben Farbbands
    wie das Fenster (Band und Lage setzt main.js 2), gleicher Takt: stehen beide an derselben Stelle, stimmen die Farben */
