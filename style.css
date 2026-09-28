@@ -181,8 +181,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .bar .nav.is-aiming a.aim span{max-width:none}
 .bar .nav.aim-measure a b{display:none}
 .bar .nav.aim-measure a span{display:inline;max-width:none}
-.bar .nav.is-aiming .nav__hl{transition:clip-path var(--nav-t) var(--nav-ease),background-color .15s var(--nav-ease)}   /* Ziehen: Farbe blendet schnell über … */
-.bar .nav.is-aiming a{transition:color .15s var(--nav-ease)}   /* … und die Schrift im selben Takt */
+.bar .nav.is-aiming .nav__hl{transition:clip-path var(--nav-t) var(--nav-ease),background-color .15s var(--nav-ease)}   /* Ziehen: Fensterfarbe blendet schnell über; Schrift wechselt sofort */
 @media (hover:none) and (max-width:1023px){
   .bar .nav{touch-action:none}                           /* Finger auf dem Streifen: zielt (main.js 3), statt ihn zu schieben */
 }
