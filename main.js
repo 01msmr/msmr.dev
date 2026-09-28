@@ -2,7 +2,7 @@
    0 Grundlagen (Elemente, Scrollbereich: Fenster bzw. .pager auf Touch)
    1 Wortmarke (Bogen, Schrift-Transition; Leiste gleitet mit dem letzten Stück herein)
    2 Navigation (aktives Projekt, Farbband/-fenster; schmal: mittig, Nummern gleiten an ihren neuen Platz)
-   3 Schmale Navigation (Auswahlrad)
+   3 Schmale Navigation (Auswahlrad mit Rad/Trackpad; Touch: Zielen — Fenster fest in der Mitte, Nummern ziehen durch)
    4 Blättern (aktives Projekt; Rad/Tasten auf dem Rechner, Wischen auf Touch — je Geste eine Karte,
      im Tempo der Geste; seitliche Gesten)
    5 Projektbild und Details (Raster/Bild; Tipp auf ein Detail; weggeblättert: zurückgesetzt)
@@ -251,8 +251,9 @@ function navDelay(){                          // Touch: ab Beginn der Füllung g
 }
 
 /* ═══ 3 Schmale Navigation: Auswahlrad (mittig rechts der Wortmarke) ═══
-   Wischen: nur Nummern, das Farbfenster folgt dem Eintrag in der Mitte.
-   Loslassen: der Eintrag rastet ein, wird aktiv, zeigt seinen Namen, die Karte wechselt. */
+   Rad/Trackpad (und Touch mit Maus): nur Nummern, das Farbfenster folgt dem Eintrag in der Mitte;
+   Loslassen: der Eintrag rastet ein, wird aktiv, zeigt seinen Namen, die Karte wechselt.
+   Touch: stattdessen Zielen (unten) — der Streifen selbst lässt sich nicht schieben. */
 let scrubbing = false, settleT = 0;
 
 const NAV_MS = 450;                             // Takt der Umschalt-Animation (wie .nav__hl im CSS)
@@ -432,7 +433,6 @@ function glide(to, dur){
   };
   requestAnimationFrame(tick);
 }
-const first = () => slides[0].offsetTop;
 const here = () => {                             // Bildschirm, dessen Anfang der Scrollposition am nächsten ist
   const y = Y(); let b = 0;
   screens.forEach((el, i) => { if (Math.abs(el.offsetTop - y) < Math.abs(screens[b].offsetTop - y)) b = i; });
