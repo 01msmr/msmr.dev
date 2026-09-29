@@ -338,17 +338,24 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 @supports (text-box:trim-both cap alphabetic){
   .num{text-box:trim-both cap alphabetic;top:-1px}
 }
-/* Was die Ziffern der ruhenden Karte über ihre Kante hinausragen lassen (Touch und schmale Fenster: an die Leiste,
-   Rechner: an die Linie), zeigt eine Zahl in der Leiste über dem Fenster — nur die Füllung, ohne Kontur, nur dieser Streifen. Sie verschwindet bei jeder
-   Bewegung und kommt, wenn die Seite steht (main.js 5). Lage wird von der Zahl in der Karte übernommen. */
-.num-peek{
-    display:block;position:absolute;left:0;top:0;z-index:3;pointer-events:none;white-space:nowrap;
-    font-size:clamp(7rem,22vw,20rem);font-weight:600;line-height:.8;letter-spacing:-.08em;color:var(--bg);
-    clip-path:inset(50%);                                  /* Ausschnitt setzt main.js: über der Kartenkante ∩ im Fenster */
-    opacity:0;                                             /* an und aus ohne Blende: genau im Bild, in dem die Karte ankommt bzw. sich bewegt */
-  }
-  .num-peek.on{opacity:1}
-  @supports (text-box:trim-both cap alphabetic){.num-peek{text-box:trim-both cap alphabetic}}
+/* Kopf der großen Zahl auf der Karte: eine Kopie je Karte (main.js 5), nur die Füllung, nur der Streifen über der
+   Kartenkante, über der Leiste (z 21) — so erscheinen die Ziffern über dem Fenster ganz. Sichtbar allein nach der
+   Scrollposition: ruhend oder nach unten gezogen ja; sobald die Karte 1 px nach oben unter die Leiste rückt, aus.
+   Ohne scroll-gekoppelte Animation: aus (sonst glitte sie über die Leiste). */
+.slide{position:relative;view-timeline:--slide}
+.num-top{
+  position:absolute;left:0;top:0;z-index:21;pointer-events:none;white-space:nowrap;
+  font-size:clamp(7rem,22vw,20rem);font-weight:600;line-height:.8;letter-spacing:-.08em;color:var(--bg);
+  clip-path:inset(-2rem -2rem calc(100% - 1px) -2rem);    /* nur über der Kartenkante (1 px unter der Oberkante der Ziffern) */
+  display:none;
+}
+@supports (text-box:trim-both cap alphabetic){.num-top{text-box:trim-both cap alphabetic}}
+@supports (animation-timeline:view()){
+  .num-top{display:block;animation:num-top-away linear both;animation-timeline:--slide;animation-range:exit 0px exit 1px}
+  @keyframes num-top-away{from{opacity:1}to{opacity:0}}
+}
+@media (prefers-reduced-motion:reduce){.num-top{display:none !important}}   /* dort laufen keine Animationen: sonst stünde sie immer da */
+
 /* Rechner: Linie unter dem aktiven Eintrag, direkt unterhalb der Leiste — ein zweiter Ausschnitt desselben Farbbands
    wie das Fenster (Band und Lage setzt main.js 2), gleicher Takt: stehen beide an derselben Stelle, stimmen die Farben */
 .nav__under{display:none}

@@ -171,8 +171,8 @@ function paintText(){
   bar.style.setProperty('--wr', x0 + hl.offsetWidth - R + 'px');
 }
 let textRaf = 0;
-const textLoop = () => { paintText(); placePeekClip(); textRaf = requestAnimationFrame(textLoop); };
-const textStop = () => { cancelAnimationFrame(textRaf); textRaf = 0; paintText(); placePeekClip(); };
+const textLoop = () => { paintText(); textRaf = requestAnimationFrame(textLoop); };
+const textStop = () => { cancelAnimationFrame(textRaf); textRaf = 0; paintText(); };
 hl.addEventListener('transitionrun', () => { if (!textRaf) textRaf = requestAnimationFrame(textLoop); });
 hl.addEventListener('transitionend', textStop);
 hl.addEventListener('transitioncancel', textStop);
@@ -374,7 +374,7 @@ if (pagerOn) {
   };
   const start = (a, ev) => {                     // a: der aktive Eintrag — Ausgangspunkt, egal wo der Finger liegt
     const spots = navSpots();
-    aiming = true; aimed = -1; dragged = false; peekHide();
+    aiming = true; aimed = -1; dragged = false;
     from = f = f0 = links.indexOf(a); x0 = ev.clientX;
     // Streifen auf den Anfang: das Fenster gleitet mit dem Inhalt mit — ausgleichen, damit es auf dem Bildschirm
     // stehen bleibt und von dort aus mittig wächst (sonst springt es erst zur Seite und kommt zurück)
@@ -490,7 +490,6 @@ let fillAhead = () => {}, aheadT = 0;
 const fillBefore = (i, dur) => { clearTimeout(aheadT); aheadT = setTimeout(() => fillAhead(screens[i]), Math.max(0, dur - FILL_AHEAD)); };
 let glideTouch = null;                           // Touch: Gleiten im .pager (siehe unten)
 function glide(to, dur, i){                      // i: Zielbildschirm (für den Kopf der Zahl)
-  peekHide();                                    // Kopf der Zahl: weg, solange sich etwas bewegt
   if (calm.matches) return toY(to);              // reduzierte Bewegung: sofort an der Kante
   const from = Y(), t0 = performance.now();
   gliding = true;
@@ -500,7 +499,7 @@ function glide(to, dur, i){                      // i: Zielbildschirm (für den 
     toY(from + (to - from) * easeOutC(k));
     if (k < 1) return requestAnimationFrame(tick);
     snapEl.style.scrollSnapType = ''; snapEl.style.scrollBehavior = '';
-    gliding = false; peekCheck();
+    gliding = false;
   };
   requestAnimationFrame(tick);
 }
@@ -544,7 +543,6 @@ function jumpTo(i){
   snapEl.style.scrollSnapType = 'none';                          // sonst rastet die verschobene Seite neu ein
   toY(at(i));                                                    // die Seite steht sofort am Ziel …
   if (pagerOn) fillBefore(i, dur);
-  peekHide();
   const t0 = performance.now();
   const tick = now => {                                          // … Abbild hinaus, Inhalt hinterher (ease-out, eine Kartenlänge)
     const k = Math.min(1, (now - t0) / dur), e = easeOutC(k);
@@ -552,7 +550,7 @@ function jumpTo(i){
     content.style.transform = `translateY(${dir * vh * (1 - e)}px)`;
     if (k < 1) return requestAnimationFrame(tick);
     ghost.remove(); content.style.transform = '';
-    snapEl.style.scrollSnapType = ''; gliding = false; peekCheck();
+    snapEl.style.scrollSnapType = ''; gliding = false;
   };
   content.style.transform = `translateY(${dir * vh}px)`;
   requestAnimationFrame(tick);
@@ -604,15 +602,14 @@ if (pagerOn) {
   function glideTo(to, dur, i){                   // ease-out cubic (easeOutC): Anfangstempo 3·Weg/Dauer, am Ende 0; i: Zielbildschirm
     cancelAnimationFrame(anim);
     const from = pager.scrollTop, d = to - from;
-    peekHide();
-    if (Math.abs(d) < 1 || calm.matches) { pager.scrollTop = to; pager.style.overflowY = ''; requestAnimationFrame(peekCheck); return; }
+    if (Math.abs(d) < 1 || calm.matches) { pager.scrollTop = to; pager.style.overflowY = ''; return; }
     fillBefore(i, dur);
     pager.style.overflowY = 'hidden';                  // stoppt den iOS-Schwung
     const t0 = performance.now();
     const tick = now => {
       const k = Math.min(1, (now - t0) / dur);
       pager.scrollTop = from + d * easeOutC(k);
-      if (k < 1) anim = requestAnimationFrame(tick); else { pager.style.overflowY = ''; peekCheck(); }
+      if (k < 1) anim = requestAnimationFrame(tick); else pager.style.overflowY = '';
     };
     anim = requestAnimationFrame(tick);
   }
@@ -670,55 +667,24 @@ document.addEventListener('click', ev => {
   history.replaceState(null, '', a.getAttribute('href'));
 });
 
-/* Kopf der großen Zahl über der Leiste (CSS .num-peek) — nur wenn nötig, nie sonst:
-   · Zustand: die Seite steht genau auf einer Projektkarte (kein Gleiten, kein Sprung, kein Zielen, kein Finger);
-     ausgelöst von Ereignissen (Ende des Scrollens / des Gleitens), nicht von Wartezeiten
-   · Ort: nur wo die Ziffern über die Kartenkante ragen UND das Farbfenster darüber liegt — der Ausschnitt folgt
-     den Fensterkanten auch, wenn das Fenster sich bewegt (placePeekClip, Bild für Bild mit dem Fenster) */
-const numPeek = document.createElement('span');
-numPeek.className = 'num-peek'; numPeek.setAttribute('aria-hidden', 'true');
-bar.append(numPeek);
-let peekOn = null, peekY = 0, touching = false;     // peekOn: Karte, deren Zahl gezeigt wird
-const scrollMax = () => pagerOn ? pager.scrollHeight - pager.clientHeight : root.scrollHeight - innerHeight;
-function restingSlide(){                            // Projektkarte, auf der die Seite genau steht — sonst null
-  if (gliding || aiming || touching || pager.style.transform || (pagerOn && pager.style.overflowY === 'hidden')) return null;
-  const s = screens[here()];
-  if (!s || !s.classList.contains('slide') || Math.abs(Y() - Math.min(s.offsetTop, scrollMax())) > 1) return null;
-  return s;
+/* Kopf der großen Zahl auf der Karte (CSS .num-top): eine Kopie der Zahl je Karte, genau auf ihr, über der Leiste.
+   Sichtbar ist nur, was über die Kartenkante ragt; ob sie zu sehen ist, entscheidet allein die Scrollposition (CSS):
+   ruhend oder nach unten gezogen ja, nach oben unter die Leiste nein. Hier nur die Lage, einmal je Größe. */
+const numTops = [...document.querySelectorAll('.slide .num')].map(n => {
+  const c = n.cloneNode(true); c.className = 'num-top'; c.setAttribute('aria-hidden', 'true');
+  n.closest('.slide').append(c);
+  return [n, c];
+});
+function placeNumTops(){
+  numTops.forEach(([n, c]) => {
+    c.style.transform = '';
+    const r = n.getBoundingClientRect(), q = c.getBoundingClientRect();
+    c.style.transform = `translate(${(r.left - q.left).toFixed(1)}px,${(r.top - q.top).toFixed(1)}px)`;
+  });
 }
-function placePeekClip(){                           // sichtbar nur: über der Kartenkante ∩ innerhalb des Fensters
-  if (!peekOn) return;                             // liegt das Fenster nicht über der Zahl: aus
-  const p = numPeek.getBoundingClientRect(), h = hl.getBoundingClientRect(), cs = getComputedStyle(hl);
-  const m = cs.clipPath.match(/-?[\d.]+px/g);
-  if (!m || m.length < 4) return;
-  const winL = h.left + parseFloat(m[3]), winR = h.right - parseFloat(m[1]);
-  const edge = peekOn.querySelector('.card').getBoundingClientRect().top;     // Kartenkante
-  const l = Math.max(-40, winL - p.left), rr = Math.max(-40, p.right - winR);
-  const over = winR > p.left && winL < p.right;
-  numPeek.classList.toggle('on', over);
-  if (over) numPeek.style.clipPath = `inset(-40px ${rr.toFixed(1)}px ${(p.bottom - edge).toFixed(1)}px ${l.toFixed(1)}px)`;
-}
-function peekCheck(){                               // Seite steht? Ziffern ragen über die Kante? Dann zeigen
-  const s = restingSlide(), n = s && s.querySelector('.num');
-  if (!n) return peekHide();
-  const r = n.getBoundingClientRect(), card = s.querySelector('.card').getBoundingClientRect();
-  if (r.top - n.offsetHeight * .02 >= card.top) return peekHide();   // nichts ragt hinaus (z. B. ohne text-box): nie nötig
-  const b = bar.getBoundingClientRect();
-  numPeek.textContent = n.textContent;
-  numPeek.style.transform = `translate(${r.left - b.left}px,${r.top - b.top}px)`;
-  peekOn = s; peekY = Y();
-  placePeekClip();                                 // schaltet an, wenn das Fenster über der Zahl liegt
-}
-function peekHide(){ if (!peekOn && !numPeek.classList.contains('on')) return; peekOn = null; numPeek.classList.remove('on'); }
-// Ereignisse: Scrollen weg vom Ruhepunkt blendet aus; Ende des Scrollens / Gleitens / Tippens prüft
-scroller.addEventListener('scroll', () => { if (peekOn && Math.abs(Y() - peekY) > 1) peekHide(); }, { passive:true });
-if ('onscrollend' in window) scroller.addEventListener('scrollend', () => { if (!gliding) peekCheck(); });   // Gleiten meldet sich selbst am Ende
-else { let t = 0; scroller.addEventListener('scroll', () => { clearTimeout(t); t = setTimeout(peekCheck, 120); }, { passive:true }); }
-addEventListener('touchstart', () => { touching = true; peekHide(); }, { passive:true });
-addEventListener('touchend', () => { touching = false; requestAnimationFrame(peekCheck); }, { passive:true });
-addEventListener('touchcancel', () => { touching = false; }, { passive:true });
-addEventListener('resize', () => { peekHide(); requestAnimationFrame(peekCheck); });
-document.fonts.ready.then(peekCheck);
+addEventListener('resize', placeNumTops);
+document.fonts.ready.then(placeNumTops);
+placeNumTops();
 
 /* Unterzeile beginnt genau unter dem ersten Buchstaben des Titels: der große Titel hat mehr Vorbreite (5–11 px je
    nach Buchstabe) — je Karte gemessen und die Unterzeile um den Unterschied eingerückt */
