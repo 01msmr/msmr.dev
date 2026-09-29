@@ -122,6 +122,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 }
 @media (hover:hover) and (pointer:fine) and (min-width:1024px){
   .bar .nav a,.bar .nav a.in-win,.bar .nav a:is(.nav-end,.nav-start).in-win{opacity:.33;transition:opacity 1.6s var(--out)}   /* auch der Eintrag im Fenster: gleich langsam hinein wie hinaus (nur die Deckkraft) */      /* Rechner: Schrift der Navigation gedimmt, solange der Cursor außerhalb ist … */
+  @media (prefers-color-scheme:dark){.bar .nav a,.bar .nav a.in-win,.bar .nav a:is(.nav-end,.nav-start).in-win{opacity:.45}}   /* dunkel: helle Schrift auf dunklem Grund braucht mehr, sonst zu schwach */
   .bar .nav:hover a,.bar .nav:hover a.in-win,.bar .nav:hover a:is(.nav-end,.nav-start).in-win{opacity:1}                           /* … über der Navigation voll; Fenster, Linie und Wortmarke bleiben immer voll */
   .bar .nav a[aria-current],.bar .nav a[aria-current].in-win{opacity:1}                   /* der aktive Eintrag bleibt immer voll */
 }
