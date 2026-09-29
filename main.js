@@ -2,7 +2,7 @@
    0 Grundlagen (Elemente, Scrollbereich: Fenster bzw. .pager auf Touch)
    1 Wortmarke (Bogen, Schrift-Transition; Leiste gleitet mit dem letzten Stück herein)
    2 Navigation (Einträge ↑ 01 … 07 ↗, aktives Projekt, Farbband/-fenster, Linie unter dem aktiven Eintrag;
-     voll: Schriftfarbe genau an den Fensterkanten, die Wortmarke ist der Eintrag ↑; schmal: mittig, Telefon mit ‹ ›,
+     voll: Schriftfarbe genau an den Fensterkanten, die Wortmarke ist der Eintrag ↑; schmal: mittig, Nachbarn als Nummern,
      keine Nummer gleitet durchs Fenster)
    3 Schmale Navigation (Auswahlrad mit Rad/Trackpad; Touch: Zielen — Fenster fest in der Mitte, Nummern ziehen durch)
    4 Blättern (aktives Projekt; Rad/Tasten auf dem Rechner, Wischen auf Touch — je Geste eine Karte,
@@ -198,17 +198,17 @@ function placeHl(){
   if (narrow.matches) hl.style.backgroundColor = navColors[links.indexOf(a)];
 }
 function relayout(){ markNeighbours(); paintBand(); placeHl(); }
-function markNeighbours(c){                   // schmal: aktiver Eintrag (oder die Mitte beim Wischen) mit Nachbarn, dahinter ‹ ›
+function markNeighbours(c){                   // schmal: aktiver Eintrag (oder die Mitte beim Wischen) mit seinen Nachbarn als Nummern
   if (aiming) return;
   let i = links.indexOf(c || peek || activeItem());
   if (i < 0) i = 0;                             // Startbildschirm: als stünde 01 an — nie alle Einträge zeigen
-  const K = innerWidth >= 700 ? 2 : 0;          // Nummern je Seite: Tablet hochkant 2; Telefon keine — dort führen ‹ › direkt zu den Nachbarn
-  links.forEach((a, j) => {
-    const d = j - i;
-    a.classList.toggle('far', Math.abs(d) > K + 1);
-    a.classList.toggle('edge-l', d === -(K + 1));
-    a.classList.toggle('edge-r', d === K + 1);
-  });
+  // Nummern je Seite: alle, die ganz in den Streifen passen, wenn der aktive Eintrag in der Mitte steht
+  // (Telefon meist 1, Tablet mehr) — nach ihrer tatsächlichen Lage, ohne Schätzung
+  const act = links[i], cx = act.offsetLeft + act.offsetWidth / 2, half = nav.clientWidth / 2;
+  let lo = i, hi = i;
+  while (lo > 0 && links[lo - 1].offsetLeft >= cx - half) lo--;
+  while (hi < links.length - 1 && links[hi + 1].offsetLeft + links[hi + 1].offsetWidth <= cx + half) hi++;
+  links.forEach((a, j) => a.classList.toggle('far', j < lo || j > hi));
 }
 // 01 ist von Anfang an aktiv (Name + Fenster + Linie) — beim Wechsel Start → 01 ändert sich nichts
 linkOf(0).setAttribute('aria-current', '');
@@ -262,14 +262,13 @@ function windowWidth(){                          // aktuelle Breite des Farbfens
 let settleHl = 0;
 const navSpots = () => links.map(a => {        // Lage und Zustand jedes Eintrags (vor dem Umschalten)
   const r = a.getBoundingClientRect();
-  return { x:r.left + r.width / 2, shown:!a.classList.contains('far'), inWin:a.classList.contains('in-win'),
-           edge:a.matches('.edge-l, .edge-r') };
+  return { x:r.left + r.width / 2, shown:!a.classList.contains('far'), inWin:a.classList.contains('in-win') };
 });
 /* Schmal, nach dem Umschalten: Fenster beginnt mittig in der alten Breite und wächst/schrumpft auf den
    neuen Eintrag; Fenster- und Schriftfarbe wechseln sofort, zusammen. Keine Nummer gleitet durchs Fenster:
    der neue Eintrag steht gleich als Name darin, der bisherige beginnt direkt am Fensterrand und gleitet
    hinaus. Die übrigen gleiten von ihrem alten Platz an den neuen; wer verschwindet, verblasst zuerst,
-   wer erscheint oder zu ‹ › wird, blendet danach ein — nie zwei übereinander. Alles im selben Takt. */
+   wer erscheint, blendet danach ein — nie zwei übereinander. Alles im selben Takt. */
 function followCentre(wOld, before){
   const act = activeItem();
   links.forEach(a => a.getAnimations().forEach(x => x.cancel()));   // früheres Gleiten beenden: Ruheplätze messen
@@ -297,7 +296,7 @@ function followCentre(wOld, before){
     }
     if (!n.shown) {                              // verschwindet: gleitet hinaus, zuerst verblasst
       if (o.shown) a.animate([{ transform:move(dx), opacity:1 }, { opacity:0, offset:.4 }, { transform:move(dx - Math.sign(dx) * slot), opacity:0 }], opt);
-    } else if (!o.shown || o.edge !== n.edge)    // erscheint oder wird Nummer ↔ ‹ ›: blendet danach ein
+    } else if (!o.shown)                         // erscheint: blendet danach ein
       a.animate([{ transform:move(o.shown ? dx : Math.sign(dx) * slot), opacity:0 }, { opacity:0, offset:.4 }, { transform:'none', opacity:1 }], opt);
     else if (Math.abs(dx) > .5) a.animate([{ transform:move(dx) }, { transform:'none' }], opt);
   });

@@ -141,7 +141,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 @media (min-width:1024px) and (max-width:1099px){
   .nav a{padding:0 .5rem}
 }
-/* Telefon (< 700 px): Platzhalter an den Enden zeigen — gleiche Anordnung ‹ · Nachbar · aktiv · Nachbar · › überall */
+/* Telefon (< 700 px): Platzhalter an den Enden zeigen — gleiche Anordnung Nachbar · aktiv · Nachbar überall */
 @media (max-width:699px){
   .nav-pad{display:flex;align-items:center;padding:0 .675rem;font:400 calc(.75rem * var(--fs-s)) var(--mono);letter-spacing:0;visibility:hidden;pointer-events:none}
 }
@@ -167,15 +167,11 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .bar .nav::-webkit-scrollbar{display:none}
   .bar .nav::before,.bar .nav::after{content:"";flex:0 0 50%}   /* je halbe Streifenbreite: erster und letzter Eintrag können in die Mitte */
   .nav a{padding:0 .675rem}                               /* enger; kein CSS-Einrasten — das Skript zentriert (sonst springt es an den Enden) */
-  .nav a::after{display:none}                            /* keine Trennstriche: nur ein Eintrag mit ‹ › sichtbar */
+  .nav a::after{display:none}                            /* keine Trennstriche */
   .nav.is-scrubbing a b{display:inline}                   /* beim Wischen nur Nummern — nichts verschiebt sich unter dem Finger */
   .nav.is-scrubbing a span{max-width:0}
-  /* nur der aktive Eintrag; links und rechts davon ‹ bzw. › für den vorigen / nächsten */
+  /* der aktive Eintrag mit seinen Nachbarn als Nummern (main.js 2); die übrigen unsichtbar */
   .nav a.far{opacity:0;pointer-events:none}
-  .nav a:is(.edge-l,.edge-r) :is(b,span){display:none}
-  .nav a.edge-l::before,.nav a.edge-r::before{font:400 calc(.8125rem * var(--fs-s)) var(--mono);color:var(--mute)}
-  .nav a.edge-l::before{content:"<"}
-  .nav a.edge-r::before{content:">"}
   .mark{z-index:2}                                     /* über dem Streifen — ohne eigenen Hintergrund */
   .nav__hl{transition:clip-path var(--nav-t) var(--nav-ease)}   /* schmal: Fenster im Takt des Streifens; Farbe wechselt sofort … */
   .nav a{transition:none}                                /* … zusammen mit der Schriftfarbe */
@@ -193,15 +189,15 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
    Ziffernhöhe 0,697 × --num-fs); alles steht senkrecht mittig im Fenster */
 @media (max-width:1023px){
   .bar .nav{--num-fs:calc(30px * .493 / .697)}
-  .bar .nav a b,.bar .nav a:is(.edge-l,.edge-r)::before{font-size:var(--num-fs)}
+  .bar .nav a b{font-size:var(--num-fs)}
 }
-/* Telefon: engere Einträge — neben dem aktiven Namen nur ‹ ›, sie führen zu den direkten Nachbarn (main.js 2) */
+/* Telefon: engere Einträge, damit neben langen Namen je eine Nachbarnummer passt */
 @media (max-width:699px){
   .bar .nav a{padding-left:.45rem;padding-right:.45rem}
 }
 
 /* Zielen (Touch, schmal; main.js 3): Einträge frei gesetzt, alle als Nummer, der im Fenster mit Namen.
-   Nach den Regeln der schmalen Ansicht und mit .bar davor: gewinnt gegen .far, ‹ › und den aktiven Eintrag */
+   Nach den Regeln der schmalen Ansicht und mit .bar davor: gewinnt gegen .far und den aktiven Eintrag */
 .bar .nav:is(.is-aiming,.aim-measure){overflow:hidden}
 .bar .nav.is-aiming a{position:absolute;left:0;top:0;bottom:0;opacity:1;pointer-events:auto}
 .bar .nav.is-aiming a::before{content:none}
