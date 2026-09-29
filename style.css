@@ -341,6 +341,20 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 @supports (text-box:trim-both cap alphabetic){
   .num{text-box:trim-both cap alphabetic;top:-1px}
 }
+/* Touch: was die Ziffern der ruhenden Karte über ihre Kante (= Unterkante der Leiste) hinausragen lassen, zeigt eine
+   Zahl in der Leiste über dem Fenster — nur die Füllung, ohne Kontur, nur dieser Streifen. Sie verschwindet bei jeder
+   Bewegung und kommt, wenn die Seite steht (main.js 5). Lage wird von der Zahl in der Karte übernommen. */
+.num-peek{display:none}
+@media (hover:none){
+  .num-peek{
+    display:block;position:absolute;left:0;top:0;z-index:3;pointer-events:none;white-space:nowrap;
+    font-size:clamp(7rem,22vw,20rem);font-weight:600;line-height:.8;letter-spacing:-.08em;color:var(--bg);
+    clip-path:inset(-2rem -2rem calc(100% - 1px) -2rem);   /* nur oberhalb der Kartenkante (1 px unter der Oberkante der Ziffern) */
+    opacity:0;transition:opacity .12s linear;              /* weg: schnell */
+  }
+  .num-peek.on{opacity:1;transition:opacity .25s ease-out} /* da: weich */
+  @supports (text-box:trim-both cap alphabetic){.num-peek{text-box:trim-both cap alphabetic}}
+}
 /* Rechner: Linie unter dem aktiven Eintrag, direkt unterhalb der Leiste — ein zweiter Ausschnitt desselben Farbbands
    wie das Fenster (Band und Lage setzt main.js 2), gleicher Takt: stehen beide an derselben Stelle, stimmen die Farben */
 .nav__under{display:none}

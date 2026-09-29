@@ -667,6 +667,30 @@ document.addEventListener('click', ev => {
   history.replaceState(null, '', a.getAttribute('href'));
 });
 
+/* Touch: Kopf der großen Zahl über der Leiste — nur in Ruhe (CSS .num-peek). Eine Zahl für das aktive Projekt:
+   bei jeder Bewegung sofort weg, wenn die Seite steht, mit Ziffern und Lage der Karte wieder da. */
+if (pagerOn) {
+  const peek = document.createElement('span');
+  peek.className = 'num-peek'; peek.setAttribute('aria-hidden', 'true');
+  bar.append(peek);
+  let restT = 0;
+  const moving = () => gliding || pager.style.overflowY === 'hidden' || pager.style.transform;   // Gleiten, Einrasten, ferner Sprung
+  const show = () => {
+    if (moving() || aiming) { restT = setTimeout(show, 100); return; }
+    const i = here(), s = screens[i], n = s && s.classList.contains('slide') && s.querySelector('.num');
+    if (!n) return;                                          // Start und Linkseite: nichts zu zeigen
+    const r = n.getBoundingClientRect(), b = bar.getBoundingClientRect();
+    peek.textContent = n.textContent;
+    peek.style.transform = `translate(${r.left - b.left}px,${r.top - b.top}px)`;
+    peek.classList.add('on');
+  };
+  const hide = () => { peek.classList.remove('on'); clearTimeout(restT); restT = setTimeout(show, 160); };
+  pager.addEventListener('scroll', hide, { passive:true });
+  pager.addEventListener('touchstart', hide, { passive:true });
+  addEventListener('resize', hide);
+  document.fonts.ready.then(show);
+}
+
 /* Unterzeile beginnt genau unter dem ersten Buchstaben des Titels: der große Titel hat mehr Vorbreite (5–11 px je
    nach Buchstabe) — je Karte gemessen und die Unterzeile um den Unterschied eingerückt */
 const inkCanvas = document.createElement('canvas').getContext('2d');
