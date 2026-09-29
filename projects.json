@@ -40,7 +40,7 @@
     "url": "https://github.com/01msmr/doday/blob/main/README.md",
     "title": [{ "label": "Do Day", "url": "https://github.com/01msmr/doday/blob/main/README.md" }],
     "text": "Tasks and appointments with tagging, data hosted on a Nextcloud instance.",
-    "tech": ["TypeScript", "Hono", "CalDAV/WebDAV", "PWA", "Claude"],
+    "tech": ["TypeScript", "Hono", "CalDAV/WebDAV", "Claude"],
     "shot": "img/doday.webp?v=2"
   },
   {
@@ -50,7 +50,7 @@
     "url": "https://time.msmr.co",
     "title": [{ "label": "Chromachron", "url": "https://time.msmr.co" }],
     "text": "a watch with colours instead of hands.",
-    "tech": ["p5.js", "iOS Web App", "Rhino", "Claude"],
+    "tech": ["p5.js", "Rhino", "Claude"],
     "shot": "img/chromachron.webp?v=2"
   },
   {
