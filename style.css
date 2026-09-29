@@ -123,6 +123,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 @media (hover:hover) and (pointer:fine) and (min-width:1024px){
   .bar .nav a{opacity:.33;transition:opacity 1.6s var(--out)}      /* Rechner: Schrift der Navigation gedimmt, solange der Cursor außerhalb ist … */
   .bar .nav:hover a{opacity:1}                           /* … über der Navigation voll; Fenster, Linie und Wortmarke bleiben immer voll */
+  .bar .nav a[aria-current]{opacity:1}                   /* der aktive Eintrag bleibt immer voll */
 }
 /* Band aus Projektfarben, je Eintrag eine Fläche mit harter Kante; das Rechteck ist ein Fenster darauf.
    Gleitet es über eine Kante, wandert der Farbwechsel mit durch das Rechteck. */
