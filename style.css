@@ -440,7 +440,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   align-self:end;display:flex;flex-wrap:wrap;gap:.1em .9em;
   font-size:var(--t);font-weight:500;line-height:.95;letter-spacing:-.065em;   /* wie die Projekttitel (.title) */
 }
-.links a{position:relative;display:inline-block;padding:0 .3em .06em;margin-left:-.3em}
+.links a{position:relative;display:inline-block;padding:0 .3em .06em .18em;margin-left:-.18em}   /* Pille links 40 % schmaler (.3 → .18em); Schrift bleibt an ihrem Platz */
 .links a::before,.links .pill-ghost{background:var(--hl)}     /* Pille in der Projektfarbe */
 .links a:is(:hover,:focus-visible){color:inherit}              /* Schrift bleibt wie auf der gefüllten Karte */
 @media (prefers-reduced-motion:no-preference){
