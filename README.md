@@ -1,6 +1,6 @@
 # msmr.dev
 
-[msmr.dev](https://msmr.dev): web & other projects, one screen per project. On the site this project is called “paged portfolio”; its repository is [01msmr/paged-portfolio](https://github.com/01msmr/paged-portfolio) (renamed from msmr.dev — GitHub forwards the old address, also for `git pull`).
+[msmr.dev](https://msmr.dev): web & more, one screen per project. On the site this project is called “paged portfolio”; its repository is [01msmr/paged-portfolio](https://github.com/01msmr/paged-portfolio) (renamed from msmr.dev — GitHub forwards the old address, also for `git pull`).
 
 No build step and no framework. The server renders one PHP page from a JSON list of projects. The wordmark shrinks along one curve into the header while you scroll. Each project snaps into place as its own screen. Hovering a card fills it with the project's colour like a thick liquid that bulges toward the cursor. Clicking shows a halftone of the project, and a double-click shows the full screenshot. The last screen links to every project.
 
@@ -66,7 +66,7 @@ Push to `main`. A GitHub webhook tells the netcup server to pull.
 - **Desktop:** a mouse-wheel notch or trackpad swipe moves one card; trackpad momentum is ignored. The glide takes over the speed of the gesture (ease-out, duration = 3 × distance ÷ speed), 0.3–0.65 s, start ↔ 01 up to 1.05 s. Arrow keys (↑ ↓ ← →), Page Up/Down and Space move one card, and so does a sideways trackpad swipe.
 - **Touch (iPhone/iPad):** the page scrolls inside `.pager` (iOS snaps the whole page only after the momentum and then corrects visibly). The finger drives the page 1:1; on release a quick swipe or a quarter-screen drag moves one card, otherwise it springs back. The glide continues at the finger's release speed and settles on the edge, 0.25–0.52 s, start ↔ 01 up to 0.9 s. The liquid in the target card starts rising 0.33 s before the glide ends. Sideways swipes move one card, like vertical ones. Cards taller than the screen scroll freely inside.
 
-**Header.** Below the full-width wordmark the start screen reads “web & other projects.”; where the rising wordmark passes over it, the line is hidden exactly at the letters' lower edge. The wordmark shrinks along one Bézier curve (left first, then up) from the full-width start screen into the header, as a real font-size transition, over the first 72 % of the start screen with a long, soft end. The bar is 51 px high (`--bar-pad` above and below the 30 px wordmark). The header bar and nav slide in by one bar height at the same speed as the wordmark's last rise and arrive with it; on touch devices without fading.
+**Header.** Below the full-width wordmark the start screen reads “web & more.”; where the rising wordmark passes over it, the line is hidden exactly at the letters' lower edge. The wordmark shrinks along one Bézier curve (left first, then up) from the full-width start screen into the header, as a real font-size transition, over the first 72 % of the start screen with a long, soft end. The bar is 51 px high (`--bar-pad` above and below the 30 px wordmark). The header bar and nav slide in by one bar height at the same speed as the wordmark's last rise and arrive with it; on touch devices without fading.
 
 **Navigation** (layout by width):
 

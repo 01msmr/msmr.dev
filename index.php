@@ -25,9 +25,9 @@ $icon = random_int(0, $n - 1);               // Icon in einer der Projektfarben 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>msmr.dev — Projects</title>
-<meta name="description" content="web projects. One screen per project.">
+<meta name="description" content="web &amp; more. One screen per project.">
 <meta property="og:title" content="msmr.dev — Projects">
-<meta property="og:description" content="web projects. <?= $count ?> projects, one screen each.">
+<meta property="og:description" content="web &amp; more. <?= $count ?> projects, one screen each.">
 <meta property="og:url" content="https://msmr.dev/">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e0f10" media="(prefers-color-scheme: dark)">
@@ -60,7 +60,7 @@ $icon = random_int(0, $n - 1);               // Icon in einer der Projektfarben 
 
   <section class="hero" id="top">
     <h1 class="mark-slot"><span class="sr">msmr.dev</span></h1>
-    <p class="lede">web &amp; other projects.</p>
+    <p class="lede">web &amp; more.</p>
     <div class="cue"><a href="#<?= e($projects[0]['id']) ?>">↓ <?= $count ?> projects</a><span>Lake Constance</span></div>
   </section>
 
