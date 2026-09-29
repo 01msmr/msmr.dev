@@ -121,7 +121,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .bar .nav a:is(.nav-end,.nav-start){--on-c:var(--end-on)}              /* … auf dem dunkelgrauen Fenster von »project urls« hell */
 }
 @media (hover:hover) and (pointer:fine) and (min-width:1024px){
-  .bar .nav a{opacity:.33;transition:opacity .3s}        /* Rechner: Schrift der Navigation gedimmt, solange der Cursor außerhalb ist … */
+  .bar .nav a{opacity:.33;transition:opacity .18s var(--out)}      /* Rechner: Schrift der Navigation gedimmt, solange der Cursor außerhalb ist … */
   .bar .nav:hover a{opacity:1}                           /* … über der Navigation voll; Fenster, Linie und Wortmarke bleiben immer voll */
 }
 /* Band aus Projektfarben, je Eintrag eine Fläche mit harter Kante; das Rechteck ist ein Fenster darauf.
