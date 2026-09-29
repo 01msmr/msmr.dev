@@ -24,6 +24,11 @@ const links   = [...nav.querySelectorAll('a')];
 const hl      = nav.querySelector('.nav__hl');
 const under   = nav.querySelector('.nav__under');   // Rechner: Linie unter dem aktiven Eintrag — zweiter Ausschnitt des Bands
 const endLink = nav.querySelector('.nav-end');
+const startLink = nav.querySelector('.nav-start');   // ↑ vor 01: nur Ziel (Startbildschirm), nie aktiv
+// Einträge ↔ Bildschirme: links = ↑, 01 … 07, ↗ — Projekt i ist links[i + 1]
+const linkOf   = i => i >= 0 ? links[i + 1] : null;
+const slideOf  = a => links.indexOf(a) - 1;                   // Projektindex eines Eintrags (↑: −1)
+const screenOf = a => a === startLink ? hero : a === endLink ? endPage : slides[slideOf(a)];
 const endPage = document.querySelector('.end');
 const screens = [hero, ...slides, endPage];     // Start, Projekte, Linkseite
 let atEnd = false;                              // Linkseite sichtbar
@@ -169,7 +174,7 @@ hl.addEventListener('transitionend', textStop);
 hl.addEventListener('transitioncancel', textStop);
 // aktiver Eintrag: angeklickt/gewählt (choice) gilt sofort, sonst die Linkseite oder das Projekt auf dem Bildschirm,
 // auf dem Startbildschirm 01
-function activeItem(){ return choice || (atEnd ? endLink : (links[current] || links[0])); }
+function activeItem(){ return choice || (atEnd ? endLink : (linkOf(current) || linkOf(0))); }
 function placeHl(){
   if (aiming) return;                            // Zielen (3): das Fenster steht fest in der Mitte
   // auf dem Startbildschirm steht das Fenster schon auf 01 — es ist da, bevor die Leiste ins Bild kommt, und
@@ -201,14 +206,14 @@ function markNeighbours(c){                   // schmal: aktiver Eintrag (oder d
   });
 }
 // 01 ist von Anfang an aktiv (Name + Fenster + Linie) — beim Wechsel Start → 01 ändert sich nichts
-links[0].setAttribute('aria-current', '');
+linkOf(0).setAttribute('aria-current', '');
 markNeighbours();                               // gleich beim Laden: der Streifen startet reduziert
 links.forEach(a => a.addEventListener('pointerenter', () => { hovered = a; placeHl(); }));
 /* Klick: der Eintrag wird sofort aktiv — die Seite folgt. Sonst springt die Markierung beim
    Wegbewegen der Maus kurz zurück, bis die Seite angekommen ist. */
 links.forEach(a => a.addEventListener('click', () => {
-  choice = a;
-  if (a !== endLink) setActive(links.indexOf(a), true);
+  choice = a === startLink ? linkOf(0) : a;       // ↑: zum Start, 01 bleibt aktiv
+  if (a !== endLink) setActive(slideOf(a), true);
   relayout();
 }));
 nav.addEventListener('pointerleave', () => { hovered = null; placeHl(); });
@@ -331,8 +336,8 @@ function settle(){
   const a = peek; peek = null; scrubbing = false;
   nav.classList.remove('is-scrubbing');
   if (!a) return relayout();
-  if (a !== endLink) setActive(links.indexOf(a), true);
-  jumpTo(screens.indexOf(a === endLink ? endPage : slides[links.indexOf(a)]));
+  if (a !== endLink) setActive(slideOf(a), true);
+  jumpTo(screens.indexOf(screenOf(a)));
   requestAnimationFrame(() => { relayout(); centerNav(); });
 }
 narrow.addEventListener('change', () => { relayout(); centerNav(); });
@@ -408,13 +413,13 @@ if (pagerOn) {
       aimFrom = null; relayout(); centerNav(); followCentre(wOld, before);
       return;
     }
-    const el = links[j] === endLink ? endPage : slides[j];
+    const el = screenOf(links[j]);
     if (el === endPage) {                        // »project urls«: sofort aktiv wie ein Projekt — nicht erst, wenn die Linkseite halb im Bild ist
       choice = endLink; aimFrom = null;
       links.forEach(a => a.toggleAttribute('aria-current', a === endLink));
       relayout(); centerNav(); followCentre(wOld, before);
     }
-    else if (current === j) showNav(); else setActive(j, true);
+    else if (current === slideOf(links[j])) showNav(); else setActive(slideOf(links[j]), true);   // ↑: −1 → 01 aktiv
     jumpTo(screens.indexOf(el));
   };
   nav.addEventListener('pointerdown', ev => {
@@ -461,7 +466,7 @@ new IntersectionObserver(([en]) => {
   atEnd = en.isIntersecting;
   root.classList.toggle('at-end', atEnd);
   endLink.toggleAttribute('aria-current', atEnd);
-  links.forEach((a, j) => { if (a !== endLink) a.toggleAttribute('aria-current', !atEnd && j === current); });
+  links.forEach(a => { if (a !== endLink) a.toggleAttribute('aria-current', !atEnd && a === (linkOf(current) || linkOf(0))); });
   relayout(); centerNav();
   if (wOld) followCentre(wOld, before);
 }, { threshold:.5 }).observe(endPage);

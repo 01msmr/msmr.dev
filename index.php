@@ -46,6 +46,7 @@ $icon = random_int(0, $n - 1);               // Icon in einer der Projektfarben 
   <nav class="nav" aria-label="Projects">
     <i class="nav__hl" aria-hidden="true"></i><i class="nav__under" aria-hidden="true"></i>   <!-- Fenster (folgt der Maus) · Linie unter dem aktiven Eintrag (bleibt) — beide Ausschnitte desselben Farbbands -->
     <span class="nav-pad" aria-hidden="true">&lt;</span><span class="nav-pad" aria-hidden="true">00</span>   <!-- unsichtbare Platzhalter (Telefon): links von 01 stehen immer ‹ und ein Nachbar -->
+<a href="#top" class="nav-start" style="--hl:var(--end-fill)"><b>↑</b><span>start</span></a>   <!-- nur Ziel (Zielen, Tippen): der Startbildschirm; dort bleibt 01 aktiv -->
 <?php foreach ($projects as $i => $p): ?>
     <a href="#<?= e($p['id']) ?>" style="--hl:<?= color($p) ?>"><b><?= two($i + 1) ?></b><span><?= e($p['name']) ?></span></a>
 <?php endforeach; ?>
