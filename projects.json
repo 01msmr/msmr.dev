@@ -2,7 +2,7 @@
   {
     "id": "msmrdev",
     "name": "paged portfolio",
-    "hue": [0.18, 255],
+    "hue": [0.16, 256, 0.69],
     "url": "https://github.com/01msmr/paged-portfolio",
     "title": [{ "label": "paged portfolio", "url": "https://github.com/01msmr/paged-portfolio" }],
     "text": "clean portfolio site: one screen per project and a few small UI hacks.",
@@ -56,7 +56,7 @@
   {
     "id": "makerspaces",
     "name": "makerspac.es",
-    "hue": [0.2, 42],
+    "hue": [0.2, 44],
     "url": "https://makerspac.es",
     "title": [{ "label": "makerspac.es", "url": "https://makerspac.es" }],
     "text": "makerspaces in the EU on a map, with workshops and live opening status.",

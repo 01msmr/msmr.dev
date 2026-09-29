@@ -15,6 +15,7 @@ No build step and no framework. The server renders one PHP page from a JSON list
 | `fonts/` | Hanken Grotesk (Latin subset, SIL OFL), served from this site; used for everything |
 | `app-icons/`, `site.webmanifest.php` | favicons, iOS and Android icons in every project colour; page and manifest pick one at random on each request |
 | `tools/icons.py` | regenerates the icons from `projects.json` (needs fontTools and ImageMagick) |
+| `tools/colors.py` | checks the colour rule for all projects and suggests colours (see below) |
 | `.htaccess` | caching and compression rules for the server |
 
 ## Local preview
@@ -48,7 +49,15 @@ Push to `main`. A GitHub webhook tells the netcup server to pull.
    }
    ```
 
-   `hue` is chroma and hue of the colour `oklch(70% chroma hue)`, optionally with a third value for the lightness (e.g. `[0.17, 95, 0.86]` for a clear yellow — yellows need more than 70 % to look friendly instead of ochre). Keep the chroma around 0.15–0.22 and choose a hue that is free. A title part without `url` is plain text. `shot` is optional.
+   `hue` is chroma, hue and (optionally) lightness of the colour `oklch(lightness chroma hue)`, lightness 0.70 if left out.
+
+   **Colour rule:** every project colour differs from *every* other one by at least ΔE 0.13 (distance in OKLab, as a normal screen shows the colour), dark text stays readable on it (contrast ≥ 4.5 : 1), and it is not grey (chroma ≥ 0.08). There is one group only — all colours carry dark text. With the current seven colours there is room for about seven more. `tools/colors.py` does the work:
+
+   ```sh
+   python3 tools/colors.py            # check all pairs (exit code 1 if the rule is broken)
+   python3 tools/colors.py next       # colour for the next project: the one furthest from all others
+   python3 tools/colors.py fix <id>   # nearest valid colour for a project that breaks the rule
+   ```
 
 2. Regenerate the icons so there is one per project colour: `python3 tools/icons.py`.
 3. Image (optional): save a screenshot, about 1600 px wide, as WebP:
