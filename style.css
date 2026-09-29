@@ -142,7 +142,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 }
 /* Telefon (< 700 px): Platzhalter an den Enden zeigen — gleiche Anordnung ‹ · Nachbar · aktiv · Nachbar · › überall */
 @media (max-width:699px){
-  .nav-pad{display:flex;align-items:center;padding:0 .45rem;font:400 calc(.75rem * var(--fs-s)) var(--mono);letter-spacing:0;visibility:hidden;pointer-events:none}
+  .nav-pad{display:flex;align-items:center;padding:0 .675rem;font:400 calc(.75rem * var(--fs-s)) var(--mono);letter-spacing:0;visibility:hidden;pointer-events:none}
 }
 /* ↑ (nur Ziel: Startbildschirm): schmal nur der Pfeil, »start« nur beim Zielen im Fenster; voll ohne Pfeil — dort ist die Wortmarke der Eintrag */
 .nav a.nav-start b{display:inline}
@@ -165,7 +165,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   }
   .bar .nav::-webkit-scrollbar{display:none}
   .bar .nav::before,.bar .nav::after{content:"";flex:0 0 50%}   /* je halbe Streifenbreite: erster und letzter Eintrag können in die Mitte */
-  .nav a{padding:0 .45rem}                               /* enger; kein CSS-Einrasten — das Skript zentriert (sonst springt es an den Enden) */
+  .nav a{padding:0 .675rem}                               /* enger; kein CSS-Einrasten — das Skript zentriert (sonst springt es an den Enden) */
   .nav a::after{display:none}                            /* keine Trennstriche: nur ein Eintrag mit ‹ › sichtbar */
   .nav.is-scrubbing a b{display:inline}                   /* beim Wischen nur Nummern — nichts verschiebt sich unter dem Finger */
   .nav.is-scrubbing a span{max-width:0}
@@ -186,20 +186,17 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .nav-pad{padding:0 .63rem}
 }
 @media (hover:hover) and (pointer:fine) and (min-width:1024px) and (max-width:1099px){.nav a{padding:0 .7rem}}
-@media (hover:hover) and (pointer:fine) and (max-width:1023px){.nav a{padding:0 .63rem}}
+@media (hover:hover) and (pointer:fine) and (max-width:1023px){.nav a{padding:0 .945rem}}
 
 /* Schmale Navigation: die Nummern sind so hoch wie die Kleinbuchstaben der Wortmarke (x-Höhe 0,493 × 30px =
-   Ziffernhöhe 0,697 × --num-fs); Nummern, Name und Wortmarke stehen auf einer Grundlinie (bei Zeilenhöhe 1 liegt
-   sie bei 0,88 der Schriftgröße: Oberlänge 0,97, Unterlänge 0,21). */
+   Ziffernhöhe 0,697 × --num-fs); alles steht senkrecht mittig im Fenster */
 @media (max-width:1023px){
-  .bar .nav{--num-fs:calc(30px * .493 / .697);--base:calc(var(--bar-pad) + 30px * .88)}
-  .bar .nav a{align-items:flex-start;line-height:1;padding-top:calc(var(--base) - var(--num-fs) * .88)}
-  .bar .nav a b,.bar .nav a:is(.edge-l,.edge-r)::before{font-size:var(--num-fs);line-height:1}
-  .bar .nav a span{margin-top:calc((var(--num-fs) - 1em) * .88)}   /* kleinere Schrift: tiefer, gleiche Grundlinie */
+  .bar .nav{--num-fs:calc(30px * .493 / .697)}
+  .bar .nav a b,.bar .nav a:is(.edge-l,.edge-r)::before{font-size:var(--num-fs)}
 }
 /* Telefon: engere Einträge — neben dem aktiven Namen nur ‹ ›, sie führen zu den direkten Nachbarn (main.js 2) */
 @media (max-width:699px){
-  .bar .nav a{padding-left:.3rem;padding-right:.3rem}
+  .bar .nav a{padding-left:.45rem;padding-right:.45rem}
 }
 
 /* Zielen (Touch, schmal; main.js 3): Einträge frei gesetzt, alle als Nummer, der im Fenster mit Namen.
@@ -341,12 +338,10 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 @supports (text-box:trim-both cap alphabetic){
   .num{text-box:trim-both cap alphabetic;top:-1px}
 }
-/* Touch: was die Ziffern der ruhenden Karte über ihre Kante (= Unterkante der Leiste) hinausragen lassen, zeigt eine
-   Zahl in der Leiste über dem Fenster — nur die Füllung, ohne Kontur, nur dieser Streifen. Sie verschwindet bei jeder
+/* Was die Ziffern der ruhenden Karte über ihre Kante hinausragen lassen (Touch und schmale Fenster: an die Leiste,
+   Rechner: an die Linie), zeigt eine Zahl in der Leiste über dem Fenster — nur die Füllung, ohne Kontur, nur dieser Streifen. Sie verschwindet bei jeder
    Bewegung und kommt, wenn die Seite steht (main.js 5). Lage wird von der Zahl in der Karte übernommen. */
-.num-peek{display:none}
-@media (hover:none){
-  .num-peek{
+.num-peek{
     display:block;position:absolute;left:0;top:0;z-index:3;pointer-events:none;white-space:nowrap;
     font-size:clamp(7rem,22vw,20rem);font-weight:600;line-height:.8;letter-spacing:-.08em;color:var(--bg);
     clip-path:inset(-2rem -2rem calc(100% - 1px) -2rem);   /* nur oberhalb der Kartenkante (1 px unter der Oberkante der Ziffern) */
@@ -354,7 +349,6 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   }
   .num-peek.on{opacity:1;transition:opacity .25s ease-out} /* da: weich */
   @supports (text-box:trim-both cap alphabetic){.num-peek{text-box:trim-both cap alphabetic}}
-}
 /* Rechner: Linie unter dem aktiven Eintrag, direkt unterhalb der Leiste — ein zweiter Ausschnitt desselben Farbbands
    wie das Fenster (Band und Lage setzt main.js 2), gleicher Takt: stehen beide an derselben Stelle, stimmen die Farben */
 .nav__under{display:none}

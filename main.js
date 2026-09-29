@@ -489,7 +489,8 @@ const FILL_AHEAD = 330;
 let fillAhead = () => {}, aheadT = 0;
 const fillBefore = (i, dur) => { clearTimeout(aheadT); aheadT = setTimeout(() => fillAhead(screens[i]), Math.max(0, dur - FILL_AHEAD)); };
 let glideTouch = null;                           // Touch: Gleiten im .pager (siehe unten)
-function glide(to, dur){
+function glide(to, dur, i){                      // i: Zielbildschirm (für den Kopf der Zahl)
+  if (i !== undefined) peekArrive(i, calm.matches ? 0 : dur);
   if (calm.matches) return toY(to);              // reduzierte Bewegung: sofort an der Kante
   const from = Y(), t0 = performance.now();
   gliding = true;
@@ -517,7 +518,7 @@ function go(dir, speed = 0){                     // speed: Tempo der Geste in px
   if (d < 1) return;
   const most = (from <= 1 && i <= 1) ? (pagerOn ? 900 : 1050) : (pagerOn ? 520 : 650);
   if (pagerOn) return glideTouch(to, most, i);
-  glide(to, speed > 0 ? Math.min(most, Math.max(300, 3 * d / speed)) : most);
+  glide(to, speed > 0 ? Math.min(most, Math.max(300, 3 * d / speed)) : most, i);
 }
 /* Ferne Ziele (Navigation, Zielen, Links): nur die aktuelle Karte gleitet hinaus und das Ziel direkt hinterher
    herein — eine Kartenlänge, wie beim Blättern; die Karten dazwischen erscheinen nie. Die Seite springt sofort
@@ -528,7 +529,7 @@ function jumpTo(i){
   if (i < 0 || i === from) return;
   const max = pagerOn ? pager.scrollHeight - pager.clientHeight : root.scrollHeight - innerHeight;
   const at = j => Math.min(screens[j].offsetTop, max);
-  const glideTo = (j, dur) => pagerOn ? glideTouch(at(j), dur, j) : glide(at(j), dur);
+  const glideTo = (j, dur) => pagerOn ? glideTouch(at(j), dur, j) : glide(at(j), dur, j);
   if (Math.abs(i - from) <= 1 || calm.matches || i === 0) {      // Nachbar, reduzierte Bewegung oder Start: wie gewohnt
     if (Math.abs(i - from) > 1) toY(at(1));
     return glideTo(i, Math.min(i, from) === 0 || i === 0 ? (pagerOn ? 900 : 1050) : (pagerOn ? 520 : 650));
@@ -543,6 +544,7 @@ function jumpTo(i){
   snapEl.style.scrollSnapType = 'none';                          // sonst rastet die verschobene Seite neu ein
   toY(at(i));                                                    // die Seite steht sofort am Ziel …
   if (pagerOn) fillBefore(i, dur);
+  peekArrive(i, dur);
   const t0 = performance.now();
   const tick = now => {                                          // … Abbild hinaus, Inhalt hinterher (ease-out, eine Kartenlänge)
     const k = Math.min(1, (now - t0) / dur), e = easeOutC(k);
@@ -602,6 +604,7 @@ if (pagerOn) {
   function glideTo(to, dur, i){                   // ease-out cubic (easeOutC): Anfangstempo 3·Weg/Dauer, am Ende 0; i: Zielbildschirm
     cancelAnimationFrame(anim);
     const from = pager.scrollTop, d = to - from;
+    if (i !== undefined) peekArrive(i, calm.matches || Math.abs(d) < 1 ? 0 : dur);
     if (Math.abs(d) < 1 || calm.matches) { pager.scrollTop = to; pager.style.overflowY = ''; return; }
     fillBefore(i, dur);
     pager.style.overflowY = 'hidden';                  // stoppt den iOS-Schwung
@@ -667,29 +670,35 @@ document.addEventListener('click', ev => {
   history.replaceState(null, '', a.getAttribute('href'));
 });
 
-/* Touch: Kopf der großen Zahl über der Leiste — nur in Ruhe (CSS .num-peek). Eine Zahl für das aktive Projekt:
-   bei jeder Bewegung sofort weg, wenn die Seite steht, mit Ziffern und Lage der Karte wieder da. */
-if (pagerOn) {
-  const peek = document.createElement('span');
-  peek.className = 'num-peek'; peek.setAttribute('aria-hidden', 'true');
-  bar.append(peek);
-  let restT = 0;
-  const moving = () => gliding || pager.style.overflowY === 'hidden' || pager.style.transform;   // Gleiten, Einrasten, ferner Sprung
-  const show = () => {
-    if (moving() || aiming) { restT = setTimeout(show, 100); return; }
-    const i = here(), s = screens[i], n = s && s.classList.contains('slide') && s.querySelector('.num');
-    if (!n) return;                                          // Start und Linkseite: nichts zu zeigen
-    const r = n.getBoundingClientRect(), b = bar.getBoundingClientRect();
-    peek.textContent = n.textContent;
-    peek.style.transform = `translate(${r.left - b.left}px,${r.top - b.top}px)`;
-    peek.classList.add('on');
-  };
-  const hide = () => { peek.classList.remove('on'); clearTimeout(restT); restT = setTimeout(show, 160); };
-  pager.addEventListener('scroll', hide, { passive:true });
-  pager.addEventListener('touchstart', hide, { passive:true });
-  addEventListener('resize', hide);
-  document.fonts.ready.then(show);
+/* Kopf der großen Zahl über der Leiste — nur in Ruhe (CSS .num-peek). Eine Zahl für das Zielprojekt: bei jeder
+   Bewegung sofort weg; beim Gleiten erscheint sie schon ~0,34 s vor dem Ankommen mit Ziffern und Lage der Zielkarte,
+   sonst 0,16 s nachdem die Seite steht. Die Lage ist die der Zahl in ihrer Karte, wenn die Karte oben steht. */
+const numPeek = document.createElement('span');
+numPeek.className = 'num-peek'; numPeek.setAttribute('aria-hidden', 'true');
+bar.append(numPeek);
+const PEEK_AHEAD = 340;
+let peekT = 0;
+function peekShow(scr){                            // scr: Bildschirm, auf dem die Seite (gleich) steht
+  const n = scr && scr.classList.contains('slide') && scr.querySelector('.num');
+  if (!n || aiming) return;                        // Start und Linkseite: nichts zu zeigen
+  const r = n.getBoundingClientRect(), s = scr.getBoundingClientRect(), b = bar.getBoundingClientRect();
+  numPeek.textContent = n.textContent;
+  numPeek.style.transform = `translate(${r.left - b.left}px,${r.top - s.top - b.top}px)`;   // Lage bei eingerasteter Karte
+  numPeek.classList.add('on');
 }
+function peekHide(){ numPeek.classList.remove('on'); clearTimeout(peekT); }
+function peekArrive(i, dur){                       // Gleiten zu Bildschirm i beginnt: jetzt weg, kurz vor dem Ankommen da
+  peekHide();
+  peekT = setTimeout(() => peekShow(screens[i]), Math.max(0, dur - PEEK_AHEAD));
+}
+const programmatic = () => gliding || (pagerOn && pager.style.overflowY === 'hidden');   // Gleiten des Skripts
+scroller.addEventListener('scroll', () => {        // von Hand gescrollt (Finger, Rad ohne Gleiten, Bildlaufleiste)
+  if (programmatic()) return;
+  peekHide(); peekT = setTimeout(() => peekShow(screens[here()]), 160);
+}, { passive:true });
+addEventListener('touchstart', peekHide, { passive:true });
+addEventListener('resize', () => { peekHide(); peekT = setTimeout(() => peekShow(screens[here()]), 160); });
+document.fonts.ready.then(() => peekShow(screens[here()]));
 
 /* Unterzeile beginnt genau unter dem ersten Buchstaben des Titels: der große Titel hat mehr Vorbreite (5–11 px je
    nach Buchstabe) — je Karte gemessen und die Unterzeile um den Unterschied eingerückt */
