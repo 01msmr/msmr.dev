@@ -357,10 +357,10 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 }
 /* Verlassen: eine Kopie der Pille fährt nach links aus dem Bild (JS), die echte ist sofort weg.
    So läuft sie auch bei schnellem Wiederbetreten weiter, und eine neue Pille erscheint. */
-.pill-ghost{inset:-.084em 0 -.023em;pointer-events:none}
+.pill-ghost{inset:-.02em 0 -.04em;pointer-events:none}
 :is(.title,.links) a:is(:hover,:focus-visible){color:var(--pill-ink)}
 :is(.title,.links) a:is(:hover,:focus-visible)::before{
-  opacity:1;inset:-.084em 0 -.023em;transform:none;       /* Hover: erscheint in Textgröße, wächst etwas darüber — über der Versalhöhe und unter der Grundlinie je .21em (Unterlängen passen gerade hinein) */
+  opacity:1;inset:-.02em 0 -.04em;transform:none;         /* Hover: erscheint in Textgröße, wächst etwas darüber — folgt der Schrift: Unterlängen knapp innen */
   transition:transform 0s,opacity .12s linear,inset 1.1s var(--out);
 }
 
