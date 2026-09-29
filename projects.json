@@ -22,7 +22,7 @@
   {
     "id": "afterworkphotos",
     "name": "afterworkphotos",
-    "hue": [0.15, 210],
+    "hue": [0.17, 210, 0.76],
     "url": "https://afterworkphotos.com",
     "title": [
       { "label": "afterworkphotos", "url": "https://afterworkphotos.com" },
