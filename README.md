@@ -91,6 +91,7 @@ The line under a card's title starts exactly below the title's first letter (mea
 
 ## Notes
 
+- Hovering a link (card titles, links page) shows a pill in the project colour; on the links page it reaches less far to the left of the name (0.18 em instead of 0.3 em).
 - External project links open in a new tab; links to msmr.dev itself don't. Do Day links to its README, because the app itself is private.
 - Colours follow the system's light or dark mode; in light mode page and bar are pure white.
 - On desktop the nav type is 1.8× larger (`--fs-s`) and all text inside the cards — titles (also on the links page), tech details at rest, the line under a title — 1.4× (`--fs-c`, both in `style.css`); an enlarged detail and the big numbers keep their size.

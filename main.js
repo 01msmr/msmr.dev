@@ -7,7 +7,8 @@
    3 Schmale Navigation (Auswahlrad mit Rad/Trackpad; Touch: Zielen — Fenster fest in der Mitte, Nummern ziehen durch)
    4 Blättern (aktives Projekt; Rad/Tasten auf dem Rechner, Wischen auf Touch — je Geste eine Karte,
      im Tempo der Geste; seitliche Gesten)
-   5 Projektbild und Details (Raster/Bild; Tipp auf ein Detail; weggeblättert: zurückgesetzt)
+   5 Kopf der großen Zahl auf der Karte · Unterzeile unter dem Titel ausgerichtet · Projektbild und Details
+     (Raster/Bild; Tipp auf ein Detail; weggeblättert: zurückgesetzt)
    6 Link-Pille · 7 Flüssigkeit · 8 Cursor */
 
 /* ═══ 0 Grundlagen: Elemente, Medienabfragen, gemeinsamer Zustand ═══ */
