@@ -8,7 +8,7 @@ Schreibt nach app-icons/: fav-<n>.svg und fav-<n>-32.png (Browser, nur »m« —
 (iOS, 180 px), icon-192-<n>.png / icon-512-<n>.png (Android; site.webmanifest.php wählt per Zufall).
 Die Seite wählt beim Laden per Zufall eine Farbe.
 """
-import io, math, subprocess, pathlib
+import io, math, re, subprocess, pathlib
 from fontTools.ttLib import TTFont
 from fontTools.varLib import instancer
 from fontTools.pens.svgPathPen import SVGPathPen
@@ -35,6 +35,11 @@ def oklch_hex(L, C, h):
     return '#' + ''.join(f'{round(min(1, max(0, enc(max(0, v)))) * 255):02x}' for v in rgb)
 
 
+def tidy(d):
+    """Pfaddaten kürzen: Zahlen auf höchstens 2 Nachkommastellen (1/100 der 100er-Fläche — unsichtbar, viel kleiner)."""
+    return re.sub(r'-?\d+\.\d+', lambda m: (f'{float(m.group()):.2f}'.rstrip('0').rstrip('.') or '0'), d)
+
+
 def word_path(text, size, tracking=-.065):
     """Umriss von text in Hanken Grotesk 600 als SVG-Pfad, Breite und Höhe (px)."""
     font = TTFont(ROOT / 'fonts/hanken-grotesk-latin.woff2')
@@ -49,7 +54,7 @@ def word_path(text, size, tracking=-.065):
         x += font['hmtx'][g][0] * sc + tracking * size
     x -= tracking * size
     cap = font['OS/2'].sxHeight * sc                           # x-Höhe: nur Kleinbuchstaben
-    return ' '.join(parts), x, cap
+    return tidy(' '.join(parts)), x, cap
 
 
 def svg(color, size=100, pad=0, paper=None, word='msmr', fill=1.3):
@@ -67,7 +72,7 @@ def svg(color, size=100, pad=0, paper=None, word='msmr', fill=1.3):
     tx, ty = cx - w / 2, cy + xh / 2                           # optisch mittig auf der x-Höhe
     bg = f'<rect width="{size}" height="{size}" fill="{paper}"/>' if paper else ''
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {size} {size}">{bg}'
-            f'<path d="{shape}" fill="{color}"/>'
+            f'<path d="{tidy(shape)}" fill="{color}"/>'
             f'<path transform="translate({tx:.2f} {ty:.2f})" d="{d}" fill="{INK}"/></svg>')
 
 
