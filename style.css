@@ -172,6 +172,21 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 @media (hover:hover) and (pointer:fine) and (min-width:1024px) and (max-width:1099px){.nav a{padding:0 .7rem}}
 @media (hover:hover) and (pointer:fine) and (max-width:1023px){.nav a{padding:0 .63rem}}
 
+/* Schmale Navigation: die Nummern sind so hoch wie die Kleinbuchstaben der Wortmarke (x-Höhe 0,493 × 30px =
+   Ziffernhöhe 0,697 × --num-fs); Nummern, Name und Wortmarke stehen auf einer Grundlinie (bei Zeilenhöhe 1 liegt
+   sie bei 0,88 der Schriftgröße: Oberlänge 0,97, Unterlänge 0,21). */
+@media (max-width:1023px){
+  .bar .nav{--num-fs:calc(30px * .493 / .697);--base:calc(var(--bar-pad) + 30px * .88)}
+  .bar .nav a{align-items:flex-start;line-height:1;padding-top:calc(var(--base) - var(--num-fs) * .88)}
+  .bar .nav a b,.bar .nav a:is(.edge-l,.edge-r)::before{font-size:var(--num-fs);line-height:1}
+  .bar .nav a span{margin-top:calc((var(--num-fs) - 1em) * .88)}   /* kleinere Schrift: tiefer, gleiche Grundlinie */
+}
+/* Telefon: engere Nummern und keine ‹ › — sonst passt der Streifen mit langen Namen nicht auf den Bildschirm */
+@media (max-width:699px){
+  .bar .nav a{padding-left:.3rem;padding-right:.3rem}
+  .bar .nav a:is(.edge-l,.edge-r){opacity:0;pointer-events:none}
+}
+
 /* Zielen (Touch, schmal; main.js 3): Einträge frei gesetzt, alle als Nummer, der im Fenster mit Namen.
    Nach den Regeln der schmalen Ansicht und mit .bar davor: gewinnt gegen .far, ‹ › und den aktiven Eintrag */
 .bar .nav:is(.is-aiming,.aim-measure){overflow:hidden}
