@@ -344,10 +344,10 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .num-peek{
     display:block;position:absolute;left:0;top:0;z-index:3;pointer-events:none;white-space:nowrap;
     font-size:clamp(7rem,22vw,20rem);font-weight:600;line-height:.8;letter-spacing:-.08em;color:var(--bg);
-    clip-path:inset(-2rem -2rem calc(100% - 1px) -2rem);   /* nur oberhalb der Kartenkante (1 px unter der Oberkante der Ziffern) */
+    clip-path:inset(50%);                                  /* Ausschnitt setzt main.js: über der Kartenkante ∩ im Fenster */
     opacity:0;transition:opacity .12s linear;              /* weg: schnell */
   }
-  .num-peek.on{opacity:1;transition:opacity .25s ease-out} /* da: weich */
+  .num-peek.on{opacity:1;transition:opacity .15s ease-out} /* da: kurz und weich (erst wenn die Seite steht) */
   @supports (text-box:trim-both cap alphabetic){.num-peek{text-box:trim-both cap alphabetic}}
 /* Rechner: Linie unter dem aktiven Eintrag, direkt unterhalb der Leiste — ein zweiter Ausschnitt desselben Farbbands
    wie das Fenster (Band und Lage setzt main.js 2), gleicher Takt: stehen beide an derselben Stelle, stimmen die Farben */
