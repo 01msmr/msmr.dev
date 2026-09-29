@@ -104,7 +104,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .bar{--wl:0px;--wr:0px}
   .bar .nav{margin-left:0}                               /* ↑ beginnt unter der Wortmarke … */
   .bar .mark{z-index:2}                                  /* Wortmarke über dem Fenster */
-  .bar .nav a.nav-start{margin-left:-1rem;padding:0 0 0 calc(var(--mark-w0,120px) + 2rem)}   /* … ohne Pfeil: nur die Fläche der Wortmarke, 1rem Rand je Seite — Hover zeigt das Fenster hinter ihr */
+  .bar .nav a.nav-start{padding:0 0 0 calc(var(--mark-w0,120px) + 1rem)}   /* … ohne Pfeil: die Fläche der Wortmarke — Fenster beginnt an der linken Kartenkante (nicht davor), rechts 1rem Rand */
   .bar .nav a.nav-start b{display:none}
   /* Wortmarke in der Leiste: Schrift wechselt die Farbe an den Fensterkanten wie die Einträge (Fenster über ↑) */
   .mark.in-bar,.mark.in-bar i{color:transparent;-webkit-background-clip:text;background-clip:text}
