@@ -91,7 +91,7 @@ In the narrow nav the numbers are exactly as tall as the lowercase letters of th
 
 - External project links open in a new tab; links to msmr.dev itself don't. Do Day links to its README, because the app itself is private.
 - Colours follow the system's light or dark mode; in light mode page and bar are pure white.
-- On desktop the text type (nav, tech details at rest, the line under a card's title) is 1.8× larger (`--fs-s` in `style.css`); an enlarged detail keeps its size. Titles and big numbers keep their size.
+- On desktop the nav type is 1.8× larger (`--fs-s`) and all text inside the cards — titles (also on the links page), tech details at rest, the line under a title — 1.4× (`--fs-c`, both in `style.css`); an enlarged detail and the big numbers keep their size.
 - Right after the page has loaded, all screenshots are fetched and their halftones drawn one after another, so fast scrolling never meets an unloaded card. Fonts come from this site, not from Google.
 - On touch devices there is no text selection, loupe or grey tap flash, so holding and tapping stay with the page's own gestures. Pinch zoom stays, and project links keep their long-press menu.
 - Motion respects `prefers-reduced-motion`: pages jump instead of gliding, cards fill plainly instead of as a liquid, and the cursor has no trail.

@@ -20,14 +20,15 @@
   --out:cubic-bezier(.16,1,.3,1);       /* expo-out: schnell rein, weich aus */
   --nav-t:.45s;                         /* Takt der schmalen Navigation (Fenster, Nummern, Zielen) … */
   --nav-ease:cubic-bezier(.33,1,.68,1); /* … und ihre Kurve (ease-out cubic) — main.js liest beides */
-  --fs-s:1;                             /* Faktor der Texte (Navigation, ruhende Details, Unterzeile der Karte); Rechner: 1,8 */
+  --fs-s:1;                             /* Faktor der Navigationsschrift; Rechner: 1,8 */
+  --fs-c:1;                             /* Faktor aller Schrift in der Karte (Titel, Details, Unterzeile; nicht die große Zahl); Rechner: 1,4 */
   --stroke:2px;                         /* Linien in Projektfarbe: Kartenkontur, Ziffernkontur */
   --nav-line:3px;                       /* Linie unter dem aktiven Eintrag (Rechner) */
   --p:1;                                /* Kopf groß → klein, von JS gesetzt */
 
   /* Projektfarben kommen aus projects.json (oklch 70 % …), direkt an den Elementen */
 }
-@media (hover:hover) and (pointer:fine) and (min-width:1024px){:root{--fs-s:1.8}}   /* nur mit voller Navigation */
+@media (hover:hover) and (pointer:fine) and (min-width:1024px){:root{--fs-s:1.8;--fs-c:1.4}}   /* nur mit voller Navigation */
 @media (prefers-color-scheme:dark){
   :root{
     --bg:#0e0f10;
@@ -238,7 +239,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .card{
   position:relative;isolation:isolate;overflow:hidden;background:var(--bg);   /* Grund, auch für die Invertierung der Linkseite */
   display:grid;grid-template-rows:auto 1fr auto;gap:1.5rem;
-  --t:clamp(2.6rem,7.4vw,7rem);                          /* Titelgröße */
+  --t:calc(clamp(2.6rem,7.4vw,7rem) * var(--fs-c));      /* Titelgröße (Rechner 1,4-fach) */
   padding:clamp(1.25rem,3.5vw,3rem);
   box-shadow:inset 0 0 0 var(--stroke) var(--hl);        /* Kontur liegt unter der Füllung und verschwindet darin */
   --r:140px;                                             /* Rechner */
@@ -294,7 +295,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   :is(.title,.links) a{-webkit-touch-callout:default}
 }
 
-.meta{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:1.4em 1.25rem;max-width:calc(100% - 12rem);font:400 calc(.8125rem * var(--fs-s))/1.4 var(--mono);color:var(--ink);letter-spacing:0}   /* voll deckend */
+.meta{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:1.4em 1.25rem;max-width:calc(100% - 12rem);font:400 calc(.8125rem * var(--fs-c))/1.4 var(--mono);color:var(--ink);letter-spacing:0}   /* voll deckend */
 .meta .d{position:relative;display:inline-flex}          /* Trefferfläche bleibt in Normalgröße … */
 .meta .d.on{z-index:3;color:var(--hl)}   /* .on: angetipptes Detail (Touch, main.js 5); leere Karte: in Projektfarbe … */
 /* … gefüllte Karte: weiß. Ohne Flüssigkeit: nach den Zuständen der glatten Füllung */
@@ -307,14 +308,14 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   display:inline-flex;align-items:center;pointer-events:none;
   transform-origin:0 50%;transition:transform .33s var(--out);   /* 1,8× so schnell wie zuvor (0,6 s) */
 }
-.meta .d.on .dx{transform:scale(calc(4 / var(--fs-s)))}
+.meta .d.on .dx{transform:scale(calc(4 / var(--fs-c)))}
 @media (hover:hover){                                       /* Maus: beim Überfahren; Touch nicht (:hover bleibt dort hängen) */
   .inv .meta .d:hover{color:#fff}
   .meta .d:hover{z-index:3;color:var(--hl)}
   .card.filled .meta .d:hover,html:not(.liquid) .card:is(:hover,:focus-within) .meta .d:hover{color:var(--pill)}
   .liquid .card:not(.filled) .meta .d:hover .dx{color:transparent;-webkit-background-clip:text;background-clip:text;
     background-image:linear-gradient(var(--hl) var(--cut,100%),var(--pill) var(--cut,100%))}
-  .meta .d:hover .dx{transform:scale(calc(4 / var(--fs-s)))}   /* vergrößert so groß wie bisher, egal wie groß die Ruheschrift ist */
+  .meta .d:hover .dx{transform:scale(calc(4 / var(--fs-c)))}   /* vergrößert so groß wie bisher, egal wie groß die Ruheschrift ist */
 }
 /* Trefferfläche: waagerecht bis zur Mitte der Lücke zum Nachbarn (Lücke 1,25 rem),
    senkrecht 50 % der Höhe darüber und darunter — Zeilenabstand = eine Zeilenhöhe (1,4 em),
@@ -365,7 +366,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 }
 
 .body{margin:0;max-width:60ch}
-.tagline{margin:0;max-width:30ch;font-size:calc(clamp(1.25rem,2.2vw,1.75rem) * var(--fs-s));line-height:1.15;letter-spacing:-.05em;color:var(--mute)}   /* Rechner: 1,8-fach wie die Details */
+.tagline{margin:0;max-width:30ch;font-size:calc(clamp(1.25rem,2.2vw,1.75rem) * var(--fs-c));line-height:1.15;letter-spacing:-.05em;color:var(--mute)}   /* Rechner: 1,4-fach wie alle Kartenschrift */
 
 
 
