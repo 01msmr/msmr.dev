@@ -3,8 +3,8 @@
     "id": "msmrdev",
     "name": "paged portfolio",
     "hue": [0.18, 255],
-    "url": "https://github.com/01msmr/msmr.dev",
-    "title": [{ "label": "paged portfolio", "url": "https://github.com/01msmr/msmr.dev" }],
+    "url": "https://github.com/01msmr/paged-portfolio",
+    "title": [{ "label": "paged portfolio", "url": "https://github.com/01msmr/paged-portfolio" }],
     "text": "clean portfolio site: one screen per project and a few small UI hacks.",
     "tech": ["HTML", "CSS", "Vanilla JS", "PHP", "Claude"],
     "shot": "img/msmrdev.webp?v=2"

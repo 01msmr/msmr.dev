@@ -1,6 +1,6 @@
 # msmr.dev
 
-[msmr.dev](https://msmr.dev): web projects, one screen per project.
+[msmr.dev](https://msmr.dev): web & other projects, one screen per project. On the site this project is called “paged portfolio”; its repository is [01msmr/paged-portfolio](https://github.com/01msmr/paged-portfolio) (renamed from msmr.dev — GitHub forwards the old address, also for `git pull`).
 
 No build step and no framework. The server renders one PHP page from a JSON list of projects. The wordmark shrinks along one curve into the header while you scroll. Each project snaps into place as its own screen. Hovering a card fills it with the project's colour like a thick liquid that bulges toward the cursor. Clicking shows a halftone of the project, and a double-click shows the full screenshot. The last screen links to every project.
 
