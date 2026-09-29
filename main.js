@@ -202,13 +202,7 @@ function markNeighbours(c){                   // schmal: aktiver Eintrag (oder d
   if (aiming) return;
   let i = links.indexOf(c || peek || activeItem());
   if (i < 0) i = 0;                             // Startbildschirm: als stünde 01 an — nie alle Einträge zeigen
-  // Nummern je Seite: alle, die ganz in den Streifen passen, wenn der aktive Eintrag in der Mitte steht
-  // (Telefon meist 1, Tablet mehr) — nach ihrer tatsächlichen Lage, ohne Schätzung
-  const act = links[i], cx = act.offsetLeft + act.offsetWidth / 2, half = nav.clientWidth / 2;
-  let lo = i, hi = i;
-  while (lo > 0 && links[lo - 1].offsetLeft >= cx - half) lo--;
-  while (hi < links.length - 1 && links[hi + 1].offsetLeft + links[hi + 1].offsetWidth <= cx + half) hi++;
-  links.forEach((a, j) => a.classList.toggle('far', j < lo || j > hi));
+  links.forEach((a, j) => a.classList.toggle('far', Math.abs(j - i) > 1));   // je Seite eine Nummer, Telefon wie Tablet
 }
 // 01 ist von Anfang an aktiv (Name + Fenster + Linie) — beim Wechsel Start → 01 ändert sich nichts
 linkOf(0).setAttribute('aria-current', '');
