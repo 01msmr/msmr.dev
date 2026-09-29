@@ -120,6 +120,9 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .bar .nav a{--on-c:var(--on)}                         /* Schrift im Fenster: dunkel … */
   .bar .nav a:is(.nav-end,.nav-start){--on-c:var(--end-on)}              /* … auf dem dunkelgrauen Fenster von »project urls« hell */
 }
+@media (hover:hover) and (pointer:fine) and (min-width:1024px){
+  .bar .nav a{opacity:.6}                                /* Rechner: Schrift der Navigation gedimmt — Fenster und Linie bleiben voll */
+}
 /* Band aus Projektfarben, je Eintrag eine Fläche mit harter Kante; das Rechteck ist ein Fenster darauf.
    Gleitet es über eine Kante, wandert der Farbwechsel mit durch das Rechteck. */
 .nav__hl{
