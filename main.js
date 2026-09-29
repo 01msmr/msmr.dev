@@ -677,16 +677,18 @@ const numPeek = document.createElement('span');
 numPeek.className = 'num-peek'; numPeek.setAttribute('aria-hidden', 'true');
 bar.append(numPeek);
 const PEEK_AHEAD = 340;
-let peekT = 0;
+let peekT = 0, peekY = null;                        // peekY: Scrollstand, zu dem die gezeigte Zahl gehört
 function peekShow(scr){                            // scr: Bildschirm, auf dem die Seite (gleich) steht
   const n = scr && scr.classList.contains('slide') && scr.querySelector('.num');
   if (!n || aiming) return;                        // Start und Linkseite: nichts zu zeigen
+  const max = pagerOn ? pager.scrollHeight - pager.clientHeight : root.scrollHeight - innerHeight;
+  peekY = Math.min(scr.offsetTop, max);
   const r = n.getBoundingClientRect(), s = scr.getBoundingClientRect(), b = bar.getBoundingClientRect();
   numPeek.textContent = n.textContent;
   numPeek.style.transform = `translate(${r.left - b.left}px,${r.top - s.top - b.top}px)`;   // Lage bei eingerasteter Karte
   numPeek.classList.add('on');
 }
-function peekHide(){ numPeek.classList.remove('on'); clearTimeout(peekT); }
+function peekHide(){ numPeek.classList.remove('on'); clearTimeout(peekT); peekY = null; }
 function peekArrive(i, dur){                       // Gleiten zu Bildschirm i beginnt: jetzt weg, kurz vor dem Ankommen da
   peekHide();
   peekT = setTimeout(() => peekShow(screens[i]), Math.max(0, dur - PEEK_AHEAD));
@@ -694,9 +696,15 @@ function peekArrive(i, dur){                       // Gleiten zu Bildschirm i be
 const programmatic = () => gliding || (pagerOn && pager.style.overflowY === 'hidden');   // Gleiten des Skripts
 scroller.addEventListener('scroll', () => {        // von Hand gescrollt (Finger, Rad ohne Gleiten, Bildlaufleiste)
   if (programmatic()) return;
+  if (peekY !== null && Math.abs(Y() - peekY) < 3) return;   // letzter Schritt des Gleitens, Einrasten: die Seite bleibt, wo die Zahl hingehört
   peekHide(); peekT = setTimeout(() => peekShow(screens[here()]), 160);
 }, { passive:true });
-addEventListener('touchstart', peekHide, { passive:true });
+let peekTouchY = 0;
+addEventListener('touchstart', () => { peekHide(); peekTouchY = Y(); }, { passive:true });
+addEventListener('touchend', () => {                // nur getippt, nichts bewegt: wieder zeigen
+  if (programmatic() || Math.abs(Y() - peekTouchY) >= 3) return;
+  peekT = setTimeout(() => peekShow(screens[here()]), 160);
+}, { passive:true });
 addEventListener('resize', () => { peekHide(); peekT = setTimeout(() => peekShow(screens[here()]), 160); });
 document.fonts.ready.then(() => peekShow(screens[here()]));
 
