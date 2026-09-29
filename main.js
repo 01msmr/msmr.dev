@@ -667,6 +667,30 @@ document.addEventListener('click', ev => {
   history.replaceState(null, '', a.getAttribute('href'));
 });
 
+/* Unterzeile beginnt genau unter dem ersten Buchstaben des Titels: der große Titel hat mehr Vorbreite (5–11 px je
+   nach Buchstabe) — je Karte gemessen und die Unterzeile um den Unterschied eingerückt */
+const inkCanvas = document.createElement('canvas').getContext('2d');
+function inkLeft(el){                                // Bildschirm-x der Tinte des ersten Buchstabens
+  const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode:n => n.textContent.trim() ? 1 : 3 });
+  const tn = walk.nextNode(); if (!tn) return null;
+  const i = tn.textContent.search(/\S/), rg = document.createRange();
+  rg.setStart(tn, i); rg.setEnd(tn, i + 1);
+  const cs = getComputedStyle(tn.parentElement);
+  inkCanvas.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  return rg.getBoundingClientRect().left - inkCanvas.measureText(tn.textContent[i]).actualBoundingBoxLeft;
+}
+function alignSublines(){
+  document.querySelectorAll('.slide .card').forEach(c => {
+    const t = c.querySelector('.title'), s = c.querySelector('.tagline'); if (!t || !s) return;
+    s.style.marginLeft = '';
+    const a = inkLeft(t), b = inkLeft(s);
+    if (a !== null && b !== null) s.style.marginLeft = Math.max(0, a - b).toFixed(1) + 'px';
+  });
+}
+addEventListener('resize', alignSublines);
+document.fonts.ready.then(alignSublines);
+alignSublines();
+
 /* ═══ 5 Projektbild und Details
    Klick: Raster ein/aus. Doppelklick (nur bei Raster): volles Farbbild ↔ Raster; Touch: Doppeltipp, auch ohne Raster.
    Alle Bilder werden nach dem Laden der Seite vorab geladen und gerastert.
