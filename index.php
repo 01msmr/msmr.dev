@@ -6,7 +6,7 @@ $projects = json_decode(file_get_contents(__DIR__ . '/projects.json'), true);
 $n = count($projects);
 
 function e($s) { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
-function color($p) { return 'oklch(70% ' . $p['hue'][0] . ' ' . $p['hue'][1] . ')'; }
+function color($p) { return 'oklch(' . (($p['hue'][2] ?? .7) * 100) . '% ' . $p['hue'][0] . ' ' . $p['hue'][1] . ')'; }   // hue: [Chroma, Farbton, Helligkeit (optional, sonst 70 %)]
 function two($i) { return str_pad((string)$i, 2, '0', STR_PAD_LEFT); }
 // Links auf andere Seiten öffnen in einem neuen Tab, msmr.dev selbst nicht
 function target($url) {

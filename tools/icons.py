@@ -20,7 +20,7 @@ OUT.mkdir(exist_ok=True)
 
 # Projektfarben (oklch 70 % …), Reihenfolge = Zeitleiste
 import json
-HUES = [tuple(p['hue']) for p in json.load(open(ROOT / 'projects.json'))]   # eine Quelle: projects.json
+HUES = [tuple(p['hue']) + (() if len(p['hue']) > 2 else (.7,)) for p in json.load(open(ROOT / 'projects.json'))]   # eine Quelle: projects.json; (C, h, L), L sonst 70 %
 INK, PAPER = '#191b1d', '#fff'
 
 
@@ -93,8 +93,8 @@ def png(svg_text, px, path):
                     '-resize', f'{px}x{px}', str(path)], input=svg_text.encode(), check=True)
 
 
-for n, (C, h) in enumerate(HUES):
-    col = oklch_hex(.7, C, h)
+for n, (C, h, L) in enumerate(HUES):
+    col = oklch_hex(L, C, h)
     fav = svg(col, pad=0, word='m', fill=.95)                  # klein: nur »m«, sonst unlesbar
     (OUT / f'fav-{n}.svg').write_text(fav)
     png(fav, 32, OUT / f'fav-{n}-32.png')

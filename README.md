@@ -48,7 +48,7 @@ Push to `main`. A GitHub webhook tells the netcup server to pull.
    }
    ```
 
-   `hue` is chroma and hue of the colour `oklch(70% chroma hue)`. Keep the chroma around 0.15–0.22 and choose a hue that is free. A title part without `url` is plain text. `shot` is optional.
+   `hue` is chroma and hue of the colour `oklch(70% chroma hue)`, optionally with a third value for the lightness (e.g. `[0.17, 95, 0.86]` for a clear yellow — yellows need more than 70 % to look friendly instead of ochre). Keep the chroma around 0.15–0.22 and choose a hue that is free. A title part without `url` is plain text. `shot` is optional.
 
 2. Regenerate the icons so there is one per project colour: `python3 tools/icons.py`.
 3. Image (optional): save a screenshot, about 1600 px wide, as WebP:
