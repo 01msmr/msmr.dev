@@ -60,7 +60,7 @@ $icon = random_int(0, $n - 1);               // Icon in einer der Projektfarben 
 
   <section class="hero" id="top">
     <h1 class="mark-slot"><span class="sr">msmr.dev</span></h1>
-    <p class="lede">web and other projects.</p>
+    <p class="lede">web &amp; other projects.</p>
     <div class="cue"><a href="#<?= e($projects[0]['id']) ?>">↓ <?= $count ?> projects</a><span>Lake Constance</span></div>
   </section>
 
