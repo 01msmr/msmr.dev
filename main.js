@@ -58,7 +58,7 @@ function measure(){
   slot.style.height = mark.offsetHeight * big * .86 + 'px';
   slotTop = slot.offsetTop;
   travel = Math.max(1, hero.offsetHeight * .72);    // Weg bis zur Kopfleiste: endet später, wo das Gleiten schon langsamer ist
-  lede.style.transform = ''; lede.style.opacity = '';
+  lede.style.transform = ''; lede.style.opacity = ''; lede.style.clipPath = '';
   ledeTop = lede.offsetTop; ledeH = lede.offsetHeight;
   barH = bar.offsetHeight;                          // Höhe der Leiste (CSS --bar)
   TOP = bar.offsetTop + (parseFloat(getComputedStyle(root).getPropertyValue('--bar-pad')) || 10.5);   // Leiste kann eingerückt sein (Rechner: --pad)
@@ -94,11 +94,13 @@ function update(force){
   // Unterzeile: schrumpft und verblasst beim Hochscrollen; ganz weg, wenn sie noch
   // eine eigene Höhe unter der Kopfleiste steht
   const q = Math.min(1, Math.max(0, Y() / Math.max(1, ledeTop - ledeEnd)));
-  // … und ist ganz weg, bevor die aufsteigende Wortmarke sie berührt (nie hinter dem Kopf zu sehen)
-  const gap = (ledeTop - Y()) - (my + 30 * s * .36);         // Oberkante Unterzeile − Unterkante der Buchstaben (Grundlinie ≈ 86 % der Zeile)
-  const free = Math.min(1, Math.max(0, gap / 40));          // blendet auf den letzten 40 px Abstand aus
-  lede.style.opacity = Math.min(1 - q, free).toFixed(3);
-  lede.style.transform = `scale(${(1 - .35 * q).toFixed(3)})`;
+  // … und wo die aufsteigende Wortmarke über ihr steht, ist sie verdeckt: abgeschnitten genau an der Unterkante
+  // der Buchstaben (Grundlinie ≈ 86 % der Zeile) — nie hinter dem Kopf zu sehen
+  const sc = 1 - .35 * q;
+  const under = (my + 30 * s * .36) - (ledeTop - Y());      // wie weit die Wortmarke in die Unterzeile reicht (px)
+  lede.style.opacity = (1 - q).toFixed(3);
+  lede.style.transform = `scale(${sc.toFixed(3)})`;
+  lede.style.clipPath = under > 0 ? `inset(${(under / sc).toFixed(1)}px 0 0 0)` : '';
   onHeader.forEach(f => f());
 }
 let queued = false;
@@ -329,8 +331,8 @@ function settle(){
   const a = peek; peek = null; scrubbing = false;
   nav.classList.remove('is-scrubbing');
   if (!a) return relayout();
-  if (a === endLink) endPage.scrollIntoView({ behavior:'smooth' });
-  else { setActive(links.indexOf(a), true); slides[links.indexOf(a)].scrollIntoView({ behavior:'smooth' }); }
+  if (a !== endLink) setActive(links.indexOf(a), true);
+  jumpTo(screens.indexOf(a === endLink ? endPage : slides[links.indexOf(a)]));
   requestAnimationFrame(() => { relayout(); centerNav(); });
 }
 narrow.addEventListener('change', () => { relayout(); centerNav(); });
@@ -413,7 +415,7 @@ if (pagerOn) {
       relayout(); centerNav(); followCentre(wOld, before);
     }
     else if (current === j) showNav(); else setActive(j, true);
-    glideTouch(Math.min(el.offsetTop, pager.scrollHeight - pager.clientHeight), 650, screens.indexOf(el));
+    jumpTo(screens.indexOf(el));
   };
   nav.addEventListener('pointerdown', ev => {
     // Finger irgendwo auf dem Streifen: Zielen vom aktiven Eintrag aus — das Fenster verhält sich immer gleich
@@ -504,6 +506,17 @@ function go(dir, speed = 0){                     // speed: Tempo der Geste in px
   const most = (from <= 1 && i <= 1) ? (pagerOn ? 900 : 1050) : (pagerOn ? 520 : 650);
   if (pagerOn) return glideTouch(to, most, i);
   glide(to, speed > 0 ? Math.min(most, Math.max(300, 3 * d / speed)) : most);
+}
+/* Ferne Ziele (Navigation, Zielen, Links): sofort zur Karte davor, dann gleitet nur die letzte Karte — wie beim
+   Blättern eine Karte pro Geste; nichts rauscht mit Farben, Füllungen und Nummern durch. */
+function jumpTo(i){
+  if (i < 0) return;
+  const max = pagerOn ? pager.scrollHeight - pager.clientHeight : root.scrollHeight - innerHeight;
+  const at = j => Math.min(screens[j].offsetTop, max);
+  const from = here();
+  if (Math.abs(i - from) > 1) toY(at(i - Math.sign(i - from)));
+  const most = Math.min(i, from) === 0 && Math.abs(i - from) <= 1 ? (pagerOn ? 900 : 1050) : (pagerOn ? 520 : 650);   // Start ↔ 01 wie beim Blättern
+  if (pagerOn) glideTouch(at(i), most, i); else glide(at(i), most);
 }
 addEventListener('keydown', ev => {
   if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.target.closest('input, textarea')) return;
@@ -612,7 +625,8 @@ document.addEventListener('click', ev => {
   const t = document.querySelector(a.getAttribute('href'));
   if (!t) return;
   ev.preventDefault();
-  t.scrollIntoView({ behavior:calm.matches ? 'auto' : 'smooth' });
+  if (screens.includes(t)) jumpTo(screens.indexOf(t));    // Bildschirm (Start, Projekt, Linkseite): höchstens eine Karte Weg sichtbar
+  else t.scrollIntoView({ behavior:calm.matches ? 'auto' : 'smooth' });
   history.replaceState(null, '', a.getAttribute('href'));
 });
 
