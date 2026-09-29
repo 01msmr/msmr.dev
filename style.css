@@ -20,7 +20,7 @@
   --out:cubic-bezier(.16,1,.3,1);       /* expo-out: schnell rein, weich aus */
   --nav-t:.45s;                         /* Takt der schmalen Navigation (Fenster, Nummern, Zielen) … */
   --nav-ease:cubic-bezier(.33,1,.68,1); /* … und ihre Kurve (ease-out cubic) — main.js liest beides */
-  --fs-s:1;                             /* Faktor kleiner Schrift: Navigation, ruhende Details (Rechner: 1,8) */
+  --fs-s:1;                             /* Faktor der Texte (Navigation, ruhende Details, Unterzeile der Karte); Rechner: 1,8 */
   --stroke:2px;                         /* Linien in Projektfarbe: Kartenkontur, Ziffernkontur */
   --nav-line:3px;                       /* Linie unter dem aktiven Eintrag (Rechner) */
   --p:1;                                /* Kopf groß → klein, von JS gesetzt */
@@ -100,7 +100,17 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 /* Volle Navigation (≥ 1024 px): das Fenster gleitet über die Einträge — die Schrift wechselt die Farbe genau an
    seinen Kanten, in jedem Bild (main.js 2 setzt --wl/--wr = Fensterkanten, --x = Lage des Eintrags), kein Überblenden */
 @media (min-width:1024px){
-  .nav{--wl:0px;--wr:0px}
+  .bar{--wl:0px;--wr:0px}
+  .bar .nav{margin-left:0}                               /* ↑ beginnt unter der Wortmarke … */
+  .bar .mark{z-index:2}                                  /* Wortmarke über dem Fenster */
+  .bar .nav a.nav-start{margin-left:-1rem;padding:0 0 0 calc(var(--mark-w0,120px) + 2rem)}   /* … ohne Pfeil: nur die Fläche der Wortmarke, 1rem Rand je Seite — Hover zeigt das Fenster hinter ihr */
+  .bar .nav a.nav-start b{display:none}
+  /* Wortmarke in der Leiste: Schrift wechselt die Farbe an den Fensterkanten wie die Einträge (Fenster über ↑) */
+  .mark.in-bar,.mark.in-bar i{color:transparent;-webkit-background-clip:text;background-clip:text}
+  .mark.in-bar{background-image:linear-gradient(to right,var(--ink) var(--wl),var(--end-on) var(--wl),var(--end-on) var(--wr),var(--ink) var(--wr))}
+  .mark.in-bar i{background-image:linear-gradient(to right,var(--mute) calc(var(--wl) - var(--ix)),var(--end-on) calc(var(--wl) - var(--ix)),
+    var(--end-on) calc(var(--wr) - var(--ix)),var(--mute) calc(var(--wr) - var(--ix)))}
+  .mark.in-bar:hover i{color:transparent}
   .bar .nav a,.bar .nav a.in-win,.bar .nav a:is(.nav-end,.nav-start).in-win{
     --x:0px;color:transparent;-webkit-background-clip:text;background-clip:text;transition:none;
     background-image:linear-gradient(to right,var(--ink) calc(var(--wl) - var(--x)),var(--on-c) calc(var(--wl) - var(--x)),
@@ -181,10 +191,9 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .bar .nav a b,.bar .nav a:is(.edge-l,.edge-r)::before{font-size:var(--num-fs);line-height:1}
   .bar .nav a span{margin-top:calc((var(--num-fs) - 1em) * .88)}   /* kleinere Schrift: tiefer, gleiche Grundlinie */
 }
-/* Telefon: engere Nummern und keine ‹ › — sonst passt der Streifen mit langen Namen nicht auf den Bildschirm */
+/* Telefon: engere Einträge — neben dem aktiven Namen nur ‹ ›, sie führen zu den direkten Nachbarn (main.js 2) */
 @media (max-width:699px){
   .bar .nav a{padding-left:.3rem;padding-right:.3rem}
-  .bar .nav a:is(.edge-l,.edge-r){opacity:0;pointer-events:none}
 }
 
 /* Zielen (Touch, schmal; main.js 3): Einträge frei gesetzt, alle als Nummer, der im Fenster mit Namen.
@@ -356,7 +365,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 }
 
 .body{margin:0;max-width:60ch}
-.tagline{margin:0;max-width:30ch;font-size:clamp(1.25rem,2.2vw,1.75rem);line-height:1.15;letter-spacing:-.05em;color:var(--mute)}
+.tagline{margin:0;max-width:30ch;font-size:calc(clamp(1.25rem,2.2vw,1.75rem) * var(--fs-s));line-height:1.15;letter-spacing:-.05em;color:var(--mute)}   /* Rechner: 1,8-fach wie die Details */
 
 
 

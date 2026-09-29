@@ -1,8 +1,9 @@
 /* msmr.dev — Verhalten der Seite. Blöcke:
    0 Grundlagen (Elemente, Scrollbereich: Fenster bzw. .pager auf Touch)
    1 Wortmarke (Bogen, Schrift-Transition; Leiste gleitet mit dem letzten Stück herein)
-   2 Navigation (aktives Projekt, Farbband/-fenster, Linie unter dem aktiven Eintrag; voll: Schriftfarbe genau an den
-     Fensterkanten; schmal: mittig, keine Nummer gleitet durchs Fenster)
+   2 Navigation (Einträge ↑ 01 … 07 ↗, aktives Projekt, Farbband/-fenster, Linie unter dem aktiven Eintrag;
+     voll: Schriftfarbe genau an den Fensterkanten, die Wortmarke ist der Eintrag ↑; schmal: mittig, Telefon mit ‹ ›,
+     keine Nummer gleitet durchs Fenster)
    3 Schmale Navigation (Auswahlrad mit Rad/Trackpad; Touch: Zielen — Fenster fest in der Mitte, Nummern ziehen durch)
    4 Blättern (aktives Projekt; Rad/Tasten auf dem Rechner, Wischen auf Touch — je Geste eine Karte,
      im Tempo der Geste; seitliche Gesten)
@@ -60,6 +61,8 @@ function measure(){
   markW = mark.getBoundingClientRect().width;
   big = (innerWidth - 2 * padX) / markW * .97;   // Rand für Glyphenüberhang
   root.style.setProperty('--mark-w', markW + 32 + 'px');
+  root.style.setProperty('--mark-w0', markW + 'px');            // volle Navigation: ↑ steht direkt hinter der Wortmarke
+  mark.style.setProperty('--ix', mark.querySelector('i').offsetLeft + 'px');   // ».dev« in der Wortmarke (Schriftfarbe im Fenster)
   slot.style.height = mark.offsetHeight * big * .86 + 'px';
   slotTop = slot.offsetTop;
   travel = Math.max(1, hero.offsetHeight * .72);    // Weg bis zur Kopfleiste: endet später, wo das Gleiten schon langsamer ist
@@ -92,6 +95,7 @@ function update(force){
   mark.style.fontSize = (30 * s).toFixed(2) + 'px';
   mark.style.transform = `translate3d(${x}px,${y}px,0)`;
   root.style.setProperty('--p', t.toFixed(3));
+  mark.classList.toggle('in-bar', p >= 1);          // erst in der Leiste reagiert die Wortmarke auf das Fenster
   // Leiste/Navigation: kommen im selben Tempo herunter, in dem die Wortmarke das letzte Stück (eine
   // Leistenhöhe) hinaufsteigt — sie beginnen kurz vor dem Ende und sind mit ihr zugleich am Ziel
   root.style.setProperty('--nav-y', -Math.min(Math.max(0, my - ey), bar.offsetTop + barH) + 'px');   // ganz aus dem Bild, samt Rand darüber
@@ -163,8 +167,8 @@ function paintText(){
   const m = getComputedStyle(hl).clipPath.match(/-?[\d.]+px/g);
   if (!m || m.length < 4) return;
   const [, R, , L] = m.map(parseFloat), x0 = hl.offsetLeft;
-  nav.style.setProperty('--wl', x0 + L + 'px');
-  nav.style.setProperty('--wr', x0 + hl.offsetWidth - R + 'px');
+  bar.style.setProperty('--wl', x0 + L + 'px');                 // an der Leiste: gilt für Navigation und Wortmarke
+  bar.style.setProperty('--wr', x0 + hl.offsetWidth - R + 'px');
 }
 let textRaf = 0;
 const textLoop = () => { paintText(); textRaf = requestAnimationFrame(textLoop); };
@@ -197,7 +201,7 @@ function markNeighbours(c){                   // schmal: aktiver Eintrag (oder d
   if (aiming) return;
   let i = links.indexOf(c || peek || activeItem());
   if (i < 0) i = 0;                             // Startbildschirm: als stünde 01 an — nie alle Einträge zeigen
-  const K = innerWidth >= 700 ? 2 : 1;          // Nachbarn je Seite: Tablet hochkant 2 (= 5 Einträge), Telefon 1 (= 3)
+  const K = innerWidth >= 700 ? 2 : 0;          // Nummern je Seite: Tablet hochkant 2; Telefon keine — dort führen ‹ › direkt zu den Nachbarn
   links.forEach((a, j) => {
     const d = j - i;
     a.classList.toggle('far', Math.abs(d) > K + 1);
@@ -217,6 +221,9 @@ links.forEach(a => a.addEventListener('click', () => {
   relayout();
 }));
 nav.addEventListener('pointerleave', () => { hovered = null; placeHl(); });
+// volle Navigation: die Wortmarke gehört zum Eintrag ↑ — über ihr gleitet das Fenster dorthin
+mark.addEventListener('pointerenter', () => { if (!narrow.matches && lastP >= 1) { hovered = startLink; placeHl(); } });
+mark.addEventListener('pointerleave', () => { if (hovered === startLink) { hovered = null; placeHl(); } });
 
 /* Die Karte wechselt sofort (ihre Füllung beginnt); die Navigation folgt, wenn die
    Füllung zu 85 % steht — bei der Flüssigkeit auf Touch nach ≈ 390 ms. */
