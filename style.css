@@ -121,9 +121,9 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .bar .nav a:is(.nav-end,.nav-start){--on-c:var(--end-on)}              /* … auf dem dunkelgrauen Fenster von »project urls« hell */
 }
 @media (hover:hover) and (pointer:fine) and (min-width:1024px){
-  .bar .nav a{opacity:.33;transition:opacity 1.6s var(--out)}      /* Rechner: Schrift der Navigation gedimmt, solange der Cursor außerhalb ist … */
-  .bar .nav:hover a{opacity:1}                           /* … über der Navigation voll; Fenster, Linie und Wortmarke bleiben immer voll */
-  .bar .nav a[aria-current]{opacity:1}                   /* der aktive Eintrag bleibt immer voll */
+  .bar .nav a,.bar .nav a.in-win,.bar .nav a:is(.nav-end,.nav-start).in-win{opacity:.33;transition:opacity 1.6s var(--out)}   /* auch der Eintrag im Fenster: gleich langsam hinein wie hinaus (nur die Deckkraft) */      /* Rechner: Schrift der Navigation gedimmt, solange der Cursor außerhalb ist … */
+  .bar .nav:hover a,.bar .nav:hover a.in-win,.bar .nav:hover a:is(.nav-end,.nav-start).in-win{opacity:1}                           /* … über der Navigation voll; Fenster, Linie und Wortmarke bleiben immer voll */
+  .bar .nav a[aria-current],.bar .nav a[aria-current].in-win{opacity:1}                   /* der aktive Eintrag bleibt immer voll */
 }
 /* Band aus Projektfarben, je Eintrag eine Fläche mit harter Kante; das Rechteck ist ein Fenster darauf.
    Gleitet es über eine Kante, wandert der Farbwechsel mit durch das Rechteck. */
