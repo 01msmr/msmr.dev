@@ -33,7 +33,7 @@ const pager    = document.querySelector('.pager');
 const scroller = pagerOn ? pager : window;
 const snapEl   = pagerOn ? pager : root;        // trägt scroll-snap-type
 const Y        = () => pagerOn ? pager.scrollTop : scrollY;
-const toY      = y => pagerOn ? (pager.scrollTop = y) : scrollTo(0, y);
+const toY      = y => pagerOn ? (pager.scrollTop = y) : scrollTo({ top:y, behavior:'instant' });   // immer sofort (html hat scroll-behavior:smooth)
 
 root.classList.add('js');
 // Takt der schmalen Navigation — steht nur im CSS (:root --nav-t, --nav-ease), hier gelesen
@@ -507,16 +507,41 @@ function go(dir, speed = 0){                     // speed: Tempo der Geste in px
   if (pagerOn) return glideTouch(to, most, i);
   glide(to, speed > 0 ? Math.min(most, Math.max(300, 3 * d / speed)) : most);
 }
-/* Ferne Ziele (Navigation, Zielen, Links): sofort zur Karte davor, dann gleitet nur die letzte Karte — wie beim
-   Blättern eine Karte pro Geste; nichts rauscht mit Farben, Füllungen und Nummern durch. */
+/* Ferne Ziele (Navigation, Zielen, Links): nur die aktuelle Karte gleitet hinaus und das Ziel direkt hinterher
+   herein — eine Kartenlänge, wie beim Blättern; die Karten dazwischen erscheinen nie. Die Seite springt sofort
+   zum Ziel; ein Abbild der aktuellen Karte gleitet darüber hinaus, der Inhalt vom Ziel aus hinterher.
+   Zum Startbildschirm: von 01 aus gleiten, damit die Wortmarke ihren Bogen fährt. */
 function jumpTo(i){
-  if (i < 0) return;
+  const from = here();
+  if (i < 0 || i === from) return;
   const max = pagerOn ? pager.scrollHeight - pager.clientHeight : root.scrollHeight - innerHeight;
   const at = j => Math.min(screens[j].offsetTop, max);
-  const from = here();
-  if (Math.abs(i - from) > 1) toY(at(i - Math.sign(i - from)));
-  const most = Math.min(i, from) === 0 && Math.abs(i - from) <= 1 ? (pagerOn ? 900 : 1050) : (pagerOn ? 520 : 650);   // Start ↔ 01 wie beim Blättern
-  if (pagerOn) glideTouch(at(i), most, i); else glide(at(i), most);
+  const glideTo = (j, dur) => pagerOn ? glideTouch(at(j), dur, j) : glide(at(j), dur);
+  if (Math.abs(i - from) <= 1 || calm.matches || i === 0) {      // Nachbar, reduzierte Bewegung oder Start: wie gewohnt
+    if (Math.abs(i - from) > 1) toY(at(1));
+    return glideTo(i, Math.min(i, from) === 0 || i === 0 ? (pagerOn ? 900 : 1050) : (pagerOn ? 520 : 650));
+  }
+  const dir = Math.sign(i - from), dur = pagerOn ? 520 : 650, vh = pagerOn ? pager.clientHeight : innerHeight;
+  const cur = screens[from], r = cur.getBoundingClientRect(), content = pager;   // .pager umfasst alle Bildschirme (auch die Linkseite)
+  const ghost = cur.cloneNode(true);                             // Abbild der aktuellen Karte, fest an ihrem Platz
+  ghost.removeAttribute('id'); ghost.setAttribute('aria-hidden', 'true');
+  ghost.style.cssText = `position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;margin:0;z-index:5;pointer-events:none`;
+  document.body.append(ghost);
+  gliding = true;
+  snapEl.style.scrollSnapType = 'none';                          // sonst rastet die verschobene Seite neu ein
+  toY(at(i));                                                    // die Seite steht sofort am Ziel …
+  if (pagerOn) fillBefore(i, dur);
+  const t0 = performance.now();
+  const tick = now => {                                          // … Abbild hinaus, Inhalt hinterher (ease-out, eine Kartenlänge)
+    const k = Math.min(1, (now - t0) / dur), e = easeOutC(k);
+    ghost.style.transform = `translateY(${-dir * vh * e}px)`;
+    content.style.transform = `translateY(${dir * vh * (1 - e)}px)`;
+    if (k < 1) return requestAnimationFrame(tick);
+    ghost.remove(); content.style.transform = '';
+    snapEl.style.scrollSnapType = ''; gliding = false;
+  };
+  content.style.transform = `translateY(${dir * vh}px)`;
+  requestAnimationFrame(tick);
 }
 addEventListener('keydown', ev => {
   if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.target.closest('input, textarea')) return;
