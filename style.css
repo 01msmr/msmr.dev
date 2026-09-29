@@ -15,8 +15,8 @@
   --sans:"Hanken Grotesk",system-ui,sans-serif;
   --mono:"Hanken Grotesk",system-ui,sans-serif;   /* auch die Details: eine Schrift für alles */
   --pad:clamp(1rem,4vw,3rem);
-  --bar-pad:14px;                       /* Abstand über und unter der Wortmarke (Rechner: 10.5px) */
-  --bar:calc(30px + 2 * var(--bar-pad)); /* 30px Wortmarke + 2 × --bar-pad: 58px, Rechner 51px */
+  --bar-pad:10.5px;                     /* Abstand über und unter der Wortmarke */
+  --bar:calc(30px + 2 * var(--bar-pad)); /* 30px Wortmarke + 2 × --bar-pad = 51px */
   --out:cubic-bezier(.16,1,.3,1);       /* expo-out: schnell rein, weich aus */
   --nav-t:.45s;                         /* Takt der schmalen Navigation (Fenster, Nummern, Zielen) … */
   --nav-ease:cubic-bezier(.33,1,.68,1); /* … und ihre Kurve (ease-out cubic) — main.js liest beides */
@@ -28,7 +28,6 @@
   /* Projektfarben kommen aus projects.json (oklch 70 % …), direkt an den Elementen */
 }
 @media (hover:hover) and (pointer:fine) and (min-width:1024px){:root{--fs-s:1.8}}   /* nur mit voller Navigation */
-@media (hover:hover) and (pointer:fine){:root{--bar-pad:10.5px}}   /* Rechner: Leiste 51 statt 58 px (−12 %) */
 @media (prefers-color-scheme:dark){
   :root{
     --bg:#0e0f10;
@@ -331,10 +330,10 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 }
 /* Verlassen: eine Kopie der Pille fährt nach links aus dem Bild (JS), die echte ist sofort weg.
    So läuft sie auch bei schnellem Wiederbetreten weiter, und eine neue Pille erscheint. */
-.pill-ghost{inset:-.02em 0 -.04em;pointer-events:none}
+.pill-ghost{inset:-.084em 0 -.023em;pointer-events:none}
 :is(.title,.links) a:is(:hover,:focus-visible){color:var(--pill-ink)}
 :is(.title,.links) a:is(:hover,:focus-visible)::before{
-  opacity:1;inset:-.02em 0 -.04em;transform:none;         /* Hover: erscheint in Textgröße, wächst etwas darüber */
+  opacity:1;inset:-.084em 0 -.023em;transform:none;       /* Hover: erscheint in Textgröße, wächst etwas darüber — über der Versalhöhe und unter der Grundlinie je .21em (Unterlängen passen gerade hinein) */
   transition:transform 0s,opacity .12s linear,inset 1.1s var(--out);
 }
 

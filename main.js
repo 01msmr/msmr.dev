@@ -43,7 +43,7 @@ const EASE_OUT = cssRoot.getPropertyValue('--nav-ease').trim();
 
 /* ═══ 1 Wortmarke: bildschirmbreit auf dem Start, schrumpft links oben
    in die Kopfleiste (30 px). Ohne JS steht sie gleich klein dort. ═══ */
-let TOP = 14;                                   // Abstand der kleinen Wortmarke von oben (CSS --bar-pad)
+let TOP = 10.5;                                   // Abstand der kleinen Wortmarke von oben (CSS --bar-pad)
 let big = 1, slotTop = 0, travel = 1, padX = 0, markW = 0, ledeTop = 0, ledeH = 0, ledeEnd = 0, barH = 58;
 
 /* Echte Schrift-Transition: die Schriftgröße selbst läuft mit (nicht transform:scale).
@@ -61,7 +61,7 @@ function measure(){
   lede.style.transform = ''; lede.style.opacity = '';
   ledeTop = lede.offsetTop; ledeH = lede.offsetHeight;
   barH = bar.offsetHeight;                          // Höhe der Leiste (CSS --bar)
-  TOP = bar.offsetTop + (parseFloat(getComputedStyle(root).getPropertyValue('--bar-pad')) || 14);   // Leiste kann eingerückt sein (Rechner: --pad)
+  TOP = bar.offsetTop + (parseFloat(getComputedStyle(root).getPropertyValue('--bar-pad')) || 10.5);   // Leiste kann eingerückt sein (Rechner: --pad)
   ledeEnd = bar.offsetTop + barH + ledeH;   // ganz weg: eine eigene Höhe unter der Kopfleiste
   update(true);
 }
@@ -94,7 +94,10 @@ function update(force){
   // Unterzeile: schrumpft und verblasst beim Hochscrollen; ganz weg, wenn sie noch
   // eine eigene Höhe unter der Kopfleiste steht
   const q = Math.min(1, Math.max(0, Y() / Math.max(1, ledeTop - ledeEnd)));
-  lede.style.opacity = (1 - q).toFixed(3);
+  // … und ist ganz weg, bevor die aufsteigende Wortmarke sie berührt (nie hinter dem Kopf zu sehen)
+  const gap = (ledeTop - Y()) - (my + 30 * s * .36);         // Oberkante Unterzeile − Unterkante der Buchstaben (Grundlinie ≈ 86 % der Zeile)
+  const free = Math.min(1, Math.max(0, gap / 40));          // blendet auf den letzten 40 px Abstand aus
+  lede.style.opacity = Math.min(1 - q, free).toFixed(3);
   lede.style.transform = `scale(${(1 - .35 * q).toFixed(3)})`;
   onHeader.forEach(f => f());
 }
@@ -162,18 +165,21 @@ const textStop = () => { cancelAnimationFrame(textRaf); textRaf = 0; paintText()
 hl.addEventListener('transitionrun', () => { if (!textRaf) textRaf = requestAnimationFrame(textLoop); });
 hl.addEventListener('transitionend', textStop);
 hl.addEventListener('transitioncancel', textStop);
+// aktiver Eintrag: angeklickt/gewählt (choice) gilt sofort, sonst die Linkseite oder das Projekt auf dem Bildschirm,
+// auf dem Startbildschirm 01
+function activeItem(){ return choice || (atEnd ? endLink : (links[current] || links[0])); }
 function placeHl(){
   if (aiming) return;                            // Zielen (3): das Fenster steht fest in der Mitte
   // auf dem Startbildschirm steht das Fenster schon auf 01 — es ist da, bevor die Leiste ins Bild kommt, und
   // beim Wechsel Start → 01 bewegt sich nichts
-  const a = hovered || peek || choice || (atEnd ? endLink : links[current]) || links[0];
+  const a = hovered || peek || activeItem();
   links.forEach(l => l.classList.toggle('in-win', l === a));
   const b = box(a);
   hl.style.setProperty('--l', b.l + 'px');
   hl.style.setProperty('--r', b.w - b.r + 'px');
   // Linie: derselbe Ausschnitt, aber immer auf dem aktiven Eintrag (folgt nicht der Maus) — gleiches Band, gleicher
   // Takt: wo Fenster und Linie übereinander stehen, haben sie genau dieselben Farben
-  const act = choice || (atEnd ? endLink : links[current]) || links[0], u = box(act);   // Klick: sofort, auch auf »project urls«
+  const act = activeItem(), u = box(act);   // Klick: sofort, auch auf »project urls«
   under.style.setProperty('--l', u.l + 'px');
   under.style.setProperty('--r', b.w - u.r + 'px');
   // schmal: Fenster in der Farbe des Eintrags, gleichzeitig mit der Schrift (CSS: kein Überblenden)
@@ -182,7 +188,7 @@ function placeHl(){
 function relayout(){ markNeighbours(); paintBand(); placeHl(); }
 function markNeighbours(c){                   // schmal: aktiver Eintrag (oder die Mitte beim Wischen) mit Nachbarn, dahinter ‹ ›
   if (aiming) return;
-  let i = links.indexOf(c || peek || (atEnd ? endLink : links[current]));
+  let i = links.indexOf(c || peek || activeItem());
   if (i < 0) i = 0;                             // Startbildschirm: als stünde 01 an — nie alle Einträge zeigen
   const K = innerWidth >= 700 ? 2 : 1;          // Nachbarn je Seite: Tablet hochkant 2 (= 5 Einträge), Telefon 1 (= 3)
   links.forEach((a, j) => {
@@ -226,7 +232,7 @@ function showNav(){                              // Navigation auf das aktive Pr
     const wOld = narrow.matches && hadActive ? windowWidth() : 0;
     const before = aimFrom || (wOld ? navSpots() : null); aimFrom = null;   // nach dem Zielen: von den Zielplätzen aus
     // Linkseite sichtbar: »project urls« bleibt aktiv; auf dem Startbildschirm bleibt 01 stehen (Name + Fenster)
-    const on = atEnd ? endLink : (links[current] || links[0]);
+    const on = activeItem();
     links.forEach(a => a.toggleAttribute('aria-current', a === on));
     markNeighbours();
     if (narrow.matches && !hadActive) hl.style.transition = 'none';
@@ -250,7 +256,7 @@ const navSpots = () => links.map(a => {        // Lage und Zustand jedes Eintrag
    hinaus. Die übrigen gleiten von ihrem alten Platz an den neuen; wer verschwindet, verblasst zuerst,
    wer erscheint oder zu ‹ › wird, blendet danach ein — nie zwei übereinander. Alles im selben Takt. */
 function followCentre(wOld, before){
-  const act = atEnd ? endLink : links[current]; if (!act) return;
+  const act = activeItem();
   links.forEach(a => a.getAnimations().forEach(x => x.cancel()));   // früheres Gleiten beenden: Ruheplätze messen
   const b = box(act), c = (b.l + b.r) / 2;
   hl.style.transition = 'none';
@@ -294,7 +300,7 @@ let scrubbing = false, settleT = 0;
 
 function centerNav(){                           // aktiven Eintrag sofort in die Mitte des Streifens
   if (!narrow.matches || scrubbing || aiming) return;
-  const a = atEnd ? endLink : (links[current] || links[0]);   // Startbildschirm: 01
+  const a = activeItem();
   if (!a) return;
   nav.scrollLeft = Math.max(0, Math.min(nav.scrollWidth - nav.clientWidth, a.offsetLeft + a.offsetWidth / 2 - nav.clientWidth / 2));
 }
@@ -401,7 +407,11 @@ if (pagerOn) {
       return;
     }
     const el = links[j] === endLink ? endPage : slides[j];
-    if (el === endPage) { aimFrom = null; relayout(); centerNav(); }
+    if (el === endPage) {                        // »project urls«: sofort aktiv wie ein Projekt — nicht erst, wenn die Linkseite halb im Bild ist
+      choice = endLink; aimFrom = null;
+      links.forEach(a => a.toggleAttribute('aria-current', a === endLink));
+      relayout(); centerNav(); followCentre(wOld, before);
+    }
     else if (current === j) showNav(); else setActive(j, true);
     glideTouch(Math.min(el.offsetTop, pager.scrollHeight - pager.clientHeight), 650, screens.indexOf(el));
   };
@@ -409,7 +419,7 @@ if (pagerOn) {
     // Finger irgendwo auf dem Streifen: Zielen vom aktiven Eintrag aus — das Fenster verhält sich immer gleich
     if (!narrow.matches || aiming) return;
     pid = ev.pointerId; touched = ev.target.closest('a');
-    start(atEnd ? endLink : (links[current] || links[0]), ev);
+    start(activeItem(), ev);
   });
   nav.addEventListener('pointermove', ev => {    // der Finger bleibt am Eintrag gefangen
     if (!aiming || ev.pointerId !== pid) return;   // nur der Finger, der begonnen hat
@@ -442,6 +452,7 @@ new ResizeObserver(relayout).observe(nav);   // Breite ändert sich (Schrift, sc
 /* ── Links/rechts wechselt das Projekt wie hoch/runter:
    Pfeiltasten, seitliches Wischen am Trackpad, Wischen am Touchscreen ═══ */
 new IntersectionObserver(([en]) => {
+  if (!en.isIntersecting && choice === endLink) choice = null;   // Linkseite verlassen: die Wahl »project urls« ist erledigt
   if (en.isIntersecting === atEnd) return;
   if (aiming) { atEnd = en.isIntersecting; root.classList.toggle('at-end', atEnd); navLater = true; return; }   // beim Zielen: nach dem Loslassen
   const wOld = narrow.matches ? windowWidth() : 0, before = wOld ? navSpots() : null;
