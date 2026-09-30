@@ -50,7 +50,7 @@ $icon = random_int(0, $n - 1);               // Icon in einer der Projektfarben 
 <?php foreach ($projects as $i => $p): ?>
     <a href="#<?= e($p['id']) ?>" style="--hl:<?= color($p) ?>"><b><?= two($i + 1) ?></b><span><?= e($p['name']) ?></span></a>
 <?php endforeach; ?>
-    <a href="#links" class="nav-end" style="--hl:var(--end-fill)"><b>↗</b><span>project urls</span></a>
+    <a href="#links" class="nav-end" style="--hl:var(--end-fill)"><b>↗</b><span>urls</span></a>
     <span class="nav-pad" aria-hidden="true">00</span>   <!-- … und rechts vom letzten -->
   </nav>
 </header>

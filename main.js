@@ -140,7 +140,7 @@ const box = a => {                           // genaue Lage eines Eintrags im Ba
 const zeroWidth = () => narrow.matches
   ? links[0].offsetWidth
   : parseFloat(getComputedStyle(root).getPropertyValue('--mark-w')) || 160;
-let navColors = null;                        // Farben der Einträge — einmal lesen; »project urls« hängt vom Hell-/Dunkelmodus ab
+let navColors = null;                        // Farben der Einträge — einmal lesen; »urls« hängt vom Hell-/Dunkelmodus ab
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { navColors = null; relayout(); });   // Moduswechsel: neu lesen
 function paintBand(){
   navColors = navColors || links.map(a => getComputedStyle(a).getPropertyValue('--hl'));
@@ -191,7 +191,7 @@ function placeHl(){
   hl.style.setProperty('--r', b.w - b.r + 'px');
   // Linie: derselbe Ausschnitt, aber immer auf dem aktiven Eintrag (folgt nicht der Maus) — gleiches Band, gleicher
   // Takt: wo Fenster und Linie übereinander stehen, haben sie genau dieselben Farben
-  const act = activeItem(), u = box(act);   // Klick: sofort, auch auf »project urls«
+  const act = activeItem(), u = box(act);   // Klick: sofort, auch auf »urls«
   under.style.setProperty('--l', u.l + 'px');
   under.style.setProperty('--r', b.w - u.r + 'px');
   // schmal: Fenster in der Farbe des Eintrags, gleichzeitig mit der Schrift (CSS: kein Überblenden)
@@ -240,7 +240,7 @@ function showNav(){                              // Navigation auf das aktive Pr
     const hadActive = links.some(a => a.hasAttribute('aria-current'));
     const wOld = narrow.matches && hadActive ? windowWidth() : 0;
     const before = aimFrom || (wOld ? navSpots() : null); aimFrom = null;   // nach dem Zielen: von den Zielplätzen aus
-    // Linkseite sichtbar: »project urls« bleibt aktiv; auf dem Startbildschirm bleibt 01 stehen (Name + Fenster)
+    // Linkseite sichtbar: »urls« bleibt aktiv; auf dem Startbildschirm bleibt 01 stehen (Name + Fenster)
     const on = activeItem();
     links.forEach(a => a.toggleAttribute('aria-current', a === on));
     markNeighbours();
@@ -415,7 +415,7 @@ if (pagerOn) {
       return;
     }
     const el = screenOf(links[j]);
-    if (el === endPage) {                        // »project urls«: sofort aktiv wie ein Projekt — nicht erst, wenn die Linkseite halb im Bild ist
+    if (el === endPage) {                        // »urls«: sofort aktiv wie ein Projekt — nicht erst, wenn die Linkseite halb im Bild ist
       choice = endLink; aimFrom = null;
       links.forEach(a => a.toggleAttribute('aria-current', a === endLink));
       relayout(); centerNav(); followCentre(wOld, before);
@@ -472,7 +472,7 @@ new ResizeObserver(relayout).observe(nav);   // Breite ändert sich (Schrift, sc
 /* ── Links/rechts wechselt das Projekt wie hoch/runter:
    Pfeiltasten, seitliches Wischen am Trackpad, Wischen am Touchscreen ═══ */
 new IntersectionObserver(([en]) => {
-  if (!en.isIntersecting && choice === endLink) choice = null;   // Linkseite verlassen: die Wahl »project urls« ist erledigt
+  if (!en.isIntersecting && choice === endLink) choice = null;   // Linkseite verlassen: die Wahl »urls« ist erledigt
   if (en.isIntersecting === atEnd) return;
   if (aiming) { atEnd = en.isIntersecting; root.classList.toggle('at-end', atEnd); navLater = true; return; }   // beim Zielen: nach dem Loslassen
   const wOld = narrow.matches ? windowWidth() : 0, before = wOld ? navSpots() : null;

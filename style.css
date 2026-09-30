@@ -118,7 +118,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
       var(--on-c) calc(var(--wr) - var(--x)),var(--ink) calc(var(--wr) - var(--x)));
   }
   .bar .nav a{--on-c:var(--on)}                         /* Schrift im Fenster: dunkel … */
-  .bar .nav a:is(.nav-end,.nav-start){--on-c:var(--end-on)}              /* … auf dem dunkelgrauen Fenster von »project urls« hell */
+  .bar .nav a:is(.nav-end,.nav-start){--on-c:var(--end-on)}              /* … auf dem dunkelgrauen Fenster von »urls« hell */
 }
 @media (hover:hover) and (pointer:fine) and (min-width:1024px){
   .bar .nav a,.bar .nav a.in-win,.bar .nav a:is(.nav-end,.nav-start).in-win{opacity:.33;transition:opacity 1.6s var(--out)}   /* auch der Eintrag im Fenster: gleich langsam hinein wie hinaus (nur die Deckkraft) */      /* Rechner: Schrift der Navigation gedimmt, solange der Cursor außerhalb ist … */
