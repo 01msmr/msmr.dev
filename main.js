@@ -341,7 +341,7 @@ function settle(){
   jumpTo(screens.indexOf(screenOf(a)));
   requestAnimationFrame(() => { relayout(); centerNav(); });
 }
-narrow.addEventListener('change', () => { relayout(); centerNav(); });
+narrow.addEventListener('change', () => { fitNav(); relayout(); centerNav(); });
 
 /* Touch, schmal: Zielen. Finger auf den aktiven Eintrag: das Farbfenster in der Mitte wächst auf die Breite
    des längsten Namens, alle Nummern erscheinen links und rechts davon. Seitlich ziehen: die Nummern gleiten
@@ -453,8 +453,20 @@ const io = new IntersectionObserver(entries => entries.forEach(en => {
 }), { threshold:.5 });
 scroller.addEventListener('scroll', () => { if (pending !== null) waitIdle(); }, { passive:true });
 [hero, ...slides].forEach(el => io.observe(el));
+/* Volle Navigation: passen nicht alle Einträge in die Breite, wird ihr Innenabstand so weit kleiner wie nötig,
+   höchstens um 40 % (CSS --pk); passen sie, bleibt er, wie er ist. Vor relayout: Band und Fenster messen danach */
+function fitNav(){
+  nav.style.removeProperty('--pk');
+  if (narrow.matches) return;
+  const over = links.at(-1).getBoundingClientRect().right - nav.getBoundingClientRect().left - nav.clientWidth;   // nicht scrollWidth: das Band ragt hinaus
+  if (over < 1) return;                            // Bruchteile eines Pixels: kein Bedarf
+  const pad = links.filter(a => a !== startLink)
+                   .reduce((n, a) => { const cs = getComputedStyle(a); return n + parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight); }, 0);
+  nav.style.setProperty('--pk', Math.max(.6, 1 - (over + 1) / pad));   // +1: Rundung
+}
+addEventListener('resize', fitNav);
 addEventListener('resize', relayout);
-document.fonts.ready.then(() => { relayout(); centerNav(); });   // Anfangszustand: Band, Fenster, schmal 01 mittig
+document.fonts.ready.then(() => { fitNav(); relayout(); centerNav(); });   // Anfangszustand: Band, Fenster, schmal 01 mittig
 new ResizeObserver(relayout).observe(nav);   // Breite ändert sich (Schrift, schmale Ansicht): Band neu malen
 
 /* ── Links/rechts wechselt das Projekt wie hoch/runter:

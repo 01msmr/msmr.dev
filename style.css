@@ -92,7 +92,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 @media (hover:hover) and (pointer:fine) and (min-width:1024px){
   .nav{font-size:clamp(.9375rem,2.564vw - 13.8px,calc(.9375rem * var(--fs-s)))}
 }
-.nav a{position:relative;display:flex;align-items:center;padding:0 .75rem;color:var(--ink);white-space:nowrap}   /* Farbwechsel ohne Übergang: schmal sofort, voll an den Fensterkanten */
+.nav a{position:relative;display:flex;align-items:center;padding:0 calc(.75rem * var(--pk, 1));color:var(--ink);white-space:nowrap}   /* Farbwechsel ohne Übergang: schmal sofort, voll an den Fensterkanten */
 .nav a:not(:last-of-type)::after{                         /* feiner Trennstrich rechts */
   content:"";position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--pill);   /* volle Höhe */
 }
@@ -139,7 +139,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .nav-pad{display:none}
 /* 1024–1099 px (iPad Pro 12,9″ hochkant): Desktop-Navigation, etwas enger */
 @media (min-width:1024px) and (max-width:1099px){
-  .nav a{padding:0 .5rem}
+  .nav a{padding:0 calc(.5rem * var(--pk, 1))}
 }
 /* Telefon (< 700 px): Platzhalter an den Enden zeigen — gleiche Anordnung Nachbar · aktiv · Nachbar überall */
 @media (max-width:699px){
@@ -179,10 +179,11 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 
 /* Rechner (Maus): 40 % mehr Innenabstand links und rechts in jedem Eintrag — Touch bleibt wie gehabt */
 @media (hover:hover) and (pointer:fine){
-  .nav a{padding:0 1.05rem}
+  .nav a{padding:0 calc(1.05rem * var(--pk, 1))}
   .nav-pad{padding:0 .63rem}
 }
-@media (hover:hover) and (pointer:fine) and (min-width:1024px) and (max-width:1099px){.nav a{padding:0 .7rem}}
+@media (hover:hover) and (pointer:fine) and (min-width:1024px) and (max-width:1099px){.nav a{padding:0 calc(.7rem * var(--pk, 1))}}
+/* --pk (main.js 2): volle Navigation, passen nicht alle Einträge, wird der Innenabstand kleiner — höchstens um 40 % */
 @media (hover:hover) and (pointer:fine) and (max-width:1023px){.nav a{padding:0 .945rem}}
 
 /* Schmale Navigation: die Nummern sind so hoch wie die Kleinbuchstaben der Wortmarke (x-Höhe 0,493 × 30px =
