@@ -38,7 +38,7 @@
       { "label": "Snap Cam", "url": "https://snap.afterworkphotos.com" },
       { "label": "WebXR gallery", "url": "https://afterworkphotos.com/gallery/" }
     ],
-    "text": "square photos, shot by custom Snap Cam, published straight away. On desktop, phone, tablet\nand VR.",
+    "text": "square photos, shot by custom Snap Cam,\npublished straight away.\nLayouts for desktop, phone, tablet\nand a VR gallery",
     "tech": ["HTML", "CSS", "Vanilla JS", "three.js", "Swift", "PHP", "GitHub Actions", "Claude"],
     "shot": "img/afterworkphotos.webp?v=2"
   },
