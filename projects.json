@@ -54,10 +54,10 @@
   },
   {
     "id": "chromachron",
-    "name": "Chromachron",
+    "name": "time.",
     "hue": [0.2, 305],
     "url": "https://time.msmr.co",
-    "title": [{ "label": "Chromachron", "url": "https://time.msmr.co" }],
+    "title": [{ "label": "time.", "url": "https://time.msmr.co" }],
     "text": "a watch with a window on colours\ninstead of hands.",
     "tech": ["p5.js", "Rhino", "Claude"],
     "shot": "img/chromachron.webp?v=2"
