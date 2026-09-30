@@ -79,7 +79,7 @@ $icon = random_int(0, $n - 1);               // Icon in einer der Projektfarben 
             $parts[] = isset($t['url']) ? '<a href="' . e($t['url']) . '"' . target($t['url']) . '>' . e($t['label']) . '</a>' : e($t['label']);
           echo implode(' ', $parts);
         ?></h2>
-        <p class="tagline"><?= e($p['text']) ?></p>
+        <p class="tagline"><?= nl2br(e($p['text']), false) ?></p>   <!-- \n in projects.json: Zeilenumbruch -->
       </div>
     </article>
   </section>

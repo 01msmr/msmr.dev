@@ -43,7 +43,7 @@ Push to `main`. A GitHub webhook tells the netcup server to pull.
      "hue": [0.2, 120],
      "url": "https://… (link on the last screen)",
      "title": [{ "label": "Title", "url": "https://…" }],
-     "text": "One short line.",
+     "text": "One short line (\n for a line break).",
      "tech": ["…", "Claude"],
      "shot": "img/short-id.webp?v=1"
    }
