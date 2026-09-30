@@ -438,7 +438,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .end__note{margin:0;font-size:calc(clamp(1.25rem,2.2vw,1.75rem) * var(--fs-c) * var(--fit, 1));line-height:1.15;letter-spacing:-.05em;color:var(--mute)}   /* wie die Unterzeile der Projekte (.tagline) */
 /* Projektlinks: große Schrift, beim Hover die Link-Pille wie bei den Projekttiteln */
 .links{
-  align-self:end;display:flex;flex-wrap:wrap;gap:.1em .9em;
+  align-self:end;display:flex;flex-wrap:wrap;gap:.1em .585em;
   font-size:var(--t);font-weight:500;line-height:.95;letter-spacing:-.065em;   /* wie die Projekttitel (.title) */
 }
 .links a{position:relative;display:inline-block;padding:0 .29em .06em .225em;margin-left:-.225em}   /* wie die Titel */
