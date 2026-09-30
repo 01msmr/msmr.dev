@@ -68,7 +68,7 @@
     "hue": [0.2, 44],
     "url": "https://makerspac.es",
     "title": [{ "label": "makerspac.es", "url": "https://makerspac.es" }],
-    "text": "makerspaces on a map,\nwith workshops, dates, bookmarks, settings and\nlive opening states. privacy-friendly.",
+    "text": "makerspaces on a map,\nwith workshops, dates, bookmarks, settings and live opening states.\nprivacy-friendly.",
     "tech": ["Vanilla JS", "Leaflet", "MapLibre", "SpaceAPI", "Claude"],
     "shot": "img/makerspaces.webp?v=2"
   },
