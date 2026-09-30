@@ -704,6 +704,33 @@ addEventListener('resize', alignSublines);
 document.fonts.ready.then(alignSublines);
 alignSublines();
 
+/* Linkseite passt immer in den Bildschirm, auch mit mehr Projekten: kein Name breiter als die Karte (sonst nur die
+   Links kleiner); ist sie zu hoch, wird zuerst die Überschrift kleiner (bis 40 % der Linkgröße), danach Überschrift
+   und Links zusammen — je die größte Stufe, die passt (CSS --fit-h, --fit-l) */
+const endCard = endPage.querySelector('.card'), endHead = endCard.querySelector('.end__head'), endLinks = endCard.querySelector('.links');
+function fitEnd(){
+  const ps = getComputedStyle(endPage), cs = getComputedStyle(endCard);
+  const room = (pagerOn ? pager.clientHeight : innerHeight) - parseFloat(ps.paddingTop) - parseFloat(ps.paddingBottom)
+             - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - parseFloat(cs.rowGap);
+  const wide = endCard.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const narrowOk = () => endLinks.scrollWidth <= wide + 1;     // .links selbst wächst mit dem breitesten Namen; +1: Rundung
+  const fits = () => narrowOk() && endHead.offsetHeight + endLinks.offsetHeight <= room;
+  const set = (h, l) => { endCard.style.setProperty('--fit-h', h); endCard.style.setProperty('--fit-l', l); };
+  const largest = (lo, hi, apply, ok) => {          // größte Stufe in [lo, hi], die ok ist (sonst lo)
+    apply(hi); if (ok()) return hi;
+    for (let k = 0; k < 10; k++) { const m = (lo + hi) / 2; apply(m); ok() ? lo = m : hi = m; }
+    apply(lo); return lo;
+  };
+  const l = largest(.1, 1, l => set(1, l), narrowOk);          // Breite: nur die Links
+  if (fits()) return;
+  set(.4, l);
+  if (fits()) return largest(.4, 1, h => set(h, l), fits);     // Höhe: zuerst die Überschrift …
+  largest(.1, l, l => set(.4, l), fits);                       // … dann beide
+}
+addEventListener('resize', fitEnd);
+document.fonts.ready.then(fitEnd);
+fitEnd();
+
 /* ═══ 5 Projektbild und Details
    Klick: Raster ein/aus. Doppelklick (nur bei Raster): volles Farbbild ↔ Raster; Touch: Doppeltipp, auch ohne Raster.
    Alle Bilder werden nach dem Laden der Seite vorab geladen und gerastert.

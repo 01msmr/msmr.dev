@@ -101,6 +101,7 @@ The line under a card's title starts exactly below the title's first letter (mea
 ## Notes
 
 - Hovering a link (card titles, links page) shows a pill in the project colour; it reaches 0.225 em beyond the name on the left and 0.29 em on the right — the tight letter spacing (−0.065 em) also trims the space after the last letter, so the right side gets that back and both sides look equal.
+- The links page always fits on one screen, on every device and however many projects there are: no name is wider than the card (otherwise only the links get smaller), and if it's too tall, first the heading shrinks (down to 40 % of the link size), then heading and links together — each to the largest size that fits (`fitEnd` in `main.js`).
 - External project links open in a new tab; links to msmr.dev itself don't. “paged portfolio” (this site) links to its repository on GitHub; Do Day links to its README, because the app itself is private.
 - Colours follow the system's light or dark mode; in light mode page and bar are pure white.
 - On desktop the nav type is 1.8× larger (`--fs-s`) and all text inside the cards — titles (also on the links page), tech details at rest, the line under a title — 1.4× (`--fs-c`, both in `style.css`); an enlarged detail and the big numbers keep their size.
