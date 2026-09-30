@@ -580,6 +580,20 @@ if (fsOk) {
   const fsBtn = document.querySelector('.fs');
   fsBtn.hidden = false;
   fsBtn.addEventListener('click', toggleFullscreen);
+  // unter der Maus: »F« gleitet von da, wo es gerade ist, in die Mitte (ease-out); danach läuft es von der Mitte aus weiter
+  const fsF = fsBtn.querySelector('span');
+  fsBtn.addEventListener('mouseenter', () => {
+    if (calm.matches) return;
+    const cs = getComputedStyle(fsF);
+    fsF.style.left = cs.left; fsF.style.top = cs.top;   // Ort im Lauf festhalten …
+    fsF.classList.add('centred'); fsF.offsetWidth;
+    fsF.style.left = 'calc(50% - .23em)'; fsF.style.top = 'calc(50% - .3485em)';   // … und von dort zur Mitte
+  });
+  fsBtn.addEventListener('mouseleave', () => {
+    if (!fsF.classList.contains('centred')) return;
+    fsF.classList.remove('centred'); fsF.style.left = fsF.style.top = '';
+    fsF.style.animationDelay = '-2.15s, -1.55s';   // je halbe Laufzeit (4,3 s / 3,1 s): der Lauf beginnt in der Mitte
+  });
   addEventListener('keydown', ev => {
     if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.target.closest('input, textarea')) return;
     if (ev.key === 'f' || ev.key === 'F') { ev.preventDefault(); toggleFullscreen(); }
