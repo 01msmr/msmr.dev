@@ -83,15 +83,15 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .fs:hover{color:var(--ink)}
   /* »F« läuft wie eine Billardkugel im Quadrat: waagrecht und senkrecht je hin und her, in Zeiten ohne gemeinsamen
      Takt — so prallt es an allen vier Rändern ab und nimmt immer neue Wege; unter der Maus hält es an */
-  .fs span{position:absolute;left:4px;top:4px;width:1em;height:1em;display:grid;place-items:center;line-height:1}
+  .fs span{position:absolute;left:0;top:0;width:.46em;height:.697em;line-height:.697em;text-indent:-.075em;white-space:nowrap}   /* genau die Tinte des F (Hanken Grotesk): prallt an den Rändern ab */
   @media (prefers-reduced-motion:no-preference){
     .fs span{animation:fs-x 4.3s linear infinite alternate,fs-y 3.1s linear infinite alternate}
     .fs:hover span{animation-play-state:paused}
   }
-  @media (prefers-reduced-motion:reduce){.fs span{left:calc(50% - .5em);top:calc(50% - .5em)}}
+  @media (prefers-reduced-motion:reduce){.fs span{left:calc(50% - .23em);top:calc(50% - .35em)}}
 }
-@keyframes fs-x{to{left:calc(100% - 1em - 4px)}}
-@keyframes fs-y{to{top:calc(100% - 1em - 4px)}}
+@keyframes fs-x{to{left:calc(100% - .46em)}}
+@keyframes fs-y{to{top:calc(100% - .697em)}}
 .mark{
   position:absolute;left:var(--pad);top:var(--bar-pad);pointer-events:auto;white-space:nowrap;
   font-size:30px;line-height:1;font-weight:600;letter-spacing:-.065em;
