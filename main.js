@@ -661,6 +661,26 @@ document.addEventListener('click', ev => {
   history.replaceState(null, '', a.getAttribute('href'));
 });
 
+/* Jede Karte passt in den Bildschirm, auch mit mehr Projekten: ist sie zu hoch oder ein Wort breiter als die Karte,
+   wird ihre Schrift (Titel, Unterzeile; Linkseite: Überschrift und Links) so weit kleiner, wie nötig (CSS --fit) */
+const fitWide = s => s === endPage ? [s.querySelector('.links')] : [...s.querySelectorAll('.title, .tagline')];
+function fitCards(){
+  const room = (pagerOn ? pager.clientHeight : innerHeight) + .5;
+  [...slides, endPage].forEach(s => {
+    const c = s.querySelector('.card'), cs = getComputedStyle(c);
+    c.style.removeProperty('--fit');
+    const wide = c.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) + 1;   // +1: Rundung
+    const fits = () => s.offsetHeight <= room && fitWide(s).every(e => e.scrollWidth <= wide);   // Titel/Links wachsen mit dem breitesten Wort
+    if (fits()) return;
+    let lo = .1, hi = 1;                              // größte Stufe, die passt
+    for (let k = 0; k < 10; k++) { const m = (lo + hi) / 2; c.style.setProperty('--fit', m); fits() ? lo = m : hi = m; }
+    c.style.setProperty('--fit', lo);
+  });
+}
+addEventListener('resize', fitCards);
+document.fonts.ready.then(fitCards);
+fitCards();
+
 /* Kopf der großen Zahl auf der Karte (CSS .num-top): eine Kopie der Zahl je Karte, genau auf ihr, über der Leiste.
    Sichtbar ist nur, was über die Kartenkante ragt; ob sie zu sehen ist, entscheidet allein die Scrollposition (CSS):
    ruhend oder nach unten gezogen ja, nach oben unter die Leiste nein. Hier nur die Lage, einmal je Größe. */
@@ -703,33 +723,6 @@ function alignSublines(){
 addEventListener('resize', alignSublines);
 document.fonts.ready.then(alignSublines);
 alignSublines();
-
-/* Linkseite passt immer in den Bildschirm, auch mit mehr Projekten: kein Name breiter als die Karte (sonst nur die
-   Links kleiner); ist sie zu hoch, wird zuerst die Überschrift kleiner (bis 40 % der Linkgröße), danach Überschrift
-   und Links zusammen — je die größte Stufe, die passt (CSS --fit-h, --fit-l) */
-const endCard = endPage.querySelector('.card'), endHead = endCard.querySelector('.end__head'), endLinks = endCard.querySelector('.links');
-function fitEnd(){
-  const ps = getComputedStyle(endPage), cs = getComputedStyle(endCard);
-  const room = (pagerOn ? pager.clientHeight : innerHeight) - parseFloat(ps.paddingTop) - parseFloat(ps.paddingBottom)
-             - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - parseFloat(cs.rowGap);
-  const wide = endCard.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-  const narrowOk = () => endLinks.scrollWidth <= wide + 1;     // .links selbst wächst mit dem breitesten Namen; +1: Rundung
-  const fits = () => narrowOk() && endHead.offsetHeight + endLinks.offsetHeight <= room;
-  const set = (h, l) => { endCard.style.setProperty('--fit-h', h); endCard.style.setProperty('--fit-l', l); };
-  const largest = (lo, hi, apply, ok) => {          // größte Stufe in [lo, hi], die ok ist (sonst lo)
-    apply(hi); if (ok()) return hi;
-    for (let k = 0; k < 10; k++) { const m = (lo + hi) / 2; apply(m); ok() ? lo = m : hi = m; }
-    apply(lo); return lo;
-  };
-  const l = largest(.1, 1, l => set(1, l), narrowOk);          // Breite: nur die Links
-  if (fits()) return;
-  set(.4, l);
-  if (fits()) return largest(.4, 1, h => set(h, l), fits);     // Höhe: zuerst die Überschrift …
-  largest(.1, l, l => set(.4, l), fits);                       // … dann beide
-}
-addEventListener('resize', fitEnd);
-document.fonts.ready.then(fitEnd);
-fitEnd();
 
 /* ═══ 5 Projektbild und Details
    Klick: Raster ein/aus. Doppelklick (nur bei Raster): volles Farbbild ↔ Raster; Touch: Doppeltipp, auch ohne Raster.

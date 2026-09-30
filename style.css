@@ -238,7 +238,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .card{
   position:relative;isolation:isolate;overflow:hidden;background:var(--bg);   /* Grund, auch für die Invertierung der Linkseite */
   display:grid;grid-template-rows:auto 1fr auto;gap:1.5rem;
-  --t:calc(clamp(2.6rem,7.4vw,7rem) * var(--fs-c));      /* Titelgröße (Rechner 1,4-fach) */
+  --t:calc(clamp(2.6rem,7.4vw,7rem) * var(--fs-c) * var(--fit, 1));   /* Titelgröße (Rechner 1,4-fach); --fit: main.js, falls die Karte sonst nicht in den Bildschirm passt */
   padding:clamp(1.25rem,3.5vw,3rem);
   box-shadow:inset 0 0 0 var(--stroke) var(--hl);        /* Kontur liegt unter der Füllung und verschwindet darin */
   --r:140px;                                             /* Rechner */
@@ -383,7 +383,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 }
 
 .body{margin:0;max-width:60ch}
-.tagline{margin:0;max-width:30ch;font-size:calc(clamp(1.25rem,2.2vw,1.75rem) * var(--fs-c));line-height:1.15;letter-spacing:-.05em;color:var(--mute)}   /* Rechner: 1,4-fach wie alle Kartenschrift */
+.tagline{margin:0;max-width:30ch;font-size:calc(clamp(1.25rem,2.2vw,1.75rem) * var(--fs-c) * var(--fit, 1));line-height:1.15;letter-spacing:-.05em;color:var(--mute)}   /* Rechner: 1,4-fach wie alle Kartenschrift */
 
 
 
@@ -428,14 +428,14 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .card--end{--hl:var(--end-fill);grid-template-rows:auto 1fr}   /* hell: dunkelgrau füllen, dunkel: hellgrau */
 /* Unterzeile wird beim letzten Scrollen zur großen Überschrift */
 .end__head{
-  margin:0;font-size:calc(var(--t) * var(--fit-l, 1) * var(--fit-h, 1));   /* main.js 5 verkleinert, bis alles in den Bildschirm passt */font-weight:500;line-height:.95;letter-spacing:-.065em;
+  margin:0;font-size:calc(var(--t) * .4);font-weight:500;line-height:.95;letter-spacing:-.065em;   /* deutlich kleiner als die Links darunter */
   transform-origin:0 0;
 }
 .end__head span{color:var(--mute)}
 /* Projektlinks: große Schrift, beim Hover die Link-Pille wie bei den Projekttiteln */
 .links{
   align-self:end;display:flex;flex-wrap:wrap;gap:.1em .9em;
-  font-size:calc(var(--t) * var(--fit-l, 1));font-weight:500;line-height:.95;letter-spacing:-.065em;   /* wie die Projekttitel (.title) */
+  font-size:var(--t);font-weight:500;line-height:.95;letter-spacing:-.065em;   /* wie die Projekttitel (.title) */
 }
 .links a{position:relative;display:inline-block;padding:0 .29em .06em .225em;margin-left:-.225em}   /* wie die Titel */
 .links a::before,.links .pill-ghost{background:var(--hl)}     /* Pille in der Projektfarbe */
