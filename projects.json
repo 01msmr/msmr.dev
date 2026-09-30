@@ -24,7 +24,7 @@
     "hue": [0.22, 5],
     "url": "https://korrekturen.msmr.co",
     "title": [{ "label": "korrekturen", "url": "https://korrekturen.msmr.co" }],
-    "text": "Report typos to newsrooms and collect accepted fixes.",
+    "text": "report typos to newsrooms and collect accepted fixes.",
     "tech": ["TypeScript", "Hono", "Drizzle", "SQLite", "IMAP", "Claude"],
     "shot": "img/korrekturen.webp?v=2"
   },
@@ -38,7 +38,7 @@
       { "label": "Snap Cam", "url": "https://snap.afterworkphotos.com" },
       { "label": "WebXR gallery", "url": "https://afterworkphotos.com/gallery/" }
     ],
-    "text": "square photos, unedited. made with custom Snap Cam, published straight away. On desktop, phone, tablet and VR.",
+    "text": "square photos, shot by custom Snap Cam, published straight away. On desktop, phone, tablet\nand VR.",
     "tech": ["HTML", "CSS", "Vanilla JS", "three.js", "Swift", "PHP", "GitHub Actions", "Claude"],
     "shot": "img/afterworkphotos.webp?v=2"
   },
@@ -48,7 +48,7 @@
     "hue": [0.19, 155],
     "url": "https://github.com/01msmr/doday/blob/main/README.md",
     "title": [{ "label": "Do Day", "url": "https://github.com/01msmr/doday/blob/main/README.md" }],
-    "text": "Tasks and appointments with tagging, data hosted on a Nextcloud instance.",
+    "text": "Tasks, appointments, achievements and tagging, data syncing\non Nextcloud.",
     "tech": ["TypeScript", "Hono", "CalDAV/WebDAV", "Claude"],
     "shot": "img/doday.webp?v=2"
   },
@@ -58,7 +58,7 @@
     "hue": [0.2, 305],
     "url": "https://time.msmr.co",
     "title": [{ "label": "Chromachron", "url": "https://time.msmr.co" }],
-    "text": "a watch with colours instead of hands.",
+    "text": "a watch with a window on colours\ninstead of hands.",
     "tech": ["p5.js", "Rhino", "Claude"],
     "shot": "img/chromachron.webp?v=2"
   },
@@ -68,7 +68,7 @@
     "hue": [0.2, 44],
     "url": "https://makerspac.es",
     "title": [{ "label": "makerspac.es", "url": "https://makerspac.es" }],
-    "text": "makerspaces in the EU on a map, with workshops and live opening status.",
+    "text": "makerspaces on a map, with workshops, dates and\nlive opening status.",
     "tech": ["Vanilla JS", "Leaflet", "MapLibre", "SpaceAPI", "Claude"],
     "shot": "img/makerspaces.webp?v=2"
   },
@@ -78,7 +78,7 @@
     "hue": [0.16, 95, 0.82],
     "url": "https://a.msmr.co",
     "title": [{ "label": "a.msmr", "url": "https://a.msmr.co" }],
-    "text": "a simple start page: clean layout, inline editable.",
+    "text": "a start page: links in a grid, minimal design,\ninline editable.",
     "tech": ["HTML", "CSS", "Vanilla JS", "PHP", "JSON", "Claude"],
     "shot": "img/amsmr.webp?v=1"
   }

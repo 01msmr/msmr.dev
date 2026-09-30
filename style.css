@@ -263,8 +263,8 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .slide .card .meta{color:#fff}
   .slide .card .tagline{color:rgb(255 255 255 / .6)}
 }
-.inv :is(.meta,.title,.body,.end__head,.links){color:#fff;mix-blend-mode:difference}
-.inv :is(.meta,.end__head span){color:rgb(255 255 255 / .6)}
+.inv :is(.meta,.title,.body,.end__head,.links,.end__note){color:#fff;mix-blend-mode:difference}
+.inv :is(.meta,.end__head span,.end__note){color:rgb(255 255 255 / .6)}
 .inv .title:has(a:is(:hover,:focus-visible)),
 .inv .links:has(a:is(:hover,:focus-visible)){mix-blend-mode:normal;color:var(--end-on)}   /* Pille sichtbar: normal, Schrift wie auf der gefüllten Karte */
 .inv .meta .d.on{color:#fff}
@@ -426,7 +426,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .slide,.end{padding:var(--pad)}
 }
 @media (hover:hover) and (pointer:fine) and (min-width:1024px){:root{--pad:calc(var(--bar) + var(--nav-line))}}   /* + Linie unter dem aktiven Eintrag */
-.card--end{--hl:var(--end-fill);grid-template-rows:auto 1fr}   /* hell: dunkelgrau füllen, dunkel: hellgrau */
+.card--end{--hl:var(--end-fill);grid-template-rows:auto 1fr auto}   /* hell: dunkelgrau füllen, dunkel: hellgrau */
 /* Unterzeile wird beim letzten Scrollen zur großen Überschrift */
 .end__head{
   margin:0;font-size:calc(var(--t) * .6);font-weight:500;line-height:.95;letter-spacing:-.065em;   /* kleiner als die Links darunter */
@@ -434,6 +434,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 }
 @media (hover:none){.end__head{font-size:calc(var(--t) * .75)}}   /* iPhone, iPad: weniger verkleinert */
 .end__head span{color:var(--mute)}
+.end__note{margin:0;font-size:calc(clamp(1.25rem,2.2vw,1.75rem) * var(--fs-c) * var(--fit, 1));line-height:1.15;letter-spacing:-.05em;color:var(--mute)}   /* wie die Unterzeile der Projekte (.tagline) */
 /* Projektlinks: große Schrift, beim Hover die Link-Pille wie bei den Projekttiteln */
 .links{
   align-self:end;display:flex;flex-wrap:wrap;gap:.1em .9em;

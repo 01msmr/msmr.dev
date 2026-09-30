@@ -89,12 +89,13 @@ $icon = random_int(0, $n - 1);               // Icon in einer der Projektfarben 
 
 <footer class="end" id="links">
   <div class="card card--end inv">
-    <h2 class="end__head">Made at Lake Constance. <span>All projects:</span></h2>
+    <h2 class="end__head"><span>All projects:</span></h2>
     <nav class="links" aria-label="All projects">
 <?php foreach ($projects as $p): ?>
       <a href="<?= e($p['url']) ?>" style="--hl:<?= color($p) ?>"<?= target($p['url']) ?>><?= e($p['name']) ?></a>
 <?php endforeach; ?>
     </nav>
+    <p class="end__note">made at Lake Constance.</p>
   </div>
 </footer>
 </div>
