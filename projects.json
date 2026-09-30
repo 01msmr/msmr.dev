@@ -48,7 +48,7 @@
     "hue": [0.19, 155],
     "url": "https://github.com/01msmr/doday/blob/main/README.md",
     "title": [{ "label": "Do Day", "url": "https://github.com/01msmr/doday/blob/main/README.md" }],
-    "text": "Tasks, appointments, achievements and tagging, data syncing\non Nextcloud.",
+    "text": "cards UI for achievements,\ntasks and appointments; with tagging and\ndata syncing to a Nextcloud.",
     "tech": ["TypeScript", "Hono", "CalDAV/WebDAV", "Claude"],
     "shot": "img/doday.webp?v=2"
   },
