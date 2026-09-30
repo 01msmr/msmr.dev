@@ -10,6 +10,15 @@
     "shot": "img/msmrdev.webp?v=2"
   },
   {
+    "id": "w3stil",
+    "name": "w3stil",
+    "hue": [0.08, 326, 0.91],
+    "url": "https://github.com/01msmr/w3stil",
+    "title": [{ "label": "w3stil", "url": "https://github.com/01msmr/w3stil" }],
+    "text": "a reduced reading layout for the news tickers of golem, heise and Mac & i, and for Wikipedia.",
+    "tech": ["CSS", "UserCSS", "Userscript", "Node", "Playwright", "GitHub Actions", "Claude"]
+  },
+  {
     "id": "korrekturen",
     "name": "korrekturen",
     "hue": [0.22, 5],
