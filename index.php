@@ -42,6 +42,7 @@ $icon = random_int(0, $n - 1);               // Icon in einer der Projektfarben 
 <body>
 
 <header class="bar">
+  <button class="fs" type="button" aria-label="Fullscreen" hidden><span>F</span></button>   <!-- Rechner: Vollbild, im Eckquadrat links oben (main.js 4) -->
   <a class="mark" href="#top" aria-label="msmr.dev, back to top">msmr<i>.dev</i></a>
   <nav class="nav" aria-label="Projects">
     <i class="nav__hl" aria-hidden="true"></i><i class="nav__under" aria-hidden="true"></i>   <!-- Fenster (folgt der Maus) · Linie unter dem aktiven Eintrag (bleibt) — beide Ausschnitte desselben Farbbands -->

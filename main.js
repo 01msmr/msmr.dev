@@ -568,6 +568,34 @@ addEventListener('keydown', ev => {
   if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(k)) { ev.preventDefault(); go(1); }
   if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(k))          { ev.preventDefault(); go(-1); }
 });
+/* Vollbild wie eine Präsentation: Taste F, Doppelklick/-tipp auf den Hintergrund (nicht auf Karten, Links, Leiste)
+   oder der Knopf »F« links oben (nur mit Maus). iPhone kann es nicht — dort: zum Home-Bildschirm hinzufügen. */
+const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
+const fsOk = document.fullscreenEnabled || document.webkitFullscreenEnabled;
+function toggleFullscreen(){
+  if (fsEl()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
+}
+if (fsOk) {
+  const fsBtn = document.querySelector('.fs');
+  fsBtn.hidden = false;
+  fsBtn.addEventListener('click', toggleFullscreen);
+  addEventListener('keydown', ev => {
+    if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.target.closest('input, textarea')) return;
+    if (ev.key === 'f' || ev.key === 'F') { ev.preventDefault(); toggleFullscreen(); }
+  });
+  const onBg = ev => !ev.target.closest('.card, a, button, .bar');
+  if (!pagerOn) addEventListener('dblclick', ev => { if (onBg(ev)) toggleFullscreen(); });
+  else {                                        // Touch: Doppeltipp selbst erkennen (iOS meldet kein verlässliches dblclick)
+    let lastBgTap = 0;
+    addEventListener('click', ev => {
+      if (!onBg(ev)) return;
+      const now = performance.now();
+      if (now - lastBgTap < 300) { lastBgTap = 0; toggleFullscreen(); } else lastBgTap = now;
+    });
+  }
+}
+
 if (!pagerOn) addEventListener('wheel', ev => { // senkrecht: jede Geste eine Karte, im Tempo der Geste
   if (ev.target.closest && ev.target.closest('.nav')) return;
   if (Math.abs(ev.deltaY) <= Math.abs(ev.deltaX)) return;
@@ -738,11 +766,11 @@ document.fonts.ready.then(alignSublines);
 alignSublines();
 
 /* ═══ 5 Projektbild und Details
-   Klick: Raster ein/aus. Doppelklick (nur bei Raster): volles Farbbild ↔ Raster; Touch: Doppeltipp, auch ohne Raster.
+   Klick/Tipp: leere Karte → Raster → volles Bild → leere Karte. Zurück zur leeren Karte 8 s nach dem letzten Klick
+   (langsam, 4 s), beim Wegblättern oder mit einem Klick außerhalb der Karte.
    Alle Bilder werden nach dem Laden der Seite vorab geladen und gerastert.
-   Nach 11 s ohne Aktion in der Karte blendet jedes Bild aus (4 s); danach wieder mit Klick beginnen.
    Ganz aus dem Bild geblättert: Bild aus, offenes Detail zu — die Karte kommt leer zurück. ═══ */
-const SHOW_FOR = 11000;                     // danach blendet das Bild aus
+const SHOW_FOR = 8000;                      // so lange nach dem letzten Klick, dann blendet das Bild aus
 
 /* Halbton im Browser: Punkte auf gedrehtem Raster (45°), Fläche ∝ Dunkelheit.
    Gezeichnet für die echte Kartengröße und Pixeldichte — scharf, ohne eigene Dateien. */
@@ -816,7 +844,7 @@ const preload = [];
 addEventListener('load', () => setTimeout(() => preload.reduce((p, f) => p.then(f), Promise.resolve()), 300));   // nach dem Laden, eins nach dem anderen
 
 document.querySelectorAll('.card[data-shot]').forEach(card => {
-  let clickTimer, hideTimer, mode = null;     // null | 'shot' | 'full'
+  let hideTimer, mode = null;     // null | 'shot' | 'full'
   const canvas = card.querySelector('canvas.shot');
   let img = null;
   const load = () => {                        // erst bei Kontakt mit der Karte laden
@@ -837,7 +865,7 @@ document.querySelectorAll('.card[data-shot]').forEach(card => {
     card.style.setProperty('--cx', ev.clientX - r.left + 'px');
     card.style.setProperty('--cy', ev.clientY - r.top + 'px');
   };
-  const arm = () => {                         // Uhr neu starten: 11 s ohne Aktion, dann ausblenden
+  const arm = () => {                         // Uhr neu starten: 8 s nach dem letzten Klick ausblenden
     clearTimeout(hideTimer);
     if (mode) hideTimer = setTimeout(() => show(null, true), SHOW_FOR);
   };
@@ -849,30 +877,15 @@ document.querySelectorAll('.card[data-shot]').forEach(card => {
     card.classList.toggle('is-full', m === 'full');
     arm();
   };
-  onAway.set(card, () => { clearTimeout(clickTimer); if (mode) show(null); });
-  card.addEventListener('pointermove', arm, { passive:true });   // Bewegung in der Karte zählt als Aktion
-  card.addEventListener('mousedown', ev => { if (ev.detail > 1 && !ev.target.closest('a')) ev.preventDefault(); });   // kein Markieren beim Doppelklick
+  onAway.set(card, () => { if (mode) show(null); });
+  document.addEventListener('click', ev => { if (mode && !card.contains(ev.target)) show(null); });   // Klick außerhalb der Karte
+  card.addEventListener('mousedown', ev => { if (ev.detail > 1 && !ev.target.closest('a')) ev.preventDefault(); });   // kein Markieren bei schnellen Klicks
   // Touch: ein Tipp auf ein Detail (Technik) vergrößert nur das Detail — kein Tipp auf die Karte
   const ignore = ev => ev.target.closest('a') || (pagerOn && ev.target.closest('.meta .d'));
-  let lastTap = 0;
   card.addEventListener('click', ev => {
     if (ignore(ev)) return;
-    if (pagerOn) {                             // Touch: Doppeltipp selbst erkennen (iOS meldet kein verlässliches dblclick)
-      const now = performance.now();
-      if (now - lastTap < 300) {               // volles Bild ↔ Raster, vom Finger aus — auch direkt aus der leeren Karte
-        lastTap = 0; clearTimeout(clickTimer); at(ev); show(mode === 'full' ? 'shot' : 'full'); return;
-      }
-      lastTap = now;
-    }
-    if (ev.detail > 1 || mode === 'full') return;
-    clearTimeout(clickTimer);
-    clickTimer = setTimeout(() => show(mode === 'shot' ? null : 'shot'), 240);   // auf möglichen Doppelklick warten
-  });
-  card.addEventListener('dblclick', ev => {
-    if (pagerOn || ignore(ev)) return;        // Touch: siehe oben
-    clearTimeout(clickTimer);
-    if (mode === 'shot') { at(ev); show('full'); }          // öffnet sich vom Cursor aus …
-    else if (mode === 'full') { at(ev); show('shot'); }     // … und schließt sich zum Cursor hin
+    at(ev);                                    // volles Bild öffnet sich vom Cursor/Finger aus und schließt sich dorthin
+    show(mode === null ? 'shot' : mode === 'shot' ? 'full' : null);
   });
 });
 

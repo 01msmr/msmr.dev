@@ -71,6 +71,27 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   transform:translateY(var(--nav-y,0px));               /* Startbildschirm: Leiste oben aus dem Bild; fährt herein, während die Wortmarke das letzte Stück steigt */
   background:var(--bg);                                 /* voll deckend, genau wie die Seite */
 }
+/* Vollbild-Knopf »F«: nur mit Maus, im Eckquadrat links oben (links der Wortmarke, über dem linken Kartenrand) */
+.fs{display:none}
+@media (hover:hover) and (pointer:fine){
+  .fs:not([hidden]){
+    position:absolute;left:0;top:0;width:var(--pad);height:var(--bar);display:grid;place-items:center;
+    padding:0;border:0;background:none;cursor:pointer;pointer-events:auto;
+    font:500 13px var(--mono);color:var(--mute);
+    opacity:clamp(0,(var(--p) - .55) * 2.2,1);transform:translateY(var(--nav-y,0px));   /* mit der Leiste, wie die Navigation */
+  }
+  .fs:hover{color:var(--ink)}
+  /* »F« läuft wie eine Billardkugel im Quadrat: waagrecht und senkrecht je hin und her, in Zeiten ohne gemeinsamen
+     Takt — so prallt es an allen vier Rändern ab und nimmt immer neue Wege; unter der Maus hält es an */
+  .fs span{position:absolute;left:4px;top:4px;width:1em;height:1em;display:grid;place-items:center;line-height:1}
+  @media (prefers-reduced-motion:no-preference){
+    .fs span{animation:fs-x 4.3s linear infinite alternate,fs-y 3.1s linear infinite alternate}
+    .fs:hover span{animation-play-state:paused}
+  }
+  @media (prefers-reduced-motion:reduce){.fs span{left:calc(50% - .5em);top:calc(50% - .5em)}}
+}
+@keyframes fs-x{to{left:calc(100% - 1em - 4px)}}
+@keyframes fs-y{to{top:calc(100% - 1em - 4px)}}
 .mark{
   position:absolute;left:var(--pad);top:var(--bar-pad);pointer-events:auto;white-space:nowrap;
   font-size:30px;line-height:1;font-weight:600;letter-spacing:-.065em;
@@ -270,7 +291,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .inv .meta .d.on{color:#fff}
 
 /* Projektbild: Klick = Halbton-Raster (im Browser aus dem Bildschirmfoto gezeichnet),
-   Doppelklick = volles Bild. Über der Farbfläche, hinter der Schrift. */
+   nächster Klick = volles Bild, dann wieder leer (main.js 5). Über der Farbfläche, hinter der Schrift. */
 .shot{
   position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;
   opacity:.24;mix-blend-mode:multiply;
