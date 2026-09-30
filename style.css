@@ -385,6 +385,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 
 .body{margin:0;max-width:60ch}
 .tagline{margin:0;max-width:30ch;font-size:calc(clamp(1.25rem,2.2vw,1.75rem) * var(--fs-c) * var(--fit, 1));line-height:1.15;letter-spacing:-.05em;color:var(--mute)}   /* Rechner: 1,4-fach wie alle Kartenschrift */
+.tagline--lines{max-width:none}                          /* eigene Umbrüche (\n): keine Breitengrenze, umbrochen wird nur, wo die Karte zu schmal ist */
 
 
 
