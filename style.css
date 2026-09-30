@@ -267,7 +267,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   border-radius:0 var(--r) var(--r) var(--r);
   clip-path:inset(0 round 0 var(--r) var(--r) var(--r));   /* schneidet auch die gleitende Füllung rund zu */
 }
-@media (max-width:1199px){.card{--r:24px}}              /* iPad: kleine Geräteecken (~18 pt) */
+@media (max-width:1199px){.card{--r:11.68vw}}           /* iPad: wie auf dem Rechner, mit der Breite skaliert — bei 1200 px genau 140 px */
 @media (max-width:699px){.card{--r:40px}}               /* Smartphone */
 @media (min-width:700px) and (max-width:1199px){          /* iPad: Karte dicht an den Geräterand, Ecken laufen parallel */
   .slide,.end{padding-left:10px;padding-right:10px;padding-bottom:10px}
