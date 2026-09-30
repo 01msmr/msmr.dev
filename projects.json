@@ -5,7 +5,7 @@
     "hue": [0.16, 256, 0.69],
     "url": "https://github.com/01msmr/paged-portfolio",
     "title": [{ "label": "paged portfolio", "url": "https://github.com/01msmr/paged-portfolio" }],
-    "text": "clean portfolio site: one screen per project and a few small UI hacks.",
+    "text": "web portfolio: one project per screen and a lean UI.",
     "tech": ["HTML", "CSS", "Vanilla JS", "PHP", "Claude"],
     "shot": "img/msmrdev.webp?v=2"
   },
