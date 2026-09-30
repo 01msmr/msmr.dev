@@ -1,7 +1,7 @@
 /* msmr.dev — Verhalten der Seite. Blöcke:
    0 Grundlagen (Elemente, Scrollbereich: Fenster bzw. .pager auf Touch)
    1 Wortmarke (Bogen, Schrift-Transition; Leiste gleitet mit dem letzten Stück herein)
-   2 Navigation (Einträge ↑ 01 … 07 ↗, aktives Projekt, Farbband/-fenster, Linie unter dem aktiven Eintrag;
+   2 Navigation (Einträge ↑ Projekte ↗, aktives Projekt, Farbband/-fenster, Linie unter dem aktiven Eintrag;
      voll: Schriftfarbe genau an den Fensterkanten, die Wortmarke ist der Eintrag ↑; schmal: mittig, Nachbarn als Nummern,
      keine Nummer gleitet durchs Fenster)
    3 Schmale Navigation (Auswahlrad mit Rad/Trackpad; Touch: Zielen — Fenster fest in der Mitte, Nummern ziehen durch)
@@ -27,7 +27,8 @@ const hl      = nav.querySelector('.nav__hl');
 const under   = nav.querySelector('.nav__under');   // Rechner: Linie unter dem aktiven Eintrag — zweiter Ausschnitt des Bands
 const endLink = nav.querySelector('.nav-end');
 const startLink = nav.querySelector('.nav-start');   // ↑ vor 01: nur Ziel (Startbildschirm), nie aktiv
-// Einträge ↔ Bildschirme: links = ↑, 01 … 07, ↗ — Projekt i ist links[i + 1]
+// Einträge ↔ Bildschirme: links = ↑, Projekte, ↗ — Projekt i ist links[i + 1]. Nummern zählen rückwärts (neuestes Projekt oben,
+// mit der höchsten Nummer); »01« in den Kommentaren meint den ersten Eintrag
 const linkOf   = i => i >= 0 ? links[i + 1] : null;
 const slideOf  = a => links.indexOf(a) - 1;                   // Projektindex eines Eintrags (↑: −1)
 const screenOf = a => a === startLink ? hero : a === endLink ? endPage : slides[slideOf(a)];

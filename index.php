@@ -48,7 +48,7 @@ $icon = random_int(0, $n - 1);               // Icon in einer der Projektfarben 
     <span class="nav-pad" aria-hidden="true">00</span>   <!-- unsichtbarer Platzhalter (Telefon): links vom ersten Eintrag steht immer ein Nachbar -->
 <a href="#top" class="nav-start" style="--hl:var(--end-fill)"><b>↑</b><span>start</span></a>   <!-- nur Ziel (Zielen, Tippen): der Startbildschirm; dort bleibt 01 aktiv -->
 <?php foreach ($projects as $i => $p): ?>
-    <a href="#<?= e($p['id']) ?>" style="--hl:<?= color($p) ?>"><b><?= two($i + 1) ?></b><span><?= e($p['name']) ?></span></a>
+    <a href="#<?= e($p['id']) ?>" style="--hl:<?= color($p) ?>"><b><?= two($n - $i) ?></b><span><?= e($p['name']) ?></span></a>
 <?php endforeach; ?>
     <a href="#links" class="nav-end" style="--hl:var(--end-fill)"><b>↗</b><span>urls</span></a>
     <span class="nav-pad" aria-hidden="true">00</span>   <!-- … und rechts vom letzten -->
@@ -71,7 +71,7 @@ $icon = random_int(0, $n - 1);               // Icon in einer der Projektfarben 
       <canvas class="shot" aria-hidden="true"></canvas><span class="shot full" aria-hidden="true"></span>
 <?php endif; ?>
       <div class="meta"><?php foreach ($p['tech'] as $t): ?><span class="d"><span class="dx"><?= e($t) ?></span></span><?php endforeach; ?></div>
-      <span class="num" aria-hidden="true"><?= two($i + 1) ?></span>
+      <span class="num" aria-hidden="true"><?= two($n - $i) ?></span>
       <div class="main">
         <h2 class="title"><?php
           $parts = [];
