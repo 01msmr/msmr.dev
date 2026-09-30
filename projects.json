@@ -15,7 +15,7 @@
     "hue": [0.14, 115, 0.63],
     "url": "https://github.com/01msmr/w3stil",
     "title": [{ "label": "w3stil", "url": "https://github.com/01msmr/w3stil" }],
-    "text": "reduced reading layout for\nnews listings",
+    "text": "reduced reading layout for\nnews listings.",
     "tech": ["CSS", "UserCSS", "Userscript", "Node", "Playwright", "GitHub Actions", "Claude"]
   },
   {
@@ -38,7 +38,7 @@
       { "label": "Snap Cam", "url": "https://snap.afterworkphotos.com" },
       { "label": "WebXR gallery", "url": "https://afterworkphotos.com/gallery/" }
     ],
-    "text": "square photos, shot by custom Snap Cam,\npublished straight away.\nLayouts for desktop, phone, tablet\nand a VR gallery",
+    "text": "square photos, shot by custom Snap Cam,\npublished straight away.\nLayouts for desktop, phone, tablet\nand a VR gallery.",
     "tech": ["HTML", "CSS", "Vanilla JS", "three.js", "Swift", "PHP", "GitHub Actions", "Claude"],
     "shot": "img/afterworkphotos.webp?v=2"
   },
