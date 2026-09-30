@@ -428,9 +428,10 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .card--end{--hl:var(--end-fill);grid-template-rows:auto 1fr}   /* hell: dunkelgrau füllen, dunkel: hellgrau */
 /* Unterzeile wird beim letzten Scrollen zur großen Überschrift */
 .end__head{
-  margin:0;font-size:calc(var(--t) * .4);font-weight:500;line-height:.95;letter-spacing:-.065em;   /* deutlich kleiner als die Links darunter */
+  margin:0;font-size:calc(var(--t) * .6);font-weight:500;line-height:.95;letter-spacing:-.065em;   /* kleiner als die Links darunter */
   transform-origin:0 0;
 }
+@media (hover:none){.end__head{font-size:calc(var(--t) * .75)}}   /* iPhone, iPad: weniger verkleinert */
 .end__head span{color:var(--mute)}
 /* Projektlinks: große Schrift, beim Hover die Link-Pille wie bei den Projekttiteln */
 .links{
