@@ -15,7 +15,7 @@
     "hue": [0.14, 120, 0.60],
     "url": "https://github.com/01msmr/w3stil",
     "title": [{ "label": "w3stil", "url": "https://github.com/01msmr/w3stil" }],
-    "text": "a reduced reading layout for news listings.",
+    "text": "reduced reading layout for news listings",
     "tech": ["CSS", "UserCSS", "Userscript", "Node", "Playwright", "GitHub Actions", "Claude"]
   },
   {
