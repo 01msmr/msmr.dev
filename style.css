@@ -11,6 +11,7 @@
   --on:#191b1d;                         /* Schrift auf Projektfarbe, in beiden Modi dunkel */
   --end-fill:#2c2e31;                   /* Linkseite: Füllung … */
   --end-on:#fff;                        /* … und Schrift darauf (dunkel: umgekehrt) */
+  --end-diff:#d3d1ce;                   /* so erscheint --end-on per »difference« auf --end-fill (Start der Überblendung) */
   color-scheme:light dark;
   --sans:"Hanken Grotesk",system-ui,sans-serif;
   --mono:"Hanken Grotesk",system-ui,sans-serif;   /* auch die Details: eine Schrift für alles */
@@ -39,6 +40,7 @@
     --pill-ink:#ecece8;
     --end-fill:#e4e4e0;
     --end-on:#000;
+    --end-diff:#1b1b1f;
   }
 }
 *{box-sizing:border-box}
@@ -288,6 +290,9 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .inv :is(.meta,.end__head span,.end__note){color:rgb(255 255 255 / .6)}
 .inv .title:has(a:is(:hover,:focus-visible)),
 .card--end.filled .links,html:not(.liquid) :is(.card--end:is(:hover,:focus-within),.at-end .card--end) .links{mix-blend-mode:normal;color:var(--end-on)}
+.card--end.filled .links{animation:end-full .6s var(--out)}      /* vom Grau der Mischung weich zu vollem Weiß */
+@keyframes end-full{from{color:var(--end-diff)}}
+.liquid .card--end:not(.filled) .links a::before,.liquid .card--end:not(.filled) .links .pill-ghost{visibility:hidden}   /* Pille erst, wenn die Karte voll ist */
 /* Linkseite ganz gefüllt: normal und rein weiß (dunkel: schwarz) — »difference« ergäbe auf dem Dunkelgrau nur Hellgrau;
    solange die Flüssigkeit steigt, bleibt »difference«: die Schrift kippt genau an ihrer Oberfläche */
 .inv .meta .d.on{color:#fff}
