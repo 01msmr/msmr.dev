@@ -284,11 +284,14 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .slide .card .meta{color:#fff}
   .slide .card .tagline{color:rgb(255 255 255 / .6)}
 }
-.inv :is(.end__head,.links,.end__note){color:#fff;mix-blend-mode:difference}
+.inv :is(.end__head,.end__note){color:#fff;mix-blend-mode:difference}
+.inv .links{color:#fff}
+.inv .links a{mix-blend-mode:difference}                 /* je Link: der überfahrene wird normal, seine Pille zeigt die echte Farbe */
+.inv .links a:is(:hover,:focus-visible),.inv .links a:has(.pill-ghost){mix-blend-mode:normal}
 .inv :is(.end__head span,.end__note){color:rgb(255 255 255 / .6)}
 /* Linkseite ganz gefüllt: normal (gleiche Farbe wie die Mischung auf Schwarz), damit die Pille ihre Projektfarbe zeigt;
    solange die Flüssigkeit steigt, bleibt »difference«: die Schrift kippt genau an ihrer Oberfläche */
-.card--end.filled .links,html:not(.liquid) :is(.card--end:is(:hover,:focus-within),.at-end .card--end) .links{mix-blend-mode:normal;color:var(--end-on)}
+.card--end.filled .links a,html:not(.liquid) :is(.card--end:is(:hover,:focus-within),.at-end .card--end) .links a{mix-blend-mode:normal;color:var(--end-on)}
 
 /* Projektbild: Klick = Halbton-Raster (im Browser aus dem Bildschirmfoto gezeichnet),
    nächster Klick = volles Bild, dann wieder leer (main.js 5). Über der Farbfläche, hinter der Schrift. */
