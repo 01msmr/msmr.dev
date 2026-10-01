@@ -467,8 +467,7 @@ function fitNav(){
                    .reduce((n, a) => { const cs = getComputedStyle(a); return n + parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight); }, 0);
   nav.style.setProperty('--pk', Math.max(.6, 1 - (over + 1) / pad));   // +1: Rundung
 }
-/* Rechner: Fenster endet eine Linienstärke unter der Grundlinie der Schrift, die Linie beginnt dort (CSS --base);
-   die Wortmarke wird unterhalb davon wieder dunkel (--mb) — sie steht nie auf der Linie */
+/* Rechner: Fenster endet eine Linienstärke unter der Grundlinie der Schrift, die Linie beginnt dort (CSS --base) */
 function placeBase(){
   const t = links[1].querySelector('span'), p = document.createElement('i');
   p.style.cssText = 'display:inline-block;width:0;height:0';
@@ -477,7 +476,6 @@ function placeBase(){
   const n = nav.getBoundingClientRect().top;
   const d = y + parseFloat(getComputedStyle(root).getPropertyValue('--nav-line'));   // eine Linienstärke unter der Grundlinie
   nav.style.setProperty('--base', (d - n).toFixed(1) + 'px');
-  mark.style.setProperty('--mb', (d - mark.getBoundingClientRect().top).toFixed(1) + 'px');
 }
 addEventListener('resize', placeBase);
 addEventListener('resize', fitNav);

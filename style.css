@@ -130,7 +130,9 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .bar .nav a.nav-start{padding:0 0 0 calc(var(--mark-w0,120px) + 1rem)}   /* … ohne Pfeil: die Fläche der Wortmarke — Fenster beginnt an der linken Kartenkante (nicht davor), rechts 1rem Rand */
   .bar .nav a.nav-start b{display:none}
   /* Wortmarke in der Leiste: Schrift wechselt die Farbe an den Fensterkanten wie die Einträge (Fenster über ↑) */
-  .mark.in-bar,.mark.in-bar i{color:transparent;-webkit-background-clip:text;background-clip:text}
+  .mark.in-bar,.mark.in-bar i{color:transparent;-webkit-background-clip:text;background-clip:text;transition:none}   /* kein Überblenden beim Eintritt in die Leiste */
+  .mark.in-bar{--mb:calc(.85em + var(--nav-line))}       /* Grundlinie (Hanken, Zeilenhöhe 1: .85 em) + Linienstärke = Unterkante des Fensters */
+  .mark.in-bar i{--mb:calc(1em + var(--nav-line))}        /* ».dev« (inline): Feld beginnt eine Oberlänge über der Grundlinie */
   .mark.in-bar{background-image:linear-gradient(transparent var(--mb,100%),var(--ink) var(--mb,100%)),   /* unter der Grundlinie: kein Fenster */
     linear-gradient(to right,var(--ink) var(--wl),var(--end-on) var(--wl),var(--end-on) var(--wr),var(--ink) var(--wr))}
   .mark.in-bar i{background-image:linear-gradient(transparent var(--mb,100%),var(--mute) var(--mb,100%)),
