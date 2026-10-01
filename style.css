@@ -289,7 +289,6 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 /* Linkseite ganz gefüllt: normal (gleiche Farbe wie die Mischung auf Schwarz), damit die Pille ihre Projektfarbe zeigt;
    solange die Flüssigkeit steigt, bleibt »difference«: die Schrift kippt genau an ihrer Oberfläche */
 .card--end.filled .links,html:not(.liquid) :is(.card--end:is(:hover,:focus-within),.at-end .card--end) .links{mix-blend-mode:normal;color:var(--end-on)}
-.liquid .card--end:not(.filled) .links a::before,.liquid .card--end:not(.filled) .links .pill-ghost{visibility:hidden}   /* Pille erst, wenn die Karte voll ist */
 
 /* Projektbild: Klick = Halbton-Raster (im Browser aus dem Bildschirmfoto gezeichnet),
    nächster Klick = volles Bild, dann wieder leer (main.js 5). Über der Farbfläche, hinter der Schrift. */
