@@ -93,7 +93,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 @keyframes fs-x{to{left:calc(100% - .46em)}}
 @keyframes fs-y{to{top:calc(100% - .697em)}}
 .mark{
-  position:absolute;left:var(--pad);top:var(--bar-pad);pointer-events:auto;white-space:nowrap;
+  position:absolute;left:var(--pad);top:var(--mark-top,var(--bar-pad));pointer-events:auto;white-space:nowrap;
   font-size:30px;line-height:1;font-weight:600;letter-spacing:-.065em;
   transform-origin:0 0;
 }

@@ -71,7 +71,16 @@ function measure(){
   lede.style.transform = ''; lede.style.opacity = ''; lede.style.clipPath = '';
   ledeTop = lede.offsetTop; ledeH = lede.offsetHeight;
   barH = bar.offsetHeight;                          // Höhe der Leiste (CSS --bar)
-  TOP = bar.offsetTop + (parseFloat(getComputedStyle(root).getPropertyValue('--bar-pad')) || 10.5);   // Leiste kann eingerückt sein (Rechner: --pad)
+  // volle Navigation: die Wortmarke steht auf derselben Grundlinie wie die Einträge (sonst --bar-pad)
+  let mt = parseFloat(getComputedStyle(root).getPropertyValue('--bar-pad')) || 10.5;
+  if (!narrow.matches) {
+    const baseOf = el => { const q = document.createElement('i'); q.style.cssText = 'display:inline-block;width:0;height:0';
+                           el.append(q); const y = q.getBoundingClientRect().top; q.remove(); return y; };
+    const nb = baseOf(links[1].querySelector('span')) - nav.getBoundingClientRect().top + nav.offsetTop;
+    mt = nb - (baseOf(mark.querySelector('i')) - mark.getBoundingClientRect().top);
+  }
+  root.style.setProperty('--mark-top', mt.toFixed(2) + 'px');
+  TOP = bar.offsetTop + mt;                          // Leiste kann eingerückt sein (Rechner: --pad)
   ledeEnd = bar.offsetTop + barH + ledeH;   // ganz weg: eine eigene Höhe unter der Kopfleiste
   update(true);
 }
