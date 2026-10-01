@@ -11,6 +11,7 @@
   --on:#191b1d;                         /* Schrift auf Projektfarbe, in beiden Modi dunkel */
   --end-fill:#2c2e31;                   /* Linkseite: Füllung … */
   --end-on:#fff;                        /* … und Schrift darauf (dunkel: umgekehrt) */
+  --end-diff:#d3d1ce;                   /* Weiß »difference« auf --end-fill: so erscheinen die Links auf der gefüllten Linkseite */
   color-scheme:light dark;
   --sans:"Hanken Grotesk",system-ui,sans-serif;
   --mono:"Hanken Grotesk",system-ui,sans-serif;   /* auch die Details: eine Schrift für alles */
@@ -39,6 +40,7 @@
     --pill-ink:#ecece8;
     --end-fill:#e4e4e0;
     --end-on:#000;
+    --end-diff:#1b1b1f;
   }
 }
 *{box-sizing:border-box}
@@ -287,7 +289,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .inv :is(.meta,.title,.body,.end__head,.links,.end__note){color:#fff;mix-blend-mode:difference}
 .inv :is(.meta,.end__head span,.end__note){color:rgb(255 255 255 / .6)}
 .inv .title:has(a:is(:hover,:focus-visible)),
-.inv .links:has(a:is(:hover,:focus-visible)){mix-blend-mode:normal;color:var(--end-on)}   /* Pille sichtbar: normal, Schrift wie auf der gefüllten Karte */
+.inv .links:has(a:is(:hover,:focus-visible)){mix-blend-mode:normal;color:var(--end-diff)}   /* Pille sichtbar: normal, Schrift genau wie »difference« auf der gefüllten Karte — kein Sprung beim Verlassen */
 .inv .meta .d.on{color:#fff}
 
 /* Projektbild: Klick = Halbton-Raster (im Browser aus dem Bildschirmfoto gezeichnet),
