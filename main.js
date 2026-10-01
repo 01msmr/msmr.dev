@@ -24,6 +24,7 @@ const slides  = [...document.querySelectorAll('.slide')];
 const nav     = document.querySelector('.nav');
 const links   = [...nav.querySelectorAll('a')];
 const hl      = nav.querySelector('.nav__hl');
+nav.classList.add('instant');                   // beim Laden: Fenster und Linie gleich an ihrem Platz, ohne Gleiten (main.js 2)
 const under   = nav.querySelector('.nav__under');   // Rechner: Linie unter dem aktiven Eintrag — zweiter Ausschnitt des Bands
 const endLink = nav.querySelector('.nav-end');
 const startLink = nav.querySelector('.nav-start');   // ↑ vor 01: nur Ziel (Startbildschirm), nie aktiv
@@ -480,7 +481,10 @@ function placeBase(){
 addEventListener('resize', placeBase);
 addEventListener('resize', fitNav);
 addEventListener('resize', relayout);
-document.fonts.ready.then(() => { placeBase(); fitNav(); relayout(); centerNav(); });   // Anfangszustand: Band, Fenster, schmal 01 mittig
+document.fonts.ready.then(() => {
+  placeBase(); fitNav(); relayout(); centerNav(); paintText();
+  requestAnimationFrame(() => requestAnimationFrame(() => nav.classList.remove('instant')));
+});   // Anfangszustand: Band, Fenster, schmal 01 mittig
 new ResizeObserver(relayout).observe(nav);   // Breite ändert sich (Schrift, schmale Ansicht): Band neu malen
 
 /* ── Links/rechts wechselt das Projekt wie hoch/runter:

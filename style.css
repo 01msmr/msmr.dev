@@ -155,6 +155,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 }
 /* Band aus Projektfarben, je Eintrag eine Fläche mit harter Kante; das Rechteck ist ein Fenster darauf.
    Gleitet es über eine Kante, wandert der Farbwechsel mit durch das Rechteck. */
+.nav.instant :is(.nav__hl,.nav__under){transition:none !important}   /* main.js 2: beim Laden kein Gleiten */
 .nav__hl{
   position:absolute;inset:0 auto 0 0;width:100%;z-index:-1;
   clip-path:inset(0 var(--r,50%) 0 var(--l,50%));
