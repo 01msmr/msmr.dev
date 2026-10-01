@@ -93,7 +93,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 @keyframes fs-x{to{left:calc(100% - .46em)}}
 @keyframes fs-y{to{top:calc(100% - .697em)}}
 .mark{
-  position:absolute;left:var(--pad);top:var(--mark-top,var(--bar-pad));pointer-events:auto;white-space:nowrap;
+  position:absolute;left:var(--pad);top:var(--bar-pad);pointer-events:auto;white-space:nowrap;
   font-size:30px;line-height:1;font-weight:600;letter-spacing:-.065em;
   transform-origin:0 0;
 }
@@ -111,7 +111,9 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 /* Rechner, volle Navigation: Schrift wächst mit der Breite — 1× bei 1024 px bis 1,8× (--fs-s), sobald alle
    Namen in einer Zeile Platz haben (≈ 1560 px); darunter bleibt sie klein genug, dass alles passt */
 @media (hover:hover) and (pointer:fine) and (min-width:1024px){
-  .nav{font-size:clamp(.9375rem,2.564vw - 13.8px,calc(.9375rem * var(--fs-s)))}
+  .bar{--nav-fs:clamp(.9375rem,2.564vw - 13.8px,calc(.9375rem * var(--fs-s)))}
+  .nav{font-size:var(--nav-fs)}
+  .mark{top:calc(var(--nav-fs) * .346)}                   /* gleiche Grundlinie wie die Einträge (Hanken: 1 + .3 em, mittig in 51 px) */
 }
 .nav a{position:relative;display:flex;align-items:center;padding:0 calc(.75rem * var(--pk, 1));color:var(--ink);white-space:nowrap}   /* Farbwechsel ohne Übergang: schmal sofort, voll an den Fensterkanten */
 .nav a:not(:last-of-type)::after{                         /* feiner Trennstrich rechts */
