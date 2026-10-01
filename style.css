@@ -129,8 +129,10 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .bar .nav a.nav-start b{display:none}
   /* Wortmarke in der Leiste: Schrift wechselt die Farbe an den Fensterkanten wie die Einträge (Fenster über ↑) */
   .mark.in-bar,.mark.in-bar i{color:transparent;-webkit-background-clip:text;background-clip:text}
-  .mark.in-bar{background-image:linear-gradient(to right,var(--ink) var(--wl),var(--end-on) var(--wl),var(--end-on) var(--wr),var(--ink) var(--wr))}
-  .mark.in-bar i{background-image:linear-gradient(to right,var(--mute) calc(var(--wl) - var(--ix)),var(--end-on) calc(var(--wl) - var(--ix)),
+  .mark.in-bar{background-image:linear-gradient(transparent var(--mb,100%),var(--ink) var(--mb,100%)),   /* unter der Grundlinie: kein Fenster */
+    linear-gradient(to right,var(--ink) var(--wl),var(--end-on) var(--wl),var(--end-on) var(--wr),var(--ink) var(--wr))}
+  .mark.in-bar i{background-image:linear-gradient(transparent var(--mb,100%),var(--mute) var(--mb,100%)),
+    linear-gradient(to right,var(--mute) calc(var(--wl) - var(--ix)),var(--end-on) calc(var(--wl) - var(--ix)),
     var(--end-on) calc(var(--wr) - var(--ix)),var(--mute) calc(var(--wr) - var(--ix)))}
   .mark.in-bar:hover i{color:transparent}
   .bar .nav a,.bar .nav a.in-win,.bar .nav a:is(.nav-end,.nav-start).in-win{
@@ -382,8 +384,9 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .nav__under{display:none}
 @media (hover:hover) and (pointer:fine) and (min-width:1024px){
   .nav a:not(:last-of-type)::after{bottom:calc(-1 * var(--nav-line))}   /* Trennstriche schneiden auch die Linie — wie das Fenster */
-  .nav__under{
-    display:block;position:absolute;top:100%;left:0;width:100%;height:var(--nav-line);pointer-events:none;
+  .nav__hl{bottom:auto;height:var(--base,100%)}         /* Fenster bis zur Grundlinie … */
+  .nav__under{                                           /* … darunter die Linie, bis 3 px unter die Leiste */
+    display:block;position:absolute;top:var(--base,100%);left:0;width:100%;height:calc(100% - var(--base,100%) + var(--nav-line));pointer-events:none;
     clip-path:inset(0 var(--r,50%) 0 var(--l,50%));transition:clip-path .9s var(--out);   /* wie .nav__hl */
   }
 }
