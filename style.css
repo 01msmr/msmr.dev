@@ -308,7 +308,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   clip-path:circle(0 at var(--cx,50%) var(--cy,50%));
   transition:clip-path .5s cubic-bezier(.5,0,.75,0);
 }
-.shot.full{background:var(--full,none) center/cover no-repeat;opacity:1;mix-blend-mode:normal}
+.shot.full{background:var(--full,none) center/cover no-repeat;opacity:1;mix-blend-mode:normal;box-shadow:inset 0 0 0 var(--stroke) var(--hl)}   /* Kontur bleibt über dem Bild sichtbar (Raster ist durchscheinend) */
 /* Raster: blendet einfach ein und aus */
 .shot:not(.full){opacity:0;clip-path:none;transition:opacity .6s ease}           /* Ausblenden per Klick: zügig */
 .card.slow-out .shot:not(.full){transition:opacity 4s ease}                         /* Ausblenden nach Ablauf: langsam */
@@ -443,7 +443,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .cursor,.trail{position:absolute;left:0;top:0;will-change:transform}
 .cursor{width:22px;height:22px}
 .cursor svg{display:block;width:100%;height:100%;overflow:visible;fill:var(--cur);
-  stroke:var(--cur-line,rgb(255 255 255 / .7));stroke-width:2;paint-order:stroke fill;   /* Kontur 1 px außen, Gegenfarbe zum Cursor */
+  stroke:var(--cur-line,rgb(255 255 255 / .7));stroke-width:4;paint-order:stroke fill;   /* Kontur 2 px außen, Gegenfarbe zum Cursor */
   transition:width .45s var(--out),height .45s var(--out),fill .25s}
 .cursor svg path{vector-effect:non-scaling-stroke;shape-rendering:geometricPrecision;stroke-linejoin:miter}   /* Kontur bleibt 1 px, egal wie groß der Cursor ist */
 .cursor.is-link svg{width:160%;height:160%}             /* Größe über die Maße statt transform: Kontur skaliert nicht mit */

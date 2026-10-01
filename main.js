@@ -524,6 +524,7 @@ function glide(to, dur, i){                      // i: Zielbildschirm (für den 
     if (k < 1) return requestAnimationFrame(tick);
     snapEl.style.scrollSnapType = ''; snapEl.style.scrollBehavior = '';
     gliding = false;
+    clearTimeout(idleT); commit();               // Karte steht: Fenster sofort, ohne auf die Scroll-Ruhe zu warten
   };
   requestAnimationFrame(tick);
 }
@@ -575,6 +576,7 @@ function jumpTo(i){
     if (k < 1) return requestAnimationFrame(tick);
     ghost.remove(); content.style.transform = '';
     snapEl.style.scrollSnapType = ''; gliding = false;
+    clearTimeout(idleT); commit();
   };
   content.style.transform = `translateY(${dir * vh}px)`;
   requestAnimationFrame(tick);
@@ -1107,7 +1109,8 @@ if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
   const clipNav = () => {                     // Ausschnitt = Fläche der Navigation, sobald sie sichtbar ist
     if (lastP < .6) { inv.style.clipPath = 'inset(100%)'; return; }
     const r = nav.getBoundingClientRect();
-    inv.style.clipPath = `inset(${r.top}px ${innerWidth - r.right}px ${innerHeight - r.bottom}px ${r.left}px)`;
+    const b = r.bottom + (fullNav.matches ? parseFloat(getComputedStyle(root).getPropertyValue('--nav-line')) : 0);   // bis genau an die Oberkante der Karte
+    inv.style.clipPath = `inset(${r.top}px ${innerWidth - r.right}px ${innerHeight - b}px ${r.left}px)`;
   };
   onHeader.push(clipNav);                   // die Leiste bewegt sich nur mit dem Kopf
   clipNav();                                // Anfangszustand (Seite kann mitten im Scrollen geladen werden)
