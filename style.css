@@ -9,9 +9,8 @@
   --pill:#fff;                          /* weiße Elemente — im Dunkelmodus schwarz */
   --pill-ink:#191b1d;
   --on:#191b1d;                         /* Schrift auf Projektfarbe, in beiden Modi dunkel */
-  --end-fill:#2c2e31;                   /* Linkseite: Füllung … */
+  --end-fill:#000;                      /* Linkseite: Füllung — rein schwarz, so ergibt Weiß per »difference« genau Weiß … */
   --end-on:#fff;                        /* … und Schrift darauf (dunkel: umgekehrt) */
-  --end-diff:#d3d1ce;                   /* so erscheint --end-on per »difference« auf --end-fill (Start der Überblendung) */
   color-scheme:light dark;
   --sans:"Hanken Grotesk",system-ui,sans-serif;
   --mono:"Hanken Grotesk",system-ui,sans-serif;   /* auch die Details: eine Schrift für alles */
@@ -38,9 +37,8 @@
     --line:rgb(236 236 232 / .14);
     --pill:#000;
     --pill-ink:#ecece8;
-    --end-fill:#e4e4e0;
+    --end-fill:#fff;
     --end-on:#000;
-    --end-diff:#1b1b1f;
   }
 }
 *{box-sizing:border-box}
@@ -120,7 +118,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   content:"";position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--pill);   /* volle Höhe */
 }
 .nav a.in-win{color:var(--on)}
-.nav a:is(.nav-end,.nav-start).in-win{color:var(--end-on)}               /* dunkelgraues Fenster: helle Schrift; sonst im Farbfenster dunkle Schrift */
+.nav a:is(.nav-end,.nav-start).in-win{color:var(--end-on)}               /* schwarzes Fenster: helle Schrift; sonst im Farbfenster dunkle Schrift */
 /* Volle Navigation (≥ 1024 px): das Fenster gleitet über die Einträge — die Schrift wechselt die Farbe genau an
    seinen Kanten, in jedem Bild (main.js 2 setzt --wl/--wr = Fensterkanten, --x = Lage des Eintrags), kein Überblenden */
 @media (min-width:1024px){
@@ -141,7 +139,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
       var(--on-c) calc(var(--wr) - var(--x)),var(--ink) calc(var(--wr) - var(--x)));
   }
   .bar .nav a{--on-c:var(--on)}                         /* Schrift im Fenster: dunkel … */
-  .bar .nav a:is(.nav-end,.nav-start){--on-c:var(--end-on)}              /* … auf dem dunkelgrauen Fenster von »urls« hell */
+  .bar .nav a:is(.nav-end,.nav-start){--on-c:var(--end-on)}              /* … auf dem schwarzen Fenster von »urls« hell */
 }
 @media (hover:hover) and (pointer:fine) and (min-width:1024px){
   .bar .nav a,.bar .nav a.in-win,.bar .nav a:is(.nav-end,.nav-start).in-win{opacity:.33;transition:opacity 1.6s var(--out)}   /* auch der Eintrag im Fenster: gleich langsam hinein wie hinaus (nur die Deckkraft) */      /* Rechner: Schrift der Navigation gedimmt, solange der Cursor außerhalb ist … */
@@ -280,22 +278,18 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 }
 /* Schrift an der Füllkante — ohne Zeitsteuerung:
    Projektkarten wechseln die Schriftfarbe nicht (hell: dunkel, dunkel: weiß).
-   Die Linkseite (dunkelgraue Füllung) nutzt »difference«: Schwarz wird an der Kante exakt zu Weiß. */
+   Die Linkseite (schwarze Füllung) nutzt »difference«: Schwarz wird an der Kante exakt zu Weiß. */
 @media (prefers-color-scheme:dark){
   .slide .card{color:#fff}
   .slide .card .meta{color:#fff}
   .slide .card .tagline{color:rgb(255 255 255 / .6)}
 }
-.inv :is(.meta,.title,.body,.end__head,.links,.end__note){color:#fff;mix-blend-mode:difference}
-.inv :is(.meta,.end__head span,.end__note){color:rgb(255 255 255 / .6)}
-.inv .title:has(a:is(:hover,:focus-visible)),
-.card--end.filled .links,html:not(.liquid) :is(.card--end:is(:hover,:focus-within),.at-end .card--end) .links{mix-blend-mode:normal;color:var(--end-on)}
-.card--end.filled .links{animation:end-full .6s var(--out)}      /* vom Grau der Mischung weich zu vollem Weiß */
-@keyframes end-full{from{color:var(--end-diff)}}
-.liquid .card--end:not(.filled) .links a::before,.liquid .card--end:not(.filled) .links .pill-ghost{visibility:hidden}   /* Pille erst, wenn die Karte voll ist */
-/* Linkseite ganz gefüllt: normal und rein weiß (dunkel: schwarz) — »difference« ergäbe auf dem Dunkelgrau nur Hellgrau;
+.inv :is(.end__head,.links,.end__note){color:#fff;mix-blend-mode:difference}
+.inv :is(.end__head span,.end__note){color:rgb(255 255 255 / .6)}
+/* Linkseite ganz gefüllt: normal (gleiche Farbe wie die Mischung auf Schwarz), damit die Pille ihre Projektfarbe zeigt;
    solange die Flüssigkeit steigt, bleibt »difference«: die Schrift kippt genau an ihrer Oberfläche */
-.inv .meta .d.on{color:#fff}
+.card--end.filled .links,html:not(.liquid) :is(.card--end:is(:hover,:focus-within),.at-end .card--end) .links{mix-blend-mode:normal;color:var(--end-on)}
+.liquid .card--end:not(.filled) .links a::before,.liquid .card--end:not(.filled) .links .pill-ghost{visibility:hidden}   /* Pille erst, wenn die Karte voll ist */
 
 /* Projektbild: Klick = Halbton-Raster (im Browser aus dem Bildschirmfoto gezeichnet),
    nächster Klick = volles Bild, dann wieder leer (main.js 5). Über der Farbfläche, hinter der Schrift. */
@@ -338,7 +332,6 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 }
 .meta .d.on .dx{transform:scale(calc(4 / var(--fs-c)))}
 @media (hover:hover){                                       /* Maus: beim Überfahren; Touch nicht (:hover bleibt dort hängen) */
-  .inv .meta .d:hover{color:#fff}
   .meta .d:hover{z-index:3;color:var(--hl)}
   .card.filled .meta .d:hover,html:not(.liquid) .card:is(:hover,:focus-within) .meta .d:hover{color:var(--pill)}
   .liquid .card:not(.filled) .meta .d:hover .dx{color:transparent;-webkit-background-clip:text;background-clip:text;
@@ -455,7 +448,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   .slide,.end{padding:var(--pad)}
 }
 @media (hover:hover) and (pointer:fine) and (min-width:1024px){:root{--pad:calc(var(--bar) + var(--nav-line))}}   /* + Linie unter dem aktiven Eintrag */
-.card--end{--hl:var(--end-fill);grid-template-rows:auto 1fr auto}   /* hell: dunkelgrau füllen, dunkel: hellgrau */
+.card--end{--hl:var(--end-fill);grid-template-rows:auto 1fr auto}   /* hell: schwarz füllen, dunkel: weiß */
 /* Unterzeile wird beim letzten Scrollen zur großen Überschrift */
 .end__head{
   margin:0;font-size:calc(var(--t) * .6);font-weight:500;line-height:.95;letter-spacing:-.065em;   /* kleiner als die Links darunter */
