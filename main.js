@@ -185,14 +185,16 @@ function placeHl(){
   if (aiming) return;                            // Zielen (3): das Fenster steht fest in der Mitte
   // auf dem Startbildschirm steht das Fenster schon auf 01 — es ist da, bevor die Leiste ins Bild kommt, und
   // beim Wechsel Start → 01 bewegt sich nichts
-  const a = hovered || peek || activeItem();
+  // voll (Rechner): Fenster auf dem aktiven Eintrag, die Linie folgt der Maus; schmal: das Fenster folgt
+  const hov = hovered || peek || activeItem(), act = activeItem();
+  const a = narrow.matches ? hov : act;
   links.forEach(l => l.classList.toggle('in-win', l === a));
   const b = box(a);
   hl.style.setProperty('--l', b.l + 'px');
   hl.style.setProperty('--r', b.w - b.r + 'px');
-  // Linie: derselbe Ausschnitt, aber immer auf dem aktiven Eintrag (folgt nicht der Maus) — gleiches Band, gleicher
-  // Takt: wo Fenster und Linie übereinander stehen, haben sie genau dieselben Farben
-  const act = activeItem(), u = box(act);   // Klick: sofort, auch auf »urls«
+  // Linie: derselbe Ausschnitt des Bands, auf dem Eintrag unter der Maus — gleicher Takt: wo Fenster und Linie
+  // übereinander stehen, haben sie genau dieselben Farben
+  const u = box(narrow.matches ? act : hov);
   under.style.setProperty('--l', u.l + 'px');
   under.style.setProperty('--r', b.w - u.r + 'px');
   // schmal: Fenster in der Farbe des Eintrags, gleichzeitig mit der Schrift (CSS: kein Überblenden)
@@ -465,7 +467,7 @@ function fitNav(){
                    .reduce((n, a) => { const cs = getComputedStyle(a); return n + parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight); }, 0);
   nav.style.setProperty('--pk', Math.max(.6, 1 - (over + 1) / pad));   // +1: Rundung
 }
-/* Rechner: Fenster endet an der Grundlinie der Schrift, die Linie unter dem aktiven Eintrag beginnt dort (CSS --base);
+/* Rechner: Fenster endet eine Linienstärke unter der Grundlinie der Schrift, die Linie beginnt dort (CSS --base);
    die Wortmarke wird unterhalb davon wieder dunkel (--mb) — sie steht nie auf der Linie */
 function placeBase(){
   const t = links[1].querySelector('span'), p = document.createElement('i');
@@ -473,8 +475,9 @@ function placeBase(){
   t.append(p);
   const y = p.getBoundingClientRect().top; p.remove();
   const n = nav.getBoundingClientRect().top;
-  nav.style.setProperty('--base', (y - n).toFixed(1) + 'px');
-  mark.style.setProperty('--mb', (y - mark.getBoundingClientRect().top).toFixed(1) + 'px');
+  const d = y + parseFloat(getComputedStyle(root).getPropertyValue('--nav-line'));   // eine Linienstärke unter der Grundlinie
+  nav.style.setProperty('--base', (d - n).toFixed(1) + 'px');
+  mark.style.setProperty('--mb', (d - mark.getBoundingClientRect().top).toFixed(1) + 'px');
 }
 addEventListener('resize', placeBase);
 addEventListener('resize', fitNav);
@@ -963,7 +966,7 @@ if (!calm.matches) {
     svg.setAttribute('class', 'liq'); svg.setAttribute('aria-hidden', 'true'); svg.setAttribute('preserveAspectRatio', 'none');
     const path = document.createElementNS(svg.namespaceURI, 'path'); svg.append(path);
     card.prepend(svg);        // zuerst = unter Halbton, Nummer und Schrift
-    const s = { card, path, dx:[...card.querySelectorAll('.meta .dx')], w:1, h:1, level:0, lv:0, target:0, y:new Float32Array(N), v:new Float32Array(N), px:null, py:null, mx:null, ms:null, t:Math.random() * 100, ph:Math.random() * 6.3 };
+    const s = { card, path, dx:[...card.querySelectorAll('.meta .dx')], ta:[...card.querySelectorAll('.title a')], w:1, h:1, level:0, lv:0, target:0, y:new Float32Array(N), v:new Float32Array(N), px:null, py:null, mx:null, ms:null, t:Math.random() * 100, ph:Math.random() * 6.3 };
     const size = () => { s.w = card.clientWidth; s.h = card.clientHeight; svg.setAttribute('viewBox', `0 0 ${s.w} ${s.h}`); draw(s); };
     new ResizeObserver(size).observe(card);
     const wake = () => { live.add(s); if (!raf) { t0 = 0; raf = requestAnimationFrame(loop); } };
@@ -1059,7 +1062,7 @@ if (!calm.matches) {
     }
     s.path.setAttribute('d', d + `L${w} ${h}Z`);
     // vergrößertes Detail: Schriftfarbe wechselt genau an der Oberfläche — darunter weiß, darüber Projektfarbe
-    const open = s.dx.filter(x => x.parentNode.matches('.on, :hover'));
+    const open = [...s.dx.filter(x => x.parentNode.matches('.on, :hover')), ...s.ta.filter(a => a.matches(':hover, :focus-visible'))];   // + Titel-Pille
     if (!open.length) return;
     const c = s.card.getBoundingClientRect();
     open.forEach(x => {

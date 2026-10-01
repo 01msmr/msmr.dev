@@ -384,9 +384,10 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .nav__under{display:none}
 @media (hover:hover) and (pointer:fine) and (min-width:1024px){
   .nav a:not(:last-of-type)::after{bottom:calc(-1 * var(--nav-line))}   /* Trennstriche schneiden auch die Linie — wie das Fenster */
+  .nav a::before{content:"";position:absolute;left:0;right:0;top:100%;height:var(--nav-line)}   /* Mausfläche: Fenster und Linie zusammen */
   .nav__hl{bottom:auto;height:var(--base,100%)}         /* Fenster bis zur Grundlinie … */
   .nav__under{                                           /* … darunter die Linie, bis 3 px unter die Leiste */
-    display:block;position:absolute;top:var(--base,100%);left:0;width:100%;height:calc(100% - var(--base,100%) + var(--nav-line));pointer-events:none;
+    display:block;position:absolute;top:calc(var(--base,100%) - 1px);left:0;width:100%;height:calc(100% - var(--base,100%) + var(--nav-line) + 1px);pointer-events:none;   /* 1 px unter das Fenster: keine Naht beim Zoomen */
     clip-path:inset(0 var(--r,50%) 0 var(--l,50%));transition:clip-path .9s var(--out);   /* wie .nav__hl */
   }
 }
@@ -404,6 +405,10 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
    So läuft sie auch bei schnellem Wiederbetreten weiter, und eine neue Pille erscheint. */
 .pill-ghost{inset:-.02em 0 -.04em;pointer-events:none}
 :is(.title,.links) a:is(:hover,:focus-visible){color:var(--pill-ink)}
+/* leere Karte: Titel-Pille in Projektfarbe; steigt die Flüssigkeit, wechselt sie genau an der Oberfläche (--cut, main.js 7) */
+.liquid .card:not(.filled) .title a::before{background:linear-gradient(var(--hl) var(--cut,100%),var(--pill) var(--cut,100%))}
+.liquid .card:not(.filled) .title a:is(:hover,:focus-visible){color:transparent;-webkit-background-clip:text;background-clip:text;
+  background-image:linear-gradient(var(--on) var(--cut,100%),var(--pill-ink) var(--cut,100%))}
 :is(.title,.links) a:is(:hover,:focus-visible)::before{
   opacity:1;inset:-.02em 0 -.04em;transform:none;         /* Hover: erscheint in Textgröße, wächst etwas darüber — folgt der Schrift: Unterlängen knapp innen */
   transition:transform 0s,opacity .12s linear,inset 1.1s var(--out);
