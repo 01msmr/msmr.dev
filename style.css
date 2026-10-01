@@ -287,9 +287,9 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 .inv :is(.meta,.title,.body,.end__head,.links,.end__note){color:#fff;mix-blend-mode:difference}
 .inv :is(.meta,.end__head span,.end__note){color:rgb(255 255 255 / .6)}
 .inv .title:has(a:is(:hover,:focus-visible)),
-.inv .links:has(a:is(:hover,:focus-visible)),
 .card--end.filled .links,html:not(.liquid) :is(.card--end:is(:hover,:focus-within),.at-end .card--end) .links{mix-blend-mode:normal;color:var(--end-on)}
-/* Pille sichtbar oder Linkseite ganz gefüllt: normal und rein weiß (dunkel: schwarz) — »difference« ergäbe auf dem Dunkelgrau nur Hellgrau */
+/* Linkseite ganz gefüllt: normal und rein weiß (dunkel: schwarz) — »difference« ergäbe auf dem Dunkelgrau nur Hellgrau;
+   solange die Flüssigkeit steigt, bleibt »difference«: die Schrift kippt genau an ihrer Oberfläche */
 .inv .meta .d.on{color:#fff}
 
 /* Projektbild: Klick = Halbton-Raster (im Browser aus dem Bildschirmfoto gezeichnet),
