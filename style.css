@@ -308,7 +308,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
   clip-path:circle(0 at var(--cx,50%) var(--cy,50%));
   transition:clip-path .5s cubic-bezier(.5,0,.75,0);
 }
-.shot.full{background:var(--full,none) center/cover no-repeat;opacity:1;mix-blend-mode:normal;box-shadow:inset 0 0 0 var(--stroke) var(--hl)}   /* Kontur bleibt über dem Bild sichtbar (Raster ist durchscheinend) */
+.shot.full{background:var(--full,none) center/cover no-repeat;opacity:1;mix-blend-mode:normal}
 /* Raster: blendet einfach ein und aus */
 .shot:not(.full){opacity:0;clip-path:none;transition:opacity .6s ease}           /* Ausblenden per Klick: zügig */
 .card.slow-out .shot:not(.full){transition:opacity 4s ease}                         /* Ausblenden nach Ablauf: langsam */
@@ -427,6 +427,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2p
 
 /* ── Füllung als Flüssigkeit (nur mit Maus): ersetzt die glatte Fläche ── */
 .liquid .card::before{display:none}
+.edge{position:absolute;inset:0;z-index:-1;pointer-events:none;border-radius:inherit;box-shadow:inset 0 0 0 var(--stroke) var(--hl)}   /* immer sichtbare Kontur, auch an den Rundungen */
 .liq{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
 .liq path{fill:var(--hl)}
 

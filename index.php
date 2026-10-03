@@ -71,6 +71,7 @@ $icon = random_int(0, $n - 1);               // Icon in einer der Projektfarben 
 <?php if (isset($p['shot'])): ?>
       <canvas class="shot" aria-hidden="true"></canvas><span class="shot full" aria-hidden="true"></span>
 <?php endif; ?>
+      <i class="edge" aria-hidden="true"></i>   <!-- Kontur: über Flüssigkeit, Raster und Bild, unter Zahl und Schrift -->
       <div class="meta"><?php foreach ($p['tech'] as $t): ?><span class="d"><span class="dx"><?= e($t) ?></span></span><?php endforeach; ?></div>
       <span class="num" aria-hidden="true"><?= two($n - $i) ?></span>
       <div class="main">
